@@ -3001,6 +3001,27 @@ interface MAAPI {
 			ORG_INFO = 121;
 		}
 
+		constset int MA_PIM_FIELD_EVENT_ {
+			/// #MA_PIM_TYPE_STRING
+			TITLE = 200;
+			/// #MA_PIM_TYPE_DATE
+			DATE_START = 201;
+			/// #MA_PIM_TYPE_DATE
+			DATE_END = 202;
+			/// #MA_PIM_TYPE_STRING
+			DESCRIPTION = 203;
+			/// #MA_PIM_TYPE_STRING
+			LOCATION = 204;
+			/// #MA_PIM_TYPE_BOOLEAN
+			HAS_ALARM = 205;
+			/// #MA_PIM_TYPE_DATE_ARRAY
+			ALARM = 206;
+			/// #MA_PIM_TYPE_BOOLEAN
+			ALL_DAY = 207;
+			/// #MA_PIM_TYPE_STRING
+			RECURRENCE_RULE = 208;
+		}
+
 		constset int MA_PIM_CONTACT_ADDR_ {
 			/// Index for #MA_PIM_FIELD_CONTACT_ADDR. Post office box number.
 			POBOX = 0;

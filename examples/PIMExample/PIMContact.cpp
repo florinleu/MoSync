@@ -202,7 +202,7 @@ void PIMContact::modifyAddressField()
             printf("%s %S", addressValueIndex.c_str(), addressValue);
         }
     }
-    printf("\n");
+    printf("");
 
     // Write the address into the buffer.
     mArgs.bufSize = writeWCharArraysToBuf(
@@ -378,7 +378,7 @@ void PIMContact::printAddress()
             }
         }
 
-        printf("\n");
+        printf("");
     }
 }
 
@@ -759,7 +759,7 @@ void PIMContact::addAddress()
             printf("%s %S", addressValueIndex.c_str(), addressValue);
         }
     }
-    printf("\n");
+    printf("");
 
     // Write value to buffer.
     mArgs.bufSize = writeWCharArraysToBuf(
@@ -829,7 +829,7 @@ void PIMContact::addEmail()
 
     // Add value to the email field.
     checkResultCode(maPimItemAddValue(&mArgs, MA_PIM_ATTR_EMAIL_HOME));
-    printf("\n");
+    printf("");
 
     // Print work email value and attribute for on the screen.
     attribute = getEmailAttributeString(MA_PIM_ATTR_EMAIL_WORK);
@@ -953,7 +953,7 @@ void PIMContact::addPhone()
 
     // Add value to phone field.
     checkResultCode(maPimItemAddValue(&mArgs, MA_PIM_ATTR_PHONE_MOBILE));
-    printf("\n");
+    printf("");
 
     // Print iPhone number and attribute on the screen.
     attribute = getPhoneAttributeString(MA_PIM_ATTR_PHONE_IPHONE);
@@ -965,7 +965,7 @@ void PIMContact::addPhone()
 
     // Add value to the phone field.
     checkResultCode(maPimItemAddValue(&mArgs, MA_PIM_ATTR_PHONE_IPHONE));
-    printf("\n");
+    printf("");
 
     // Print home number and attribute on the screen.
     attribute = getPhoneAttributeString(MA_PIM_ATTR_PHONE_HOME);
@@ -1016,7 +1016,7 @@ void PIMContact::addURL()
 
     // Add value to URL field.
     checkResultCode(maPimItemAddValue(&mArgs, MA_PIM_ATTR_WEBSITE_HOME));
-    printf("\n");
+    printf("");
 
     // Print work URL value and attribute.
     attribute = getWebsiteAttributeString(MA_PIM_ATTR_WEBSITE_WORK);
@@ -1052,7 +1052,7 @@ void PIMContact::addIM()
 
     // Add value to im field.
     checkResultCode(maPimItemAddValue(&mArgs, MA_PIM_ATTR_IM_HOME));
-    printf("\n");
+    printf("");
 
     // Print other IM value and attribute.
     attribute = getIMAttributeString(MA_PIM_ATTR_IM_OTHER);
@@ -1091,7 +1091,7 @@ void PIMContact::addRelation()
 
     // Add value to relation field.
     checkResultCode(maPimItemAddValue(&mArgs, MA_PIM_ATTR_RELATION_BROTHER));
-    printf("\n");
+    printf("");
 
     // Print manager relation value and attribute.
     attribute = getRelationAttributeString(MA_PIM_ATTR_RELATION_MANAGER);
