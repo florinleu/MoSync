@@ -2,6 +2,7 @@ package com.mosync.pim;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_CONTACTS;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_EVENTS;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_HANDLE_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_ALREADY_OPENED;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_TYPE_INVALID;
@@ -66,6 +67,8 @@ public class PIM {
 		switch (listType) {
 		case MA_PIM_CONTACTS:
 			return openContactsList();
+		case MA_PIM_EVENTS:
+			return openEventsList();
 		}
 		return MA_PIM_ERR_LIST_TYPE_INVALID;
 	}
@@ -108,6 +111,14 @@ public class PIM {
 		mPIMLists.put(mResourceIndex, mPIMContactsList);
 
 		return mResourceIndex++;
+	}
+
+	/**
+	 * Opens the events list.
+	 */
+	int openEventsList() {
+		DebugPrint("openEventsList()");
+		return 0;
 	}
 
 	public int maPimListNext(int list) {
