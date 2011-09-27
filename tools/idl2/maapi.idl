@@ -3385,15 +3385,26 @@ interface MAAPI {
 		}
 
 		/**
+		* \brief Returns the number of lists with lisType type.
+		* \param listType One of the \link #MA_PIM_CONTACTS MA_PIM \endlink constants.
+		* \returns \>= 0 The number of lists with listType type.
+		*          \<  0 on error:
+		*					 #MA_PIM_ERR_LIST_UNAVAILABLE if the list is not available on the current platform.
+		*                    #MA_PIM_ERR_LIST_TYPE_INVALID if the given list type is invalid.
+		*/
+		int maPimListCount(in int listType);
+
+		/**
 		* \brief Opens a PimList. Use maPimListNext() to open the list's items.
 		* \param listType One of the \link #MA_PIM_CONTACTS MA_PIM \endlink constants.
+		* \param index \>= 0 and \< maPimListCount(listType).
 		* \returns \>= 0 A PimList handle.
 		*          \<  0 on error:
 		*                    #MA_PIM_ERR_LIST_ALREADY_OPENED if the list is already opened.
 		*					 #MA_PIM_ERR_LIST_UNAVAILABLE if the list is not available on the current platform.
 		*                    #MA_PIM_ERR_LIST_TYPE_INVALID if the given list type is invalid.
 		*/
-		MAHandle maPimListOpen(in int listType);
+		MAHandle maPimListOpen(in int listType, in int index);
 
 		/**
 		* \brief Returns a handle to the next PimItem in the \a list, or 0 if there are no more items,

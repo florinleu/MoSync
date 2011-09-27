@@ -37,8 +37,12 @@ class MoSyncPIM {
 	/**
 	 * PIM related methods
 	 */
-	int maPimListOpen(int listType) {
-		return mPIM.maPimListOpen(listType);
+	int maPimListCount(int listType) {
+		return mPIM.maPimListCount(listType);
+	}
+
+	int maPimListOpen(int listType, int index) {
+		return mPIM.maPimListOpen(listType, index);
 	}
 
 	int maPimListNext(int list) {
