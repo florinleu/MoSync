@@ -2,6 +2,7 @@ package com.mosync.pim;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_CONTACTS;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_EVENTS;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_HANDLE_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_ALREADY_OPENED;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_TYPE_INVALID;
@@ -76,11 +77,13 @@ public class PIM {
 	/**
 	 * Opens the PIM list depending on the listType
 	 */
-	public int maPimListOpen(int listType) {
+	public int maPimListOpen(int listType, int index) {
 		DebugPrint("maPimListOpen()");
 		switch (listType) {
 		case MA_PIM_CONTACTS:
-			return openContactsList();
+			return openContactsList(index);
+		case MA_PIM_EVENTS:
+			return openEventsList(index);
 		}
 
 		return throwError(MA_PIM_ERR_LIST_TYPE_INVALID,
@@ -107,7 +110,7 @@ public class PIM {
 	/**
 	 * Opens the contacts list.
 	 */
-	int openContactsList() {
+	int openContactsList(int index) {
 		DebugPrint("openContactsList()");
 		// if opened, return error code
 		if (isContactListOpened()) {
@@ -127,6 +130,14 @@ public class PIM {
 		mPIMLists.put(mResourceIndex, mPIMContactsList);
 
 		return mResourceIndex++;
+	}
+
+	/**
+	 * Opens the events list.
+	 */
+	int openEventsList(int index) {
+		DebugPrint("openEventsList()");
+		return 0;
 	}
 
 	public int maPimListNext(int list) {
