@@ -3476,6 +3476,7 @@ interface MAAPI {
 		*                    #MA_PIM_ERR_LIST_ALREADY_OPENED if the list is already opened.
 		*                    #MA_PIM_ERR_LIST_UNAVAILABLE if the list is not available on the current platform.
 		*                    #MA_PIM_ERR_LIST_TYPE_INVALID if the given list type is invalid.
+		*                    #MA_PIM_ERR_INDEX_INVALID if the given index is invalid.
 		*/
 		MAHandle maPimListOpen(in int listType, in int index);
 

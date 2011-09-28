@@ -6,12 +6,16 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_EVENTS;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_HANDLE_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_ALREADY_OPENED;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_TYPE_INVALID;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_INDEX_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 
 import java.util.Hashtable;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.util.Log;
 
 import com.mosync.internal.android.MoSyncThread;
 import com.mosync.internal.android.SingletonObject;
@@ -77,6 +81,59 @@ public class PIM {
 	/**
 	 * Opens the PIM list depending on the listType
 	 */
+	public int maPimListCount(int listType) {
+		DebugPrint("maPimListCount()");
+		switch (listType) {
+		case MA_PIM_CONTACTS:
+			return 1;
+		case MA_PIM_EVENTS:
+			return countEventsList();
+		}
+
+		return throwError(MA_PIM_ERR_LIST_TYPE_INVALID,
+				PIMError.PANIC_LIST_TYPE_INVALID, PIMError.sStrListTypeInvalid);
+	}
+
+    private Cursor getCalendarManagedCursor(String[] projection,
+            String selection, String path) {
+        Uri calendars = Uri.parse("content://calendar/" + path);
+
+        Cursor managedCursor = null;
+        try {
+            managedCursor = getActivity().managedQuery(calendars, projection, selection,
+                    null, null);
+        } catch (IllegalArgumentException e) {
+            DebugPrint("Failed to get provider at ["
+                    + calendars.toString() + "]");
+        }
+
+        if (managedCursor == null) {
+            // try again
+            calendars = Uri.parse("content://com.android.calendar/" + path);
+            try {
+                managedCursor = getActivity().managedQuery(calendars, projection, selection,
+                        null, null);
+            } catch (IllegalArgumentException e) {
+                DebugPrint("Failed to get provider at ["
+                        + calendars.toString() + "]");
+            }
+        }
+        return managedCursor;
+    }
+
+	int countEventsList()
+	{
+        String[] projection = new String[] { "_id", "displayName" };
+        String selection = "selected=1";
+        String path = "calendars";
+
+        Cursor managedCursor = getCalendarManagedCursor(projection, selection,
+                path);
+	}
+
+	/**
+	 * Opens the PIM list depending on the listType
+	 */
 	public int maPimListOpen(int listType, int index) {
 		DebugPrint("maPimListOpen()");
 		switch (listType) {
@@ -111,6 +168,12 @@ public class PIM {
 	 * Opens the contacts list.
 	 */
 	int openContactsList(int index) {
+		if (index > 0)
+		{
+			return throwError(MA_PIM_ERR_INDEX_INVALID,
+					PIMError.PANIC_INDEX_INVALID,
+					PIMError.sStrIndexInvalid);
+		}
 		DebugPrint("openContactsList()");
 		// if opened, return error code
 		if (isContactListOpened()) {

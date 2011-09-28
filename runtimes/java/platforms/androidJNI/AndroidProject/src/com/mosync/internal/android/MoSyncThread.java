@@ -3764,9 +3764,14 @@ public class MoSyncThread extends Thread
 	/**
 	 * PIM related methods
 	 */
-	int maPimListOpen(int listType)
+	int maPimListCount(int listType)
 	{
-		return mMoSyncPIM.maPimListOpen(listType);
+		return mMoSyncPIM.maPimListCount(listType);
+	}
+
+	int maPimListOpen(int listType, int index)
+	{
+		return mMoSyncPIM.maPimListOpen(listType, index);
 	}
 
 	int maPimListNext(int list)
