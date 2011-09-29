@@ -33,6 +33,7 @@ public class PIM {
 	private Hashtable<Integer, PIMList> mPIMLists;
 	private Hashtable<Integer, PIMItem> mPIMItems;
 	private PIMList mPIMContactsList;
+	private PIMList mPIMEventsList;
 
 	/**
 	 * Handle for PIM
@@ -123,12 +124,16 @@ public class PIM {
 
 	int countEventsList()
 	{
-        String[] projection = new String[] { "_id", "displayName" };
-        String selection = "selected=1";
-        String path = "calendars";
+		String[] projection = new String[] { "_id", "displayName" };
+		String selection = "selected=1";
+		String path = "calendars";
 
-        Cursor managedCursor = getCalendarManagedCursor(projection, selection,
-                path);
+		Cursor managedCursor = getCalendarManagedCursor(projection, selection,
+				path);
+		if (managedCursor != null)
+			return managedCursor.getCount();
+		else
+			return 0;
 	}
 
 	/**
@@ -199,8 +204,31 @@ public class PIM {
 	 * Opens the events list.
 	 */
 	int openEventsList(int index) {
-		DebugPrint("openEventsList()");
-		return 0;
+		if (index > 0)
+		{
+			return throwError(MA_PIM_ERR_INDEX_INVALID,
+					PIMError.PANIC_INDEX_INVALID,
+					PIMError.sStrIndexInvalid);
+		}
+		DebugPrint("openContactsList()");
+		// if opened, return error code
+		if (isEventListOpened()) {
+			return throwError(MA_PIM_ERR_LIST_ALREADY_OPENED,
+					PIMError.PANIC_LIST_ALREADY_OPENED,
+					PIMError.sStrListAlreadyOpened);
+		}
+
+		// try to read the items in the list
+		// if failed, return error code
+		int error = 0;
+		if ((error = getContactList().read(getContentResolver())) < 0) {
+			return error;
+		}
+
+		// associate a handle to the list
+		mPIMLists.put(mResourceIndex, mPIMContactsList);
+
+		return mResourceIndex++;
 	}
 
 	public int maPimListNext(int list) {
