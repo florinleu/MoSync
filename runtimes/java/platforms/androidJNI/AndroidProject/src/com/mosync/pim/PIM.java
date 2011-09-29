@@ -9,6 +9,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_TYPE_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_INDEX_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import android.app.Activity;
@@ -32,8 +33,8 @@ public class PIM {
 	 */
 	private Hashtable<Integer, PIMList> mPIMLists;
 	private Hashtable<Integer, PIMItem> mPIMItems;
-	private PIMList mPIMContactsList;
-	private PIMList mPIMEventsList;
+	private PIMListContacts mPIMContactsList;
+	private Hashtable<Integer, PIMListEvents> mPIMEventsList;
 
 	/**
 	 * Handle for PIM
@@ -77,6 +78,7 @@ public class PIM {
 		mMoSyncThread = thread;
 		mPIMLists = new Hashtable<Integer, PIMList>();
 		mPIMItems = new Hashtable<Integer, PIMItem>();
+		mPIMEventsList = new Hashtable<Integer, PIMListEvents>();
 	}
 
 	/**
@@ -173,7 +175,7 @@ public class PIM {
 	 * Opens the contacts list.
 	 */
 	int openContactsList(int index) {
-		if (index > 0)
+		if (index >= countEventsList())
 		{
 			return throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID,
@@ -190,7 +192,7 @@ public class PIM {
 		// try to read the items in the list
 		// if failed, return error code
 		int error = 0;
-		if ((error = getContactList().read(getContentResolver())) < 0) {
+		if ((error = getEventsList(index).read(getContentResolver())) < 0) {
 			return error;
 		}
 
@@ -198,6 +200,23 @@ public class PIM {
 		mPIMLists.put(mResourceIndex, mPIMContactsList);
 
 		return mResourceIndex++;
+	}
+
+	/**
+	 * @return the contact list
+	 */
+	PIMList getEventsList(int index) {
+		if (mPIMEventsList.get(index) == null) {
+			mPIMEventsList.put(Integer.valueOf(index), new PIMListEvents());
+		}
+		return mPIMEventsList.get(index);
+	}
+
+	/**
+	 * @return false if the contact list is null
+	 */
+	boolean isEventsListOpened(int index) {
+		return ((mPIMEventsList.get(index) != null) ? true : false);
 	}
 
 	/**
@@ -212,7 +231,7 @@ public class PIM {
 		}
 		DebugPrint("openContactsList()");
 		// if opened, return error code
-		if (isEventListOpened()) {
+		if (isEventsListOpened(index)) {
 			return throwError(MA_PIM_ERR_LIST_ALREADY_OPENED,
 					PIMError.PANIC_LIST_ALREADY_OPENED,
 					PIMError.sStrListAlreadyOpened);
