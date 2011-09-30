@@ -82,7 +82,7 @@ public class PIM {
 	}
 
 	/**
-	 * Opens the PIM list depending on the listType
+	 * Returns the PIM list number depending on the listType
 	 */
 	public int maPimListCount(int listType) {
 		DebugPrint("maPimListCount()");
@@ -97,35 +97,34 @@ public class PIM {
 				PIMError.PANIC_LIST_TYPE_INVALID, PIMError.sStrListTypeInvalid);
 	}
 
-    private Cursor getCalendarManagedCursor(String[] projection,
-            String selection, String path) {
-        Uri calendars = Uri.parse("content://calendar/" + path);
+	private Cursor getCalendarManagedCursor(String[] projection,
+			String selection, String path) {
+		Uri calendars = Uri.parse("content://calendar/" + path);
 
-        Cursor managedCursor = null;
-        try {
-            managedCursor = getActivity().managedQuery(calendars, projection, selection,
-                    null, null);
-        } catch (IllegalArgumentException e) {
-            DebugPrint("Failed to get provider at ["
-                    + calendars.toString() + "]");
-        }
+		Cursor managedCursor = null;
+		try {
+			managedCursor = getActivity().managedQuery(calendars, projection,
+					selection, null, null);
+		} catch (IllegalArgumentException e) {
+			DebugPrint("Failed to get provider at [" + calendars.toString()
+					+ "]");
+		}
 
-        if (managedCursor == null) {
-            // try again
-            calendars = Uri.parse("content://com.android.calendar/" + path);
-            try {
-                managedCursor = getActivity().managedQuery(calendars, projection, selection,
-                        null, null);
-            } catch (IllegalArgumentException e) {
-                DebugPrint("Failed to get provider at ["
-                        + calendars.toString() + "]");
-            }
-        }
-        return managedCursor;
-    }
+		if (managedCursor == null) {
+			// try again
+			calendars = Uri.parse("content://com.android.calendar/" + path);
+			try {
+				managedCursor = getActivity().managedQuery(calendars,
+						projection, selection, null, null);
+			} catch (IllegalArgumentException e) {
+				DebugPrint("Failed to get provider at [" + calendars.toString()
+						+ "]");
+			}
+		}
+		return managedCursor;
+	}
 
-	int countEventsList()
-	{
+	int countEventsList() {
 		String[] projection = new String[] { "_id", "displayName" };
 		String selection = "selected=1";
 		String path = "calendars";
@@ -157,9 +156,9 @@ public class PIM {
 	/**
 	 * @return the contact list
 	 */
-	PIMList getContactList() {
+	PIMListContacts getContactList() {
 		if (mPIMContactsList == null) {
-			mPIMContactsList = new PIMList();
+			mPIMContactsList = new PIMListContacts();
 		}
 		return mPIMContactsList;
 	}
@@ -175,11 +174,9 @@ public class PIM {
 	 * Opens the contacts list.
 	 */
 	int openContactsList(int index) {
-		if (index >= countEventsList())
-		{
+		if (index >= countEventsList()) {
 			return throwError(MA_PIM_ERR_INDEX_INVALID,
-					PIMError.PANIC_INDEX_INVALID,
-					PIMError.sStrIndexInvalid);
+					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 		DebugPrint("openContactsList()");
 		// if opened, return error code
@@ -192,7 +189,7 @@ public class PIM {
 		// try to read the items in the list
 		// if failed, return error code
 		int error = 0;
-		if ((error = getEventsList(index).read(getContentResolver())) < 0) {
+		if ((error = getContactList(index).read(getContentResolver())) < 0) {
 			return error;
 		}
 
@@ -205,7 +202,7 @@ public class PIM {
 	/**
 	 * @return the contact list
 	 */
-	PIMList getEventsList(int index) {
+	PIMListEvents getEventsList(int index) {
 		if (mPIMEventsList.get(index) == null) {
 			mPIMEventsList.put(Integer.valueOf(index), new PIMListEvents());
 		}
@@ -223,11 +220,9 @@ public class PIM {
 	 * Opens the events list.
 	 */
 	int openEventsList(int index) {
-		if (index > 0)
-		{
+		if (index > 0) {
 			return throwError(MA_PIM_ERR_INDEX_INVALID,
-					PIMError.PANIC_INDEX_INVALID,
-					PIMError.sStrIndexInvalid);
+					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 		DebugPrint("openContactsList()");
 		// if opened, return error code
@@ -237,10 +232,17 @@ public class PIM {
 					PIMError.sStrListAlreadyOpened);
 		}
 
+		String[] projection = new String[] { "_id", "displayName" };
+		String selection = "selected=1";
+		String path = "calendars";
+
+		Cursor managedCursor = getCalendarManagedCursor(projection, selection,
+				path);
+
 		// try to read the items in the list
 		// if failed, return error code
 		int error = 0;
-		if ((error = getContactList().read(getContentResolver())) < 0) {
+		if ((error = getEventsList(index).read(managedCursor, index)) < 0) {
 			return error;
 		}
 

@@ -17,37 +17,46 @@ public class PIMListEvents extends PIMList {
 	/**
 	 * Read the list
 	 */
-	int read(ContentResolver cr) {
-		DebugPrint("PIMList.read(" + cr + ")");
+	int read(Cursor cur, int index) {
+		DebugPrint("PIMListEvents.read(" + cur + ", " + index + ")");
 		// try to query for contacts
-		Cursor cur;
-		try {
-			cur = cr.query(Contacts.CONTENT_URI, new String[] { Contacts._ID },
-					null, null, null);
-		} catch (Exception e) {
-			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
-					PIMError.PANIC_LIST_UNAVAILABLE,
-					PIMError.sStrListUnavailable);
-		}
-
 		if (cur == null) {
 			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
 					PIMError.PANIC_LIST_UNAVAILABLE,
 					PIMError.sStrListUnavailable);
 		}
 
+		cur.moveToPosition(index);
+
 		// read each item
-		while (cur.moveToNext()) {
-			String contactId = cur.getString(cur.getColumnIndex(Contacts._ID));
+		int idColumn = cur.getColumnIndex("_id");
+		String calId = cur.getString(idColumn);
 
-			PIMItem pimItem = new PIMItem(false);
-			pimItem.read(cr, contactId);
+		PIMItem pimItem = new PIMItemEvents(false);
+		// pimItem.read(cur, contactId);
 
-			mList.add(pimItem);
-		}
+		mList.add(pimItem);
 
 		mListIterator = 0;
 
 		return MA_PIM_ERR_NONE;
+
+		// int nameColumn = managedCursor.getColumnIndex("displayName");
+		// int idColumn = managedCursor.getColumnIndex("_id");
+		// do {
+		// String calName = managedCursor.getString(nameColumn);
+		// String calId = managedCursor.getString(idColumn);
+		// // Log.i(DEBUG_TAG, "Found Calendar '" + calName + "' (ID=" +
+		// // calId + ")");
+		// // tv.setText("Found Calendar '" + calName + "' (ID=" + calId +
+		// // ")");
+		// if (calName != null) {// && calName.contains("Test")) {
+		// // result = Integer.parseInt(calId);
+		// }
+		// } while (managedCursor.moveToNext());
+		// } else {
+		// // Log.i(DEBUG_TAG, "No Calendars");
+		// // tv.setText("No Calendars.");
+		// }
 	}
 }

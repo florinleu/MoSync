@@ -39,11 +39,6 @@ abstract class PIMList {
 	}
 
 	/**
-	 * Read the list
-	 */
-	abstract int read(ContentResolver cr);
-
-	/**
 	 * Checks if we reached the end of the list.
 	 */
 	boolean hasNext() {

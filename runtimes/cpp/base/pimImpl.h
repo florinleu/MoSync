@@ -25,7 +25,7 @@ void pimInit();
 void pimClose();
 PimItem* pimGetItem(MAHandle h);
 
-MAHandle maPimListOpen(int listType);
+MAHandle maPimListOpen(int listType, int index);
 MAHandle maPimListNext(MAHandle list);
 int maPimListClose(MAHandle list);
 

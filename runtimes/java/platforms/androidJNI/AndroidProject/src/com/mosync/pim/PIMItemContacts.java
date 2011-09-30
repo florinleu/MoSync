@@ -18,7 +18,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.RawContacts;
 
-public class PIMItem {
+public class PIMItemContacts {
 	public enum State {
 		NONE, ADDED, UPDATED
 	}
@@ -54,11 +54,7 @@ public class PIMItem {
 	/**
 	 * Constructor
 	 */
-	PIMItem() {
-
-	}
-
-	PIMItem(boolean isNew) {
+	PIMItemContacts(boolean isNew) {
 		setState(State.NONE);
 		if (isNew) {
 			setState(State.ADDED);

@@ -930,7 +930,7 @@ static int createContactValue(ContactValue*& v, int field, void* buf, int bufSiz
 // Syscalls
 //******************************************************************************
 
-MAHandle Syscall::maPimListOpen(int listType) {
+MAHandle Syscall::maPimListOpen(int listType, int index) {
 	PimList* pl;
 	if(listType == MA_PIM_CONTACTS) {
 		ContactList* cl = new ContactList(mPimListNextHandle);

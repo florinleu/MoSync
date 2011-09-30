@@ -228,7 +228,13 @@ namespace Base
 	int _maMessageBox(const char* title, const char* text,
 						JNIEnv* jNIEnv, jobject jThis);
 
+	int _maAlert(const char* title, const char* message, const char* button1,
+					const char* button2, const char* button3, JNIEnv* jNIEnv, jobject jThis);
+
 	int _maImagePickerOpen(JNIEnv* jNIEnv, jobject jThis);
+
+	int _maOptionsBox(const wchar* title, const wchar* destructiveText, const wchar* cancelText, int bufPointer, int bufSize,
+						JNIEnv* jNIEnv, jobject jThis);
 
 	// Widget API
 	int _maWidgetCreate(const char *widgetType,
@@ -240,6 +246,10 @@ namespace Base
 							JNIEnv* jNIEnv, jobject jThis);
 	int _maWidgetRemoveChild(int child,
 							JNIEnv* jNIEnv, jobject jThis);
+	int _maWidgetModalDialogShow(int dialog, JNIEnv* jNIEnv, jobject jThis);
+
+	int _maWidgetModalDialogHide(int dialog, JNIEnv* jNIEnv, jobject jThis);
+
 	int _maWidgetSetProperty(int widget, const char *property,
 							const char* value,
 							JNIEnv* jNIEnv, jobject jThis);
@@ -585,11 +595,16 @@ namespace Base
 	*/
 	int _maSensorStop(int sensor, JNIEnv* jNIEnv, jobject jThis);
 
+	/** Returns the number of lists with lisType type.
+	* \param listType One of the \link #MA_PIM_CONTACTS MA_PIM \endlink constants.
+	*/
+	MAHandle _maPimListCount(int listType, JNIEnv* jNIEnv, jobject jThis);
+
 	/** Opens a PimList. Use maPimListNext() to open the list's items.
 	* Returns a PimList handle, or \< 0 on error.
 	* \param listType One of the \link #MA_PIM_CONTACTS MA_PIM \endlink constants.
 	*/
-	MAHandle _maPimListOpen(int listType, JNIEnv* jNIEnv, jobject jThis);
+	MAHandle _maPimListOpen(int listType, int index, JNIEnv* jNIEnv, jobject jThis);
 
 	/** Returns a handle to the next PimItem in the \a list, or 0 if there are no more items,
 	* or \< 0 on error.
