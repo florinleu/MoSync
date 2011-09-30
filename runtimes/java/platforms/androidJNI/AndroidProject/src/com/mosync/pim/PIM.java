@@ -19,7 +19,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.mosync.internal.android.MoSyncThread;
-import com.mosync.internal.android.SingletonObject;
+import com.mosync.internal.android.MoSyncError;
 
 public class PIM {
 
@@ -65,7 +65,7 @@ public class PIM {
 	 * @return
 	 */
 	public int throwError(int errorCode, int panicCode, String panicText) {
-		return SingletonObject.getSingletonObject().error(errorCode, panicCode,
+		return MoSyncError.getSingletonObject().error(errorCode, panicCode,
 				panicText);
 	}
 
