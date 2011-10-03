@@ -31,7 +31,6 @@ public class PIM {
 	/**
 	 * PIM lists
 	 */
-	private Hashtable<Integer, PIMList> mPIMLists;
 	private Hashtable<Integer, PIMItem> mPIMItems;
 	private PIMListContacts mPIMContactsList;
 	private Hashtable<Integer, PIMListEvents> mPIMEventsList;
@@ -76,9 +75,16 @@ public class PIM {
 	 */
 	public PIM(MoSyncThread thread) {
 		mMoSyncThread = thread;
-		mPIMLists = new Hashtable<Integer, PIMList>();
 		mPIMItems = new Hashtable<Integer, PIMItem>();
 		mPIMEventsList = new Hashtable<Integer, PIMListEvents>();
+	}
+
+	PIMList getList(int handle) {
+		if (handle == 0) {
+			return mPIMContactsList;
+		} else {
+			return mPIMEventsList.get(handle - 1);
+		}
 	}
 
 	/**
@@ -174,7 +180,7 @@ public class PIM {
 	 * Opens the contacts list.
 	 */
 	int openContactsList(int index) {
-		if (index >= countEventsList()) {
+		if (index >= 0) {
 			return throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
@@ -189,14 +195,11 @@ public class PIM {
 		// try to read the items in the list
 		// if failed, return error code
 		int error = 0;
-		if ((error = getContactList(index).read(getContentResolver())) < 0) {
+		if ((error = getContactList().read(getContentResolver())) < 0) {
 			return error;
 		}
 
-		// associate a handle to the list
-		mPIMLists.put(mResourceIndex, mPIMContactsList);
-
-		return mResourceIndex++;
+		return 0;
 	}
 
 	/**
@@ -220,7 +223,7 @@ public class PIM {
 	 * Opens the events list.
 	 */
 	int openEventsList(int index) {
-		if (index > 0) {
+		if (index > countEventsList()) {
 			return throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
@@ -246,16 +249,13 @@ public class PIM {
 			return error;
 		}
 
-		// associate a handle to the list
-		mPIMLists.put(mResourceIndex, mPIMContactsList);
-
-		return mResourceIndex++;
+		return (mPIMEventsList.size());
 	}
 
 	public int maPimListNext(int list) {
 		DebugPrint("maPimListNext(" + list + ")");
 		PIMList pimList = null;
-		if ((list < 0) || ((pimList = mPIMLists.get(list)) == null)) {
+		if ((list < 0) || ((pimList = getList(list)) == null)) {
 			return throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
@@ -272,15 +272,19 @@ public class PIM {
 	public int maPimListClose(int list) {
 		DebugPrint("maPimListClose(" + list + ")");
 		PIMList pimList = null;
-		if ((list < 0) || ((pimList = mPIMLists.get(list)) == null)) {
+		if ((list < 0) || ((pimList = getList(list)) == null)) {
 			return throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
 		pimList.close(getContentResolver());
 
-		mPIMContactsList = mPIMLists.remove(list);
-		mPIMContactsList = null;
+		if (list == 0) {
+			mPIMContactsList = null;
+		} else {
+			mPIMEventsList.remove(list - 1);
+			mPIMEventsList = null;
+		}
 
 		return MA_PIM_ERR_NONE;
 	}
@@ -359,7 +363,7 @@ public class PIM {
 	public int maPimFieldType(int list, int field) {
 		DebugPrint("maPimFieldType(" + list + ", " + field + ")");
 		PIMList pimList = null;
-		if ((list < 0) || ((pimList = mPIMLists.get(list)) == null)) {
+		if ((list < 0) || ((pimList = getList(list)) == null)) {
 			return throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
@@ -434,7 +438,7 @@ public class PIM {
 	public int maPimItemCreate(int list) {
 		DebugPrint("maPimListNext(" + list + ")");
 		PIMList pimList = null;
-		if ((list < 0) || ((pimList = mPIMLists.get(list)) == null)) {
+		if ((list < 0) || ((pimList = getList(list)) == null)) {
 			return throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
@@ -447,7 +451,7 @@ public class PIM {
 	public int maPimItemRemove(int list, int item) {
 		DebugPrint("maPimItemRemove(" + list + ", " + item + ")");
 		PIMList pimList = null;
-		if ((list < 0) || ((pimList = mPIMLists.get(list)) == null)) {
+		if ((list < 0) || ((pimList = getList(list)) == null)) {
 			return throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
