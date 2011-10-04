@@ -9,15 +9,12 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_TYPE_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_INDEX_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.util.Log;
-
 import com.mosync.internal.android.MoSyncThread;
 import com.mosync.internal.android.MoSyncError;
 

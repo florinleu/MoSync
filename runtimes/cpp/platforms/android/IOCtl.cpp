@@ -1745,7 +1745,7 @@ namespace Base
 	//////////////////////
 	//		PIM			//
 	//////////////////////
-	MAHandle _maPimListCount(int listType
+	MAHandle _maPimListCount(int listType,
 		JNIEnv* jNIEnv, jobject jThis)
 	{
 		jclass cls = jNIEnv->GetObjectClass(jThis);

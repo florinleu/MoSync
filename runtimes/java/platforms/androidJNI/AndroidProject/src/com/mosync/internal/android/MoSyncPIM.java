@@ -3,8 +3,6 @@ package com.mosync.internal.android;
 import com.mosync.pim.PIM;
 import com.mosync.pim.PIMUtil;
 
-import android.app.Activity;
-
 /**
  * Wrapper for PIM Syscalls to avoid cluttering the MoSyncSyscalls file.
  */
@@ -25,13 +23,6 @@ class MoSyncPIM {
 		mMoSyncThread = thread;
 		mPIM = new PIM(thread);
 		PIMUtil.sMoSyncThread = thread;
-	}
-
-	/**
-	 * @return The Activity object.
-	 */
-	private Activity getActivity() {
-		return mMoSyncThread.getActivity();
 	}
 
 	/**
@@ -71,12 +62,14 @@ class MoSyncPIM {
 
 	int maPimItemSetLabel(int item, int field, int buffPointer, int buffSize,
 			int index) {
-		return mPIM.maPimItemSetLabel(item, field, buffPointer, buffSize, index);
+		return mPIM
+				.maPimItemSetLabel(item, field, buffPointer, buffSize, index);
 	}
 
 	int maPimItemGetLabel(int item, int field, int buffPointer, int buffSize,
 			int index) {
-		return mPIM.maPimItemGetLabel(item, field, buffPointer, buffSize, index);
+		return mPIM
+				.maPimItemGetLabel(item, field, buffPointer, buffSize, index);
 	}
 
 	int maPimFieldType(int list, int field) {
@@ -85,7 +78,8 @@ class MoSyncPIM {
 
 	int maPimItemGetValue(int item, int field, int buffPointer, int buffSize,
 			int index) {
-		return mPIM.maPimItemGetValue(item, field, buffPointer, buffSize, index);
+		return mPIM
+				.maPimItemGetValue(item, field, buffPointer, buffSize, index);
 	}
 
 	int maPimItemSetValue(int item, int field, int buffPointer, int buffSize,
