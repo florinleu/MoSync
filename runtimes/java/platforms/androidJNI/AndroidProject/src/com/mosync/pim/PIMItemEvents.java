@@ -24,7 +24,7 @@ public class PIMItemEvents extends PIMItem {
 	 * @param cr
 	 * @param contactId
 	 */
-	void read(ContentResolver cr, String contactId) {
+	void read(Cursor cur, String calendarId) {
 		DebugPrint("PIMItem.read(" + cr + ", " + contactId + ")");
 
 		Iterator<PIMField> fieldsIt = mPIMFields.iterator();

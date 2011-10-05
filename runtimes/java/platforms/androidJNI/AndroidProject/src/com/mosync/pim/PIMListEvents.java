@@ -33,30 +33,12 @@ public class PIMListEvents extends PIMList {
 		String calId = cur.getString(idColumn);
 
 		PIMItemEvents pimItem = new PIMItemEvents(false);
-		pimItem.read(cur, contactId);
+		pimItem.read(cur, calId);
 
 		mList.add(pimItem);
 
 		mListIterator = 0;
 
 		return MA_PIM_ERR_NONE;
-
-		// int nameColumn = managedCursor.getColumnIndex("displayName");
-		// int idColumn = managedCursor.getColumnIndex("_id");
-		// do {
-		// String calName = managedCursor.getString(nameColumn);
-		// String calId = managedCursor.getString(idColumn);
-		// // Log.i(DEBUG_TAG, "Found Calendar '" + calName + "' (ID=" +
-		// // calId + ")");
-		// // tv.setText("Found Calendar '" + calName + "' (ID=" + calId +
-		// // ")");
-		// if (calName != null) {// && calName.contains("Test")) {
-		// // result = Integer.parseInt(calId);
-		// }
-		// } while (managedCursor.moveToNext());
-		// } else {
-		// // Log.i(DEBUG_TAG, "No Calendars");
-		// // tv.setText("No Calendars.");
-		// }
 	}
 }
