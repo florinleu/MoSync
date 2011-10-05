@@ -1749,7 +1749,7 @@ namespace Base
 		JNIEnv* jNIEnv, jobject jThis)
 	{
 		jclass cls = jNIEnv->GetObjectClass(jThis);
-		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListOpen", "(I)I");
+		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListCount", "(I)I");
 		if (methodID == 0)
 		{
 			return 0;

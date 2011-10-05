@@ -18,36 +18,12 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.RawContacts;
 
-public class PIMItem {
+public abstract class PIMItem {
 	public enum State {
 		NONE, ADDED, UPDATED
 	}
 
 	State mState;
-
-	PIMFieldAddress mAddress;
-	PIMFieldBirthday mBirthday;
-	PIMFieldClass mClass;
-	PIMFieldEmail mEmail;
-	PIMFieldFormattedAddress mFormattedAddress;
-	PIMFieldFormattedName mFormattedName;
-	PIMFieldName mName;
-	PIMFieldNickname mNickname;
-	PIMFieldNote mNote;
-	PIMFieldOrganization mOrganization;
-	PIMFieldPhoto mPhoto;
-	PIMFieldPhotoURL mPhotoURL;
-	PIMFieldPublicKey mPublicKey;
-	PIMFieldPublicKeyString mPublicKeyString;
-	PIMFieldRevision mRevision;
-	PIMFieldPhone mPhone;
-	PIMFieldTitle mTitle;
-	PIMFieldUID mUID;
-	PIMFieldURL mURL;
-	PIMFieldIM mIM;
-	PIMFieldRelation mRelation;
-	PIMFieldOrganizationInfo mOrganizationInfo;
-	PIMFieldEvent mEvent;
 
 	ArrayList<PIMField> mPIMFields;
 
@@ -64,52 +40,6 @@ public class PIMItem {
 			setState(State.ADDED);
 		}
 		mPIMFields = new ArrayList<PIMField>();
-		mAddress = new PIMFieldAddress();
-		mBirthday = new PIMFieldBirthday();
-		mClass = new PIMFieldClass();
-		mEmail = new PIMFieldEmail();
-		mFormattedAddress = new PIMFieldFormattedAddress();
-		mFormattedName = new PIMFieldFormattedName();
-		mName = new PIMFieldName();
-		mNickname = new PIMFieldNickname();
-		mNote = new PIMFieldNote();
-		mOrganization = new PIMFieldOrganization();
-		mPhoto = new PIMFieldPhoto();
-		mPhotoURL = new PIMFieldPhotoURL();
-		mPublicKey = new PIMFieldPublicKey();
-		mPublicKeyString = new PIMFieldPublicKeyString();
-		mRevision = new PIMFieldRevision();
-		mPhone = new PIMFieldPhone();
-		mTitle = new PIMFieldTitle();
-		mUID = new PIMFieldUID();
-		mURL = new PIMFieldURL();
-		mIM = new PIMFieldIM();
-		mRelation = new PIMFieldRelation();
-		mOrganizationInfo = new PIMFieldOrganizationInfo();
-		mEvent = new PIMFieldEvent();
-		mPIMFields.add(mAddress);
-		mPIMFields.add(mBirthday);
-		mPIMFields.add(mClass);
-		mPIMFields.add(mEmail);
-		mPIMFields.add(mFormattedAddress);
-		mPIMFields.add(mFormattedName);
-		mPIMFields.add(mName);
-		mPIMFields.add(mNickname);
-		mPIMFields.add(mNote);
-		mPIMFields.add(mOrganization);
-		mPIMFields.add(mPhoto);
-		mPIMFields.add(mPhotoURL);
-		mPIMFields.add(mPublicKey);
-		mPIMFields.add(mPublicKeyString);
-		mPIMFields.add(mRevision);
-		mPIMFields.add(mPhone);
-		mPIMFields.add(mTitle);
-		mPIMFields.add(mUID);
-		mPIMFields.add(mURL);
-		mPIMFields.add(mIM);
-		mPIMFields.add(mRelation);
-		mPIMFields.add(mOrganizationInfo);
-		// mPIMFields.add(mEvent);
 	}
 
 	/**
@@ -131,15 +61,7 @@ public class PIMItem {
 	 * @param cr
 	 * @param contactId
 	 */
-	void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMItem.read(" + cr + ", " + contactId + ")");
-
-		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
-
-		while (fieldsIt.hasNext()) {
-			fieldsIt.next().read(cr, contactId);
-		}
-	}
+	abstract void read(ContentResolver cr, String contactId);
 
 	void setState(State state) {
 		if ((mState != State.ADDED) && (state != State.NONE))
@@ -410,23 +332,6 @@ public class PIMItem {
 		String id = mUID.getSpecificData(0);
 		cr.delete(RawContacts.CONTENT_URI, RawContacts.CONTACT_ID + " = ?",
 				new String[] { id });
-
-		// ArrayList<ContentProviderOperation> ops = new
-		// ArrayList<ContentProviderOperation>();
-		// ops.add(ContentProviderOperation.newDelete(Contacts.CONTENT_URI)
-		// // .withSelection(Contacts._ID + " = ?", new String[] { id })
-		// .withSelection(Contacts._ID + " = " + id, null).build());
-		// try {
-		// DebugPrint("REQUEST UPDATE");
-		// ContentProviderResult[] res = cr.applyBatch(
-		// ContactsContract.AUTHORITY, ops);
-		// for (int i = 0; i < res.length; i++) {
-		// DebugPrint("RESULT " + i + ": " + res[i].toString());
-		// }
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// DebugPrint("Exception: " + e.getMessage());
-		// }
 	}
 
 	/**

@@ -8,6 +8,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_ALREADY_OPENE
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_TYPE_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_INDEX_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_UNAVAILABLE;
 
 import java.util.Hashtable;
 
@@ -102,20 +103,12 @@ public class PIM {
 
 	private Cursor getCalendarManagedCursor(String[] projection,
 			String selection, String path) {
-		Uri calendars = Uri.parse("content://calendar/" + path);
-
-		Cursor managedCursor = null;
+		DebugPrint("getCalendarManagedCursor(" + projection + ", " + selection
+				+ ", " + path + ")");
 		try {
-			managedCursor = getActivity().managedQuery(calendars, projection,
-					selection, null, null);
-		} catch (IllegalArgumentException e) {
-			DebugPrint("Failed to get provider at [" + calendars.toString()
-					+ "]");
-		}
+			Uri calendars = Uri.parse("content://calendar/" + path);
 
-		if (managedCursor == null) {
-			// try again
-			calendars = Uri.parse("content://com.android.calendar/" + path);
+			Cursor managedCursor = null;
 			try {
 				managedCursor = getActivity().managedQuery(calendars,
 						projection, selection, null, null);
@@ -123,8 +116,22 @@ public class PIM {
 				DebugPrint("Failed to get provider at [" + calendars.toString()
 						+ "]");
 			}
+
+			if (managedCursor == null) {
+				// try again
+				calendars = Uri.parse("content://com.android.calendar/" + path);
+				try {
+					managedCursor = getActivity().managedQuery(calendars,
+							projection, selection, null, null);
+				} catch (IllegalArgumentException e) {
+					DebugPrint("Failed to get provider at ["
+							+ calendars.toString() + "]");
+				}
+			}
+			return managedCursor;
+		} catch (Exception e) {
+			return null;
 		}
-		return managedCursor;
 	}
 
 	int countEventsList() {
@@ -137,7 +144,9 @@ public class PIM {
 		if (managedCursor != null)
 			return managedCursor.getCount();
 		else
-			return 0;
+			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
+					PIMError.PANIC_LIST_UNAVAILABLE,
+					PIMError.sStrListUnavailable);
 	}
 
 	/**
@@ -220,7 +229,8 @@ public class PIM {
 	 * Opens the events list.
 	 */
 	int openEventsList(int index) {
-		if (index > countEventsList()) {
+		int listCount = countEventsList();
+		if ((listCount > 0) && (index > listCount)) {
 			return throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}

@@ -32,8 +32,8 @@ public class PIMListEvents extends PIMList {
 		int idColumn = cur.getColumnIndex("_id");
 		String calId = cur.getString(idColumn);
 
-		PIMItem pimItem = new PIMItemEvents(false);
-		// pimItem.read(cur, contactId);
+		PIMItemEvents pimItem = new PIMItemEvents(false);
+		pimItem.read(cur, contactId);
 
 		mList.add(pimItem);
 
