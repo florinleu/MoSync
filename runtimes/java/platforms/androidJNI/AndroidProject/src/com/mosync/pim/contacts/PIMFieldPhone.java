@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
@@ -34,7 +34,9 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 
-public class PIMFieldPhone extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldPhone extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -48,7 +50,7 @@ public class PIMFieldPhone extends PIMField {
 				Phone.LABEL, Phone.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 		// attributes
 		mAttributes.put(MA_PIM_ATTR_PHONE_HOME, Phone.TYPE_HOME);
 		mAttributes.put(MA_PIM_ATTR_PHONE_MOBILE, Phone.TYPE_MOBILE);
@@ -74,7 +76,7 @@ public class PIMFieldPhone extends PIMField {
 		mAttributes.put(MA_PIM_ATTR_PHONE_CUSTOM, Phone.TYPE_CUSTOM);
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, Phone.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
@@ -83,7 +85,7 @@ public class PIMFieldPhone extends PIMField {
 	/**
 	 * Get field's attributes.
 	 */
-	int getAttributes(int index) {
+	protected int getAttributes(int index) {
 		if (isEmpty()) {
 			return MA_PIM_ERR_FIELD_EMPTY;
 		}
@@ -114,7 +116,7 @@ public class PIMFieldPhone extends PIMField {
 	/**
 	 * Gets the field attribute.
 	 */
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		String attribute = null;
 		if ((attribute = getColumnValue(index, Phone.TYPE)) == null) {
 			return -1;
@@ -127,7 +129,7 @@ public class PIMFieldPhone extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return getColumnValue(index, Phone.LABEL).toCharArray();
 	}
 
@@ -136,7 +138,7 @@ public class PIMFieldPhone extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 		setColumnValue(index, Phone.LABEL, label);
 	}
 
@@ -144,12 +146,12 @@ public class PIMFieldPhone extends PIMField {
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return ((Integer.parseInt(getColumnValue(index, Phone.TYPE)) == Phone.TYPE_CUSTOM) ? true
 				: false);
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
@@ -165,7 +167,7 @@ public class PIMFieldPhone extends PIMField {
 		return val.length() + 1;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = PIMUtil.readString(buffer);
 		setSpecificData(val, index);
 	}
@@ -176,7 +178,7 @@ public class PIMFieldPhone extends PIMField {
 		mValues.set(index, val);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Phone.IS_PRIMARY, Integer.toString(1));
 		}
@@ -203,7 +205,7 @@ public class PIMFieldPhone extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("***********PHONES**********");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {

@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
@@ -27,7 +27,9 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.Relation;
 
-public class PIMFieldRelation extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldRelation extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -41,7 +43,7 @@ public class PIMFieldRelation extends PIMField {
 				Relation.LABEL, Relation.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 		// attributes
 		mAttributes.put(MA_PIM_ATTR_RELATION_MOTHER, Relation.TYPE_MOTHER);
 		mAttributes.put(MA_PIM_ATTR_RELATION_FATHER, Relation.TYPE_FATHER);
@@ -63,7 +65,7 @@ public class PIMFieldRelation extends PIMField {
 		mAttributes.put(MA_PIM_ATTR_RELATION_CUSTOM, Relation.TYPE_CUSTOM);
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, Relation.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
@@ -72,7 +74,7 @@ public class PIMFieldRelation extends PIMField {
 	/**
 	 * Gets the field attribute.
 	 */
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		String attribute = null;
 		if ((attribute = getColumnValue(index, Relation.TYPE)) == null) {
 			return -1;
@@ -85,7 +87,7 @@ public class PIMFieldRelation extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return getColumnValue(index, Relation.LABEL).toCharArray();
 	}
 
@@ -94,7 +96,7 @@ public class PIMFieldRelation extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 		setColumnValue(index, Relation.LABEL, label);
 	}
 
@@ -102,12 +104,12 @@ public class PIMFieldRelation extends PIMField {
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return ((Integer.parseInt(getColumnValue(index, Relation.TYPE)) == Relation.TYPE_CUSTOM) ? true
 				: false);
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
@@ -123,7 +125,7 @@ public class PIMFieldRelation extends PIMField {
 		return val.length() + 1;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = PIMUtil.readString(buffer);
 		setSpecificData(val, index);
 	}
@@ -134,7 +136,7 @@ public class PIMFieldRelation extends PIMField {
 		mValues.set(index, val);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Relation.IS_PRIMARY, Integer.toString(1));
 		}
@@ -155,7 +157,7 @@ public class PIMFieldRelation extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("*********RELATION**********");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {

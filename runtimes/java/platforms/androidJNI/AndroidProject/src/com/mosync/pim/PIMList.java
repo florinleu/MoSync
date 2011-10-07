@@ -14,28 +14,14 @@ import android.provider.ContactsContract.Contacts;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_UNAVAILABLE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 
-abstract class PIMList {
+public abstract class PIMList {
 
-	ArrayList<PIMItem> mList;
-	int mListIterator;
+	protected ArrayList<PIMItem> mList;
+	protected int mListIterator;
 
-	PIMList() {
+	protected PIMList() {
 		mList = new ArrayList<PIMItem>();
 		mListIterator = -1;
-	}
-
-	/**
-	 * @param errorCode
-	 *            The error code returned by the syscall.
-	 * @param panicCode
-	 *            The panic code for this error.
-	 * @param panicText
-	 *            The panic text for this error.
-	 * @return
-	 */
-	public int throwError(int errorCode, int panicCode, String panicText) {
-		return MoSyncError.getSingletonObject().error(errorCode, panicCode,
-				panicText);
 	}
 
 	/**
@@ -61,11 +47,7 @@ abstract class PIMList {
 		return mList.get(0).getFieldDataType(field);
 	}
 
-	PIMItem createItem() {
-		PIMItem p = new PIMItem(true);
-		mList.add(p);
-		return p;
-	}
+	protected abstract PIMItem createItem();
 
 	int removeItem(PIMItem item) {
 		int index = -1;

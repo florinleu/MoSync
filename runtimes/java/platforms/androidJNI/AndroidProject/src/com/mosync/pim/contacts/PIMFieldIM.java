@@ -1,8 +1,7 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,9 +27,9 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_CONTACT_IM_PROTOCOL_JA
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_CONTACT_IM_PROTOCOL_NETMEETING;
 
 import android.provider.ContactsContract.CommonDataKinds.Im;
-import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+import com.mosync.pim.*;
 
-public class PIMFieldIM extends PIMField {
+public class PIMFieldIM extends PIMFieldContact {
 
 	Map<Integer, String> mProtocols;
 
@@ -46,7 +45,7 @@ public class PIMFieldIM extends PIMField {
 				Im.CUSTOM_PROTOCOL, Im.TYPE, Im.LABEL, Im.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 		// attributes
 		mAttributes.put(MA_PIM_ATTR_IM_HOME, Im.TYPE_HOME);
 		mAttributes.put(MA_PIM_ATTR_IM_WORK, Im.TYPE_WORK);
@@ -69,7 +68,7 @@ public class PIMFieldIM extends PIMField {
 		mProtocols.put(Im.PROTOCOL_CUSTOM, "OTHER");
 	}
 
-	void preProcessData() {
+	protected void preProcessData() {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			val[2] = getProtocolName(val[2]);
@@ -84,7 +83,7 @@ public class PIMFieldIM extends PIMField {
 		return mProtocols.get(val);
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, Im.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
@@ -93,7 +92,7 @@ public class PIMFieldIM extends PIMField {
 	/**
 	 * Gets the field attribute.
 	 */
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		String attribute = null;
 		if ((attribute = getColumnValue(index, Im.TYPE)) == null) {
 			return -1;
@@ -106,7 +105,7 @@ public class PIMFieldIM extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return getColumnValue(index, Im.LABEL).toCharArray();
 	}
 
@@ -115,7 +114,7 @@ public class PIMFieldIM extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 		setColumnValue(index, Im.LABEL, label);
 	}
 
@@ -123,12 +122,12 @@ public class PIMFieldIM extends PIMField {
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return ((Integer.parseInt(getColumnValue(index, Im.TYPE)) == Im.TYPE_CUSTOM) ? true
 				: false);
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String[] val = getSpecificData(index);
 		DebugPrint("DATA SIZE = " + getDataSize(val));
 		char[] buffer = new char[getDataSize(val)];
@@ -156,7 +155,7 @@ public class PIMFieldIM extends PIMField {
 		return size;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String[] val = PIMUtil.readStringArray(buffer);
 		setSpecificData(val, index);
 	}
@@ -169,7 +168,7 @@ public class PIMFieldIM extends PIMField {
 		mValues.set(index, val);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Im.IS_PRIMARY, Integer.toString(1));
 		}
@@ -187,7 +186,7 @@ public class PIMFieldIM extends PIMField {
 		return MA_PIM_ERR_NONE;
 	}
 
-	void postProcessData() {
+	protected void postProcessData() {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			val[2] = getProtocolId(val[2]);
@@ -206,7 +205,7 @@ public class PIMFieldIM extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("*************IM************");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {

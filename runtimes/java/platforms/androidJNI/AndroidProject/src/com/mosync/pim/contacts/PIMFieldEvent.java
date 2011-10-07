@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
@@ -7,11 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_EMAIL_HOME;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_EMAIL_WORK;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_EMAIL_MOBILE;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_EMAIL_OTHER;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_EMAIL_CUSTOM;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTRPREFERRED;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
@@ -21,7 +16,9 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_DATE;
 
 import android.provider.ContactsContract.CommonDataKinds.Event;
 
-public class PIMFieldEvent extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldEvent extends PIMFieldContact {
 
 	final static int MA_PIM_FIELD_CONTACT_EVENT = 122;
 
@@ -42,7 +39,7 @@ public class PIMFieldEvent extends PIMField {
 				Event.LABEL, Event.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 		// attributes
 		mAttributes.put(MA_PIM_ATTR_EVENT_BIRTHDAY, Event.TYPE_BIRTHDAY);
 		mAttributes.put(MA_PIM_ATTR_EVENT_ANNIVERSARY, Event.TYPE_ANNIVERSARY);
@@ -50,7 +47,7 @@ public class PIMFieldEvent extends PIMField {
 		mAttributes.put(MA_PIM_ATTR_EVENT_CUSTOM, Event.TYPE_CUSTOM);
 	}
 
-	void preProcessData() {
+	protected void preProcessData() {
 		String[] val = null;
 		if ((mValues == null) || (mValues.size() == 0)) {
 			return;
@@ -84,7 +81,7 @@ public class PIMFieldEvent extends PIMField {
 		return cal.getTimeInMillis() + offset;
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, Event.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
@@ -93,7 +90,7 @@ public class PIMFieldEvent extends PIMField {
 	/**
 	 * Gets the field attribute.
 	 */
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		String attribute = null;
 		if ((attribute = getColumnValue(index, Event.TYPE)) == null) {
 			return -1;
@@ -101,7 +98,7 @@ public class PIMFieldEvent extends PIMField {
 		return Integer.parseInt(attribute);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Event.IS_PRIMARY, Integer.toString(1));
 		}
@@ -124,7 +121,7 @@ public class PIMFieldEvent extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return getColumnValue(index, Event.LABEL).toCharArray();
 	}
 
@@ -133,7 +130,7 @@ public class PIMFieldEvent extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 		setColumnValue(index, Event.LABEL, label);
 	}
 
@@ -141,12 +138,12 @@ public class PIMFieldEvent extends PIMField {
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return ((Integer.parseInt(getColumnValue(index, Event.TYPE)) == Event.TYPE_CUSTOM) ? true
 				: false);
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
@@ -162,7 +159,7 @@ public class PIMFieldEvent extends PIMField {
 		return (Integer.SIZE / 8);
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = Integer.toString(PIMUtil.readInt(buffer, 0));
 		setSpecificData(val, index);
 	}
@@ -173,7 +170,7 @@ public class PIMFieldEvent extends PIMField {
 		mValues.set(index, val);
 	}
 
-	void postProcessData() {
+	protected void postProcessData() {
 		String[] val = null;
 		if ((mValues == null) || (mValues.size() == 0)) {
 			return;
@@ -202,7 +199,7 @@ public class PIMFieldEvent extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("***********EVENT***********");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {

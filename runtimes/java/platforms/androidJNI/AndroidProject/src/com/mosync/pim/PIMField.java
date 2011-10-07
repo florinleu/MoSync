@@ -21,30 +21,30 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract.Data;
 
-abstract class PIMField {
+public abstract class PIMField {
 
 	protected static final String DUMMY = Data.DATA15;
 	protected int MAX_SIZE;
 
-	enum State {
+	protected enum State {
 		NONE, ADDED, UPDATED
 	}
 
-	enum Permission {
+	protected enum Permission {
 		FULL, READ_ONLY, WRITE_ONLY
 	}
 
-	int mType;
-	String mStrType;
-	int mDataType;
-	Permission mPermission;
-	String[] mNames;
-	ArrayList<String[]> mValues;
-	ArrayList<State> mStates;
-	ArrayList<Long> mDeletedValues;
-	Map<Integer, Integer> mAttributes;
+	protected int mType;
+	protected String mStrType;
+	protected int mDataType;
+	protected Permission mPermission;
+	protected String[] mNames;
+	protected ArrayList<String[]> mValues;
+	protected ArrayList<State> mStates;
+	protected ArrayList<Long> mDeletedValues;
+	protected Map<Integer, Integer> mAttributes;
 
-	PIMField() {
+	protected PIMField() {
 		MAX_SIZE = Integer.MAX_VALUE;
 
 		mValues = new ArrayList<String[]>();
@@ -56,28 +56,14 @@ abstract class PIMField {
 		createMaps();
 	}
 
-	abstract void createMaps();
-
-	/**
-	 * @param errorCode
-	 *            The error code returned by the syscall.
-	 * @param panicCode
-	 *            The panic code for this error.
-	 * @param panicText
-	 *            The panic text for this error.
-	 * @return
-	 */
-	public int throwError(int errorCode, int panicCode, String panicText) {
-		return MoSyncError.getSingletonObject().error(errorCode, panicCode,
-				panicText);
-	}
+	protected abstract void createMaps();
 
 	/**
 	 * Read field
 	 * @param cr
 	 * @param contactId
 	 */
-	void read(ContentResolver cr, String contactId) {
+	public void read(ContentResolver cr, String contactId) {
 		DebugPrint("PIMField.read(" + cr + ", " + contactId + ")");
 		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
 				+ "=?" + " AND " + Data.MIMETYPE + "=?",
@@ -103,13 +89,16 @@ abstract class PIMField {
 		DebugPrint("MAX SIZE = " + MAX_SIZE);
 	}
 
-	void preProcessData() {
+	public void read(Cursor cur, String calendarId) {
+	}
+
+	protected void preProcessData() {
 
 	}
 
-	abstract void print();
+	protected abstract void print();
 
-	boolean isEmpty() {
+	protected boolean isEmpty() {
 		return ((length() == 0) ? true : false);
 	}
 
@@ -117,20 +106,20 @@ abstract class PIMField {
 		return mType;
 	}
 
-	int length() {
+	protected int length() {
 		return mValues.size();
 	}
 
 	/**
 	 * Get field's attributes.
 	 */
-	int getAttributes(int index) {
+	protected int getAttributes(int index) {
 		if (isEmpty()) {
-			return throwError(MA_PIM_ERR_FIELD_EMPTY,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
 		}
 		if ((index < 0) || (index >= length())) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 
@@ -148,24 +137,24 @@ abstract class PIMField {
 		return ret;
 	}
 
-	abstract int checkForPreferredAttribute(int index);
+	protected abstract int checkForPreferredAttribute(int index);
 
 	/**
 	 * Gets the field attribute.
 	 */
-	abstract int getAndroidAttribute(int index);
+	protected abstract int getAndroidAttribute(int index);
 
 	/**
 	 * Gets the custom label of the specified field.
 	 */
 	int getLabel(int index, int buffPointer, int buffSize) {
 		if (isEmpty()) {
-			return throwError(MA_PIM_ERR_FIELD_EMPTY,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
 		}
 
 		if ((index < 0) || (index >= length())) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 
@@ -188,7 +177,7 @@ abstract class PIMField {
 	 * @param index
 	 * @return
 	 */
-	abstract char[] getLabel(int index);
+	protected abstract char[] getLabel(int index);
 
 	/**
 	 * Sets the custom label of the specified field.
@@ -197,12 +186,12 @@ abstract class PIMField {
 		DebugPrint("PIMField.setLabel(" + index + ", " + buffPointer + ", "
 				+ buffSize + ")");
 		if (isEmpty()) {
-			return throwError(MA_PIM_ERR_FIELD_EMPTY,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
 		}
 
 		if ((index < 0) || (index >= length())) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 
@@ -227,25 +216,25 @@ abstract class PIMField {
 	 * @param index
 	 * @return
 	 */
-	abstract void setLabel(int index, String label);
+	protected abstract void setLabel(int index, String label);
 
 	/**
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	abstract boolean hasCustomLabel(int index);
+	protected abstract boolean hasCustomLabel(int index);
 
 	/**
 	 * Gets the value of the specified field.
 	 */
 	int getValue(int index, int buffPointer, int buffSize) {
 		if (isEmpty()) {
-			return throwError(MA_PIM_ERR_FIELD_EMPTY,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
 		}
 
 		if ((index < 0) || (index >= length())) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 
@@ -263,7 +252,7 @@ abstract class PIMField {
 		return buffer.length;
 	}
 
-	abstract char[] getData(int index);
+	protected abstract char[] getData(int index);
 
 	/**
 	 * Sets the value of the specified field.
@@ -274,12 +263,12 @@ abstract class PIMField {
 		}
 
 		if (isEmpty()) {
-			return throwError(MA_PIM_ERR_FIELD_EMPTY,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
 		}
 
 		if ((index < 0) || (index >= length())) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 
@@ -299,7 +288,7 @@ abstract class PIMField {
 		return setAttribute(index, attributes);
 	}
 
-	abstract void setData(int index, char[] buffer);
+	protected abstract void setData(int index, char[] buffer);
 
 	/**
 	 * Sets the value of the specified field.
@@ -336,7 +325,7 @@ abstract class PIMField {
 		return index;
 	}
 
-	abstract int setAttribute(int index, int attribute);
+	protected abstract int setAttribute(int index, int attribute);
 
 	/**
 	 * Removes the value of the specified field.
@@ -347,12 +336,12 @@ abstract class PIMField {
 		}
 
 		if (isEmpty()) {
-			return throwError(MA_PIM_ERR_FIELD_EMPTY,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
 		}
 
 		if ((index < 0) || (index >= length())) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 
@@ -378,7 +367,7 @@ abstract class PIMField {
 		return (mPermission == Permission.READ_ONLY);
 	}
 
-	boolean isSupported() {
+	protected boolean isSupported() {
 		return true;
 	}
 
@@ -388,7 +377,7 @@ abstract class PIMField {
 	 * @param name
 	 * @return
 	 */
-	String getColumnValue(int index, String name) {
+	protected String getColumnValue(int index, String name) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < mNames.length; i++) {
 			if (mNames[i].equals(name)) {
@@ -404,7 +393,7 @@ abstract class PIMField {
 	 * @param name
 	 * @return
 	 */
-	void setColumnValue(int index, String name, String value) {
+	protected void setColumnValue(int index, String name, String value) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < mNames.length; i++) {
 			if (mNames[i].equals(name)) {
@@ -415,11 +404,11 @@ abstract class PIMField {
 		}
 	}
 
-	void postProcessData() {
+	protected void postProcessData() {
 
 	}
 
-	void add(ArrayList<ContentProviderOperation> ops, int contactId) {
+	public void add(ArrayList<ContentProviderOperation> ops, int contactId) {
 		if (isReadOnly()) {
 			return;
 		}
@@ -431,8 +420,8 @@ abstract class PIMField {
 		}
 	}
 
-	void update(ContentResolver cr, ArrayList<ContentProviderOperation> ops,
-			int contactId) {
+	public void update(ContentResolver cr,
+			ArrayList<ContentProviderOperation> ops, int contactId) {
 		if (isReadOnly()) {
 			return;
 		}
@@ -451,7 +440,7 @@ abstract class PIMField {
 		}
 	}
 
-	void addToDisk(ArrayList<ContentProviderOperation> ops,
+	protected void addToDisk(ArrayList<ContentProviderOperation> ops,
 			int rawContactInsertIndex, String[] names, String[] values) {
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newInsert(Data.CONTENT_URI)
@@ -468,7 +457,7 @@ abstract class PIMField {
 		ops.add(builder.build());
 	}
 
-	void updateToDisk(ArrayList<ContentProviderOperation> ops,
+	protected void updateToDisk(ArrayList<ContentProviderOperation> ops,
 			int rawContactId, String[] names, String[] values) {
 		DebugPrint("UPDATE");
 		ContentProviderOperation.Builder builder = ContentProviderOperation
@@ -499,6 +488,6 @@ abstract class PIMField {
 								mStrType, Long.toString(id) }).build());
 	}
 
-	void close() {
+	public void close() {
 	}
 }

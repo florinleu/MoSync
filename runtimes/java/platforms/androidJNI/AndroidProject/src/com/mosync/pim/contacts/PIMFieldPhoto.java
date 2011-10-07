@@ -1,8 +1,7 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -17,12 +16,12 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_INT;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.database.Cursor;
-import android.provider.BaseColumns;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
-import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.Data;
 
-public class PIMFieldPhoto extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldPhoto extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -37,7 +36,7 @@ public class PIMFieldPhoto extends PIMField {
 		mNames = new String[] { Photo._ID, Photo.PHOTO, Photo.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 	}
 
 	/**
@@ -45,7 +44,7 @@ public class PIMFieldPhoto extends PIMField {
 	 * @param cr
 	 * @param contactId
 	 */
-	void read(ContentResolver cr, String contactId) {
+	public void read(ContentResolver cr, String contactId) {
 		DebugPrint("PIMFieldPhoto.read(" + cr + ", " + contactId + ")");
 		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
 				+ "=?" + " AND " + Data.MIMETYPE + "=?",
@@ -82,7 +81,7 @@ public class PIMFieldPhoto extends PIMField {
 		return photoHandle;
 	}
 
-	int getAttributes(int index) {
+	protected int getAttributes(int index) {
 		if (isEmpty()) {
 			return MA_PIM_ERR_FIELD_EMPTY;
 		}
@@ -95,17 +94,17 @@ public class PIMFieldPhoto extends PIMField {
 		return ret;
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, Photo.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
 	}
 
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		return 0;
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Photo.IS_PRIMARY, Integer.toString(1));
 		}
@@ -123,7 +122,7 @@ public class PIMFieldPhoto extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return null;
 	}
 
@@ -132,18 +131,18 @@ public class PIMFieldPhoto extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 	}
 
 	/**
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return false;
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
@@ -159,7 +158,7 @@ public class PIMFieldPhoto extends PIMField {
 		return (Integer.SIZE / 8);
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = Integer.toString(PIMUtil.readInt(buffer, 0));
 		setSpecificData(val, index);
 	}
@@ -170,7 +169,7 @@ public class PIMFieldPhoto extends PIMField {
 		mValues.set(index, val);
 	}
 
-	void addToDisk(ArrayList<ContentProviderOperation> ops,
+	protected void addToDisk(ArrayList<ContentProviderOperation> ops,
 			int rawContactInsertIndex, String[] names, String[] values) {
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newInsert(Data.CONTENT_URI)
@@ -198,7 +197,7 @@ public class PIMFieldPhoto extends PIMField {
 		ops.add(builder.build());
 	}
 
-	void updateToDisk(ArrayList<ContentProviderOperation> ops,
+	protected void updateToDisk(ArrayList<ContentProviderOperation> ops,
 			int rawContactId, String[] names, String[] values) {
 		DebugPrint("UPDATE");
 		DebugPrint("Data: " + rawContactId + "   " + mStrType + "   "
@@ -230,7 +229,7 @@ public class PIMFieldPhoto extends PIMField {
 		ops.add(builder.build());
 	}
 
-	void close() {
+	public void close() {
 		for (int i = 0; i < mValues.size(); i++) {
 			PIMUtil.getThread().destroyBinary(
 					Integer.parseInt(mValues.get(i)[1]));
@@ -240,7 +239,7 @@ public class PIMFieldPhoto extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		String[] val = null;
 		DebugPrint("***********PHOTO***********");
 		if ((mValues == null) || (mValues.size() == 0)

@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
@@ -13,7 +13,9 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.Nickname;
 
-public class PIMFieldNickname extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldNickname extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -29,13 +31,13 @@ public class PIMFieldNickname extends PIMField {
 				Nickname.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 	}
 
 	/**
 	 * Get field's attributes.
 	 */
-	int getAttributes(int index) {
+	protected int getAttributes(int index) {
 		if (isEmpty()) {
 			return MA_PIM_ERR_FIELD_EMPTY;
 		}
@@ -48,13 +50,13 @@ public class PIMFieldNickname extends PIMField {
 		return ret;
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, Nickname.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
 	}
 
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		return 0;
 	}
 
@@ -63,7 +65,7 @@ public class PIMFieldNickname extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return null;
 	}
 
@@ -72,18 +74,18 @@ public class PIMFieldNickname extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 	}
 
 	/**
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return false;
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
@@ -99,7 +101,7 @@ public class PIMFieldNickname extends PIMField {
 		return val.length() + 1;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = PIMUtil.readString(buffer);
 		setSpecificData(val, index);
 	}
@@ -110,7 +112,7 @@ public class PIMFieldNickname extends PIMField {
 		mValues.set(index, val);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Nickname.IS_PRIMARY, Integer.toString(1));
 		}
@@ -126,7 +128,7 @@ public class PIMFieldNickname extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("*********NICKNAME**********");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {

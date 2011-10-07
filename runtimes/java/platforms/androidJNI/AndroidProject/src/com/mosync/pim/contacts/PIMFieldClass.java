@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 import android.content.ContentResolver;
@@ -8,7 +8,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_CLASS;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_INT;
 
-public class PIMFieldClass extends PIMField {
+public class PIMFieldClass extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -18,52 +18,53 @@ public class PIMFieldClass extends PIMField {
 		mDataType = MA_PIM_TYPE_INT;
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 
 	}
 
-	void read(ContentResolver cr, String contactId) {
+	public void read(ContentResolver cr, String contactId) {
+		DebugPrint("PIMFieldClass.read(" + cr + ", " + contactId + ")");
 		print();
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		return 0;
 	}
 
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		return 0;
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		return MA_PIM_ERR_NONE;
 	}
 
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return null;
 	}
 
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 	}
 
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return false;
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		return null;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 	}
 
-	boolean isSupported() {
+	public boolean isSupported() {
 		return false;
 	}
 
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("***********CLASS***********");
 		DebugPrint("Not supported");
 		DebugPrint("***************************");

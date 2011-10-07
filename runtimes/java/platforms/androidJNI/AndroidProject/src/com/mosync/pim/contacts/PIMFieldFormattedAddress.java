@@ -1,8 +1,6 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
-
-import com.mosync.pim.PIMField.Permission;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_FORMATTED_ADDR_HOME;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_FORMATTED_ADDR_WORK;
@@ -17,7 +15,9 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 
-public class PIMFieldFormattedAddress extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldFormattedAddress extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -34,7 +34,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 		mPermission = Permission.READ_ONLY;
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 		// attributes
 		mAttributes.put(MA_PIM_ATTR_FORMATTED_ADDR_HOME,
 				StructuredPostal.TYPE_HOME);
@@ -46,7 +46,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 				StructuredPostal.TYPE_CUSTOM);
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer
 				.parseInt(getColumnValue(index, StructuredPostal.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
@@ -56,7 +56,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 	/**
 	 * Gets the field attribute.
 	 */
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		String attribute = null;
 		if ((attribute = getColumnValue(index, StructuredPostal.TYPE)) == null) {
 			return -1;
@@ -69,7 +69,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return getColumnValue(index, StructuredPostal.LABEL).toCharArray();
 	}
 
@@ -78,7 +78,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 		setColumnValue(index, StructuredPostal.LABEL, label);
 	}
 
@@ -86,12 +86,12 @@ public class PIMFieldFormattedAddress extends PIMField {
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return ((Integer.parseInt(getColumnValue(index, StructuredPostal.TYPE)) == StructuredPostal.TYPE_CUSTOM) ? true
 				: false);
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
@@ -107,7 +107,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 		return val.length() + 1;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = PIMUtil.readString(buffer);
 		setSpecificData(val, index);
 	}
@@ -118,7 +118,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 		mValues.set(index, val);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, StructuredPostal.IS_PRIMARY,
 					Integer.toString(1));
@@ -140,7 +140,7 @@ public class PIMFieldFormattedAddress extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("****FORMATTED ADDRESSES****");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {

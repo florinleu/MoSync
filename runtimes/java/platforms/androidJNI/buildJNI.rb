@@ -167,20 +167,22 @@ sh( "#{File.join(androidSDKTools, "/aapt")} package -f -v " +
 
 puts "Compiling Java Source Files\n\n"
 
-packages = ["src/com/mosync/java/android/*.java",
+packages = ["gen/com/mosync/java/android/*.java",
             "src/com/mosync/internal/android/*.java",
+            "src/com/mosync/internal/android/nfc/*.java",
+            "src/com/mosync/internal/android/nfc/ops/*.java",
             "src/com/mosync/internal/generated/*.java",
+            "src/com/mosync/java/android/*.java",
             "src/com/mosync/nativeui/core/*.java",
-			"src/com/mosync/nativeui/ui/egl/*.java",
+            "src/com/mosync/nativeui/ui/custom/*.java",
+            "src/com/mosync/nativeui/ui/egl/*.java",
             "src/com/mosync/nativeui/ui/factories/*.java",
             "src/com/mosync/nativeui/ui/widgets/*.java",
             "src/com/mosync/nativeui/util/*.java",
             "src/com/mosync/nativeui/util/properties/*.java",
-			"src/com/mosync/pim/*.java",
-			"src/com/mosync/nativeui/ui/custom/*.java",
-			"gen/com/mosync/java/android/*.java",
-            "src/com/mosync/internal/android/nfc/*.java",
-            "src/com/mosync/internal/android/nfc/ops/*.java"
+            "src/com/mosync/pim/*.java",
+            "src/com/mosync/pim/contacts/*.java",
+            "src/com/mosync/pim/events/*.java",
             ]
 
 # Concatenate each list element with package_root, and flatten the list to a string

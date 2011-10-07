@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
@@ -13,7 +13,9 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING_ARRAY;
 
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 
-public class PIMFieldName extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldName extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -33,13 +35,13 @@ public class PIMFieldName extends PIMField {
 				StructuredName.PHONETIC_MIDDLE_NAME, StructuredName.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 	}
 
 	/**
 	 * Get field's attributes.
 	 */
-	int getAttributes(int index) {
+	protected int getAttributes(int index) {
 		if (isEmpty()) {
 			return MA_PIM_ERR_FIELD_EMPTY;
 		}
@@ -52,13 +54,13 @@ public class PIMFieldName extends PIMField {
 		return ret;
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, StructuredName.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
 	}
 
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		return 0;
 	}
 
@@ -67,7 +69,7 @@ public class PIMFieldName extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return null;
 	}
 
@@ -76,18 +78,18 @@ public class PIMFieldName extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 	}
 
 	/**
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return false;
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String[] val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeStringArray(val, buffer);
@@ -114,7 +116,7 @@ public class PIMFieldName extends PIMField {
 		return size;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String[] val = PIMUtil.readStringArray(buffer);
 		setSpecificData(val, index);
 	}
@@ -127,7 +129,7 @@ public class PIMFieldName extends PIMField {
 		mValues.set(index, val);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, StructuredName.IS_PRIMARY,
 					Integer.toString(1));
@@ -144,7 +146,7 @@ public class PIMFieldName extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		DebugPrint("*********NAMES********");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {

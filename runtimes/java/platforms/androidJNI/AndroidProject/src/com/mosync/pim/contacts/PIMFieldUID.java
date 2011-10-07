@@ -1,16 +1,16 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
-
-import com.mosync.pim.PIMField.State;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_UID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.content.ContentResolver;
 
-public class PIMFieldUID extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldUID extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -24,13 +24,13 @@ public class PIMFieldUID extends PIMField {
 		mPermission = Permission.READ_ONLY;
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 	}
 
 	/**
 	 * Read address field.
 	 */
-	void read(ContentResolver cr, String contactId) {
+	public void read(ContentResolver cr, String contactId) {
 		DebugPrint("PIMFieldUID.read(" + cr + ", " + contactId + ")");
 		mValues.add(new String[] { contactId });
 		mStates.add(State.NONE);
@@ -38,19 +38,19 @@ public class PIMFieldUID extends PIMField {
 		print();
 	}
 
-	int getAttributes(int index) {
+	protected int getAttributes(int index) {
 		return 0;
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		return 0;
 	}
 
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		return 0;
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		return MA_PIM_ERR_NONE;
 	}
 
@@ -59,7 +59,7 @@ public class PIMFieldUID extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return null;
 	}
 
@@ -68,25 +68,25 @@ public class PIMFieldUID extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 	}
 
 	/**
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return false;
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
 		return buffer;
 	}
 
-	String getSpecificData(int index) {
+	public String getSpecificData(int index) {
 		String[] val = mValues.get(index);
 		return val[0];
 	}
@@ -95,7 +95,7 @@ public class PIMFieldUID extends PIMField {
 		return val.length() + 1;
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = PIMUtil.readString(buffer);
 		setSpecificData(val, index);
 	}
@@ -107,7 +107,7 @@ public class PIMFieldUID extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		String[] val = null;
 		DebugPrint("*************UID***********");
 		if ((mValues == null) || (mValues.size() == 0)

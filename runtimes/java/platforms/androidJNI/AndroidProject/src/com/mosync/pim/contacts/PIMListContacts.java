@@ -1,37 +1,41 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract.Contacts;
-
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_UNAVAILABLE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 
+import com.mosync.pim.*;
+
 public class PIMListContacts extends PIMList {
 
-	PIMListContacts() {
+	protected PIMItem createItem() {
+		PIMItemContacts p = new PIMItemContacts(true);
+		mList.add(p);
+		return p;
 	}
 
 	/**
 	 * Read the list
 	 */
-	int read(ContentResolver cr) {
-		DebugPrint("PIMList.read(" + cr + ")");
+	public int read(ContentResolver cr) {
+		DebugPrint("PIMListContacts.read(" + cr + ")");
 		// try to query for contacts
 		Cursor cur;
 		try {
 			cur = cr.query(Contacts.CONTENT_URI, new String[] { Contacts._ID },
 					null, null, null);
 		} catch (Exception e) {
-			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
+			return PIMUtil.throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
 					PIMError.PANIC_LIST_UNAVAILABLE,
 					PIMError.sStrListUnavailable);
 		}
 
 		if (cur == null) {
-			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
+			return PIMUtil.throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
 					PIMError.PANIC_LIST_UNAVAILABLE,
 					PIMError.sStrListUnavailable);
 		}
@@ -40,7 +44,7 @@ public class PIMListContacts extends PIMList {
 		while (cur.moveToNext()) {
 			String contactId = cur.getString(cur.getColumnIndex(Contacts._ID));
 
-			PIMItem pimItem = new PIMItem(false);
+			PIMItemContacts pimItem = new PIMItemContacts(false);
 			pimItem.read(cr, contactId);
 
 			mList.add(pimItem);

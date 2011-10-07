@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
@@ -19,7 +19,9 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 
-public class PIMFieldBirthday extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldBirthday extends PIMFieldContact {
 
 	/**
 	 * Constructor
@@ -34,10 +36,10 @@ public class PIMFieldBirthday extends PIMField {
 				Event.LABEL, Event.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 	}
 
-	void preProcessData() {
+	protected void preProcessData() {
 		String[] val = null;
 		if ((mValues == null) || (mValues.size() == 0)
 				|| ((val = mValues.get(0)) == null)) {
@@ -67,7 +69,7 @@ public class PIMFieldBirthday extends PIMField {
 		return cal.getTimeInMillis() + offset;
 	}
 
-	int getAttributes(int index) {
+	protected int getAttributes(int index) {
 		if (isEmpty()) {
 			return MA_PIM_ERR_FIELD_EMPTY;
 		}
@@ -80,17 +82,17 @@ public class PIMFieldBirthday extends PIMField {
 		return ret;
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, StructuredName.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
 	}
 
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		return 0;
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Email.IS_PRIMARY, Integer.toString(1));
 		}
@@ -110,7 +112,7 @@ public class PIMFieldBirthday extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return null;
 	}
 
@@ -119,18 +121,18 @@ public class PIMFieldBirthday extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 	}
 
 	/**
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return false;
 	}
 
-	char[] getData(int index) {
+	protected char[] getData(int index) {
 		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
@@ -146,7 +148,7 @@ public class PIMFieldBirthday extends PIMField {
 		return (Integer.SIZE / 8);
 	}
 
-	void setData(int index, char[] buffer) {
+	protected void setData(int index, char[] buffer) {
 		String val = Integer.toString(PIMUtil.readInt(buffer, 0));
 		setSpecificData(val, index);
 	}
@@ -157,7 +159,7 @@ public class PIMFieldBirthday extends PIMField {
 		mValues.set(index, val);
 	}
 
-	void postProcessData() {
+	protected void postProcessData() {
 		String[] val = null;
 		if ((mValues == null) || (mValues.size() == 0)
 				|| ((val = mValues.get(0)) == null)) {
@@ -182,7 +184,7 @@ public class PIMFieldBirthday extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
+	protected void print() {
 		String[] val = null;
 		DebugPrint("**********BIRTHDAY*********");
 		if ((mValues == null) || (mValues.size() == 0)

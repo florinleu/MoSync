@@ -18,23 +18,27 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.RawContacts;
 
+import com.mosync.pim.contacts.*;
+
 public abstract class PIMItem {
-	public enum State {
+	protected enum State {
 		NONE, ADDED, UPDATED
 	}
 
-	State mState;
+	protected State mState;
 
-	ArrayList<PIMField> mPIMFields;
+	protected ArrayList<PIMField> mPIMFields;
 
 	/**
 	 * Constructor
 	 */
-	PIMItem() {
-
+	public PIMItem() {
+		DebugPrint("PIMItem()");
+		mPIMFields = new ArrayList<PIMField>();
 	}
 
-	PIMItem(boolean isNew) {
+	protected PIMItem(boolean isNew) {
+		DebugPrint("PIMItem(" + isNew + ")");
 		setState(State.NONE);
 		if (isNew) {
 			setState(State.ADDED);
@@ -42,28 +46,7 @@ public abstract class PIMItem {
 		mPIMFields = new ArrayList<PIMField>();
 	}
 
-	/**
-	 * @param errorCode
-	 *            The error code returned by the syscall.
-	 * @param panicCode
-	 *            The panic code for this error.
-	 * @param panicText
-	 *            The panic text for this error.
-	 * @return
-	 */
-	public int throwError(int errorCode, int panicCode, String panicText) {
-		return MoSyncError.getSingletonObject().error(errorCode, panicCode,
-				panicText);
-	}
-
-	/**
-	 * Read the item with contactId.
-	 * @param cr
-	 * @param contactId
-	 */
-	abstract void read(ContentResolver cr, String contactId);
-
-	void setState(State state) {
+	protected void setState(State state) {
 		if ((mState != State.ADDED) && (state != State.NONE))
 			mState = state;
 	}
@@ -106,7 +89,7 @@ public abstract class PIMItem {
 	int getFieldType(int index) {
 		DebugPrint("PIMItem.getFieldType(" + index + ")");
 		if ((index < 0) || (index >= mPIMFields.size())) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
 
@@ -123,7 +106,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -143,7 +126,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -167,7 +150,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -191,7 +174,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -216,7 +199,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -241,7 +224,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -266,7 +249,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -289,7 +272,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -308,7 +291,7 @@ public abstract class PIMItem {
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
-			return throwError(MA_PIM_ERR_FIELD_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_FIELD_INVALID,
 					PIMError.PANIC_FIELD_INVALID, PIMError.sStrFieldInvalid);
 		}
 		if (!pimField.isSupported()) {
@@ -318,63 +301,12 @@ public abstract class PIMItem {
 		return pimField.getDataType();
 	}
 
-	void delete(ContentResolver cr) {
-		if (mState == State.ADDED) {
-			return;
-		}
-
-		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
-
-		while (fieldsIt.hasNext()) {
-			fieldsIt.next().close();
-		}
-
-		String id = mUID.getSpecificData(0);
-		cr.delete(RawContacts.CONTENT_URI, RawContacts.CONTACT_ID + " = ?",
-				new String[] { id });
+	protected void delete(ContentResolver cr) {
 	}
 
 	/**
 	 * Closes the item
 	 */
-	void close(ContentResolver cr) {
-		DebugPrint("PIMItem.close()");
-		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
-		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
-
-		int rawContactIndex = 0;
-		if (mState == State.ADDED) {
-			rawContactIndex = ops.size();
-			ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
-					.withValue(RawContacts.ACCOUNT_TYPE, null)
-					.withValue(RawContacts.ACCOUNT_NAME, null).build());
-			while (fieldsIt.hasNext()) {
-				fieldsIt.next().add(ops, rawContactIndex);
-			}
-		} else if (mState == State.UPDATED) {
-			rawContactIndex = Integer.parseInt(mUID.getSpecificData(0));
-			while (fieldsIt.hasNext()) {
-				fieldsIt.next().update(cr, ops, rawContactIndex);
-			}
-		}
-
-		setState(State.NONE);
-		try {
-			DebugPrint("REQUEST UPDATE");
-			ContentProviderResult[] res = cr.applyBatch(
-					ContactsContract.AUTHORITY, ops);
-			for (int i = 0; i < res.length; i++) {
-				DebugPrint("RESULT " + i + ": " + res[i].toString());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			DebugPrint("Exception: " + e.getMessage());
-		}
-
-		fieldsIt = mPIMFields.iterator();
-
-		while (fieldsIt.hasNext()) {
-			fieldsIt.next().close();
-		}
+	protected void close(ContentResolver cr) {
 	}
 }

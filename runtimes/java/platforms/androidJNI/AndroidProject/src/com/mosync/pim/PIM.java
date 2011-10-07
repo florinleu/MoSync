@@ -17,7 +17,8 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import com.mosync.internal.android.MoSyncThread;
-import com.mosync.internal.android.MoSyncError;
+import com.mosync.pim.contacts.*;
+import com.mosync.pim.events.*;
 
 public class PIM {
 
@@ -53,20 +54,6 @@ public class PIM {
 	}
 
 	/**
-	 * @param errorCode
-	 *            The error code returned by the syscall.
-	 * @param panicCode
-	 *            The panic code for this error.
-	 * @param panicText
-	 *            The panic text for this error.
-	 * @return
-	 */
-	public int throwError(int errorCode, int panicCode, String panicText) {
-		return MoSyncError.getSingletonObject().error(errorCode, panicCode,
-				panicText);
-	}
-
-	/**
 	 * Constructor.
 	 * @param thread
 	 *            The MoSync thread.
@@ -97,7 +84,7 @@ public class PIM {
 			return countEventsList();
 		}
 
-		return throwError(MA_PIM_ERR_LIST_TYPE_INVALID,
+		return PIMUtil.throwError(MA_PIM_ERR_LIST_TYPE_INVALID,
 				PIMError.PANIC_LIST_TYPE_INVALID, PIMError.sStrListTypeInvalid);
 	}
 
@@ -136,7 +123,7 @@ public class PIM {
 
 	int countEventsList() {
 		String[] projection = new String[] { "_id", "displayName" };
-		String selection = "selected=1";
+		String selection = null;// "selected=1";
 		String path = "calendars";
 
 		Cursor managedCursor = getCalendarManagedCursor(projection, selection,
@@ -144,7 +131,7 @@ public class PIM {
 		if (managedCursor != null)
 			return managedCursor.getCount();
 		else
-			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
+			return PIMUtil.throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
 					PIMError.PANIC_LIST_UNAVAILABLE,
 					PIMError.sStrListUnavailable);
 	}
@@ -161,7 +148,7 @@ public class PIM {
 			return openEventsList(index);
 		}
 
-		return throwError(MA_PIM_ERR_LIST_TYPE_INVALID,
+		return PIMUtil.throwError(MA_PIM_ERR_LIST_TYPE_INVALID,
 				PIMError.PANIC_LIST_TYPE_INVALID, PIMError.sStrListTypeInvalid);
 	}
 
@@ -186,14 +173,14 @@ public class PIM {
 	 * Opens the contacts list.
 	 */
 	int openContactsList(int index) {
-		if (index >= 0) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+		DebugPrint("openContactsList()");
+		if (index > 0) {
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
-		DebugPrint("openContactsList()");
 		// if opened, return error code
 		if (isContactListOpened()) {
-			return throwError(MA_PIM_ERR_LIST_ALREADY_OPENED,
+			return PIMUtil.throwError(MA_PIM_ERR_LIST_ALREADY_OPENED,
 					PIMError.PANIC_LIST_ALREADY_OPENED,
 					PIMError.sStrListAlreadyOpened);
 		}
@@ -231,19 +218,19 @@ public class PIM {
 	int openEventsList(int index) {
 		int listCount = countEventsList();
 		if ((listCount > 0) && (index > listCount)) {
-			return throwError(MA_PIM_ERR_INDEX_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
 		}
-		DebugPrint("openContactsList()");
+		DebugPrint("openEventsList()");
 		// if opened, return error code
 		if (isEventsListOpened(index)) {
-			return throwError(MA_PIM_ERR_LIST_ALREADY_OPENED,
+			return PIMUtil.throwError(MA_PIM_ERR_LIST_ALREADY_OPENED,
 					PIMError.PANIC_LIST_ALREADY_OPENED,
 					PIMError.sStrListAlreadyOpened);
 		}
 
 		String[] projection = new String[] { "_id", "displayName" };
-		String selection = "selected=1";
+		String selection = null;// "selected=1";
 		String path = "calendars";
 
 		Cursor managedCursor = getCalendarManagedCursor(projection, selection,
@@ -263,7 +250,7 @@ public class PIM {
 		DebugPrint("maPimListNext(" + list + ")");
 		PIMList pimList = null;
 		if ((list < 0) || ((pimList = getList(list)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -280,7 +267,7 @@ public class PIM {
 		DebugPrint("maPimListClose(" + list + ")");
 		PIMList pimList = null;
 		if ((list < 0) || ((pimList = getList(list)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -300,7 +287,7 @@ public class PIM {
 		DebugPrint("maPimItemCount(" + item + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -311,7 +298,7 @@ public class PIM {
 		DebugPrint("maPimItemGetField(" + item + ", " + n + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -322,7 +309,7 @@ public class PIM {
 		DebugPrint("maPimItemFieldCount(" + item + ", " + field + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -334,7 +321,7 @@ public class PIM {
 				+ index + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -347,7 +334,7 @@ public class PIM {
 				+ buffPointer + ", " + buffSize + ", " + index + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -360,7 +347,7 @@ public class PIM {
 				+ buffPointer + ", " + buffSize + ", " + index + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -371,7 +358,7 @@ public class PIM {
 		DebugPrint("maPimFieldType(" + list + ", " + field + ")");
 		PIMList pimList = null;
 		if ((list < 0) || ((pimList = getList(list)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -384,7 +371,7 @@ public class PIM {
 				+ buffPointer + ", " + buffSize + ", " + index + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -397,7 +384,7 @@ public class PIM {
 				+ buffPointer + ", " + buffSize + ", " + index + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -411,7 +398,7 @@ public class PIM {
 				+ buffPointer + ", " + buffSize + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -423,7 +410,7 @@ public class PIM {
 				+ ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -434,7 +421,7 @@ public class PIM {
 		DebugPrint("maPimItemClose(" + item + ")");
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 		pimItem.close(getContentResolver());
@@ -446,7 +433,7 @@ public class PIM {
 		DebugPrint("maPimListNext(" + list + ")");
 		PIMList pimList = null;
 		if ((list < 0) || ((pimList = getList(list)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
@@ -459,12 +446,12 @@ public class PIM {
 		DebugPrint("maPimItemRemove(" + list + ", " + item + ")");
 		PIMList pimList = null;
 		if ((list < 0) || ((pimList = getList(list)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 		PIMItem pimItem = null;
 		if ((item < 0) || ((pimItem = mPIMItems.get(item)) == null)) {
-			return throwError(MA_PIM_ERR_HANDLE_INVALID,
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 		pimItem.delete(getContentResolver());

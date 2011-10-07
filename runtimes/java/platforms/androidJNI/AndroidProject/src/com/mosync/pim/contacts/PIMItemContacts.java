@@ -1,22 +1,17 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_FIELD_INVALID;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_FIELD_UNSUPPORTED;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_INDEX_INVALID;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.mosync.internal.android.MoSyncError;
-
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
-import android.database.Cursor;
 import android.provider.ContactsContract;
-import android.provider.ContactsContract.Contacts;
 import android.provider.ContactsContract.RawContacts;
+
+import com.mosync.pim.*;
 
 public class PIMItemContacts extends PIMItem {
 
@@ -47,8 +42,8 @@ public class PIMItemContacts extends PIMItem {
 	/**
 	 * Constructor
 	 */
-	PIMItemContacts(boolean isNew) {
-		mPIMFields = new ArrayList<PIMField>();
+	public PIMItemContacts() {
+		DebugPrint("PIMItemContacts()");
 		mAddress = new PIMFieldAddress();
 		mBirthday = new PIMFieldBirthday();
 		mClass = new PIMFieldClass();
@@ -97,18 +92,84 @@ public class PIMItemContacts extends PIMItem {
 		// mPIMFields.add(mEvent);
 	}
 
+	PIMItemContacts(boolean isNew) {
+		super(isNew);
+	}
+
 	/**
 	 * Read the item with contactId.
 	 * @param cr
 	 * @param contactId
 	 */
 	void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMItem.read(" + cr + ", " + contactId + ")");
+		DebugPrint("PIMItemContacts.read(" + cr + ", " + contactId + ")");
+
+		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
+
+		DebugPrint("Length = " + mPIMFields.size());
+
+		while (fieldsIt.hasNext()) {
+			fieldsIt.next().read(cr, contactId);
+		}
+	}
+
+	protected void delete(ContentResolver cr) {
+		if (mState == State.ADDED) {
+			return;
+		}
 
 		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
 
 		while (fieldsIt.hasNext()) {
-			fieldsIt.next().read(cr, contactId);
+			fieldsIt.next().close();
+		}
+
+		String id = mUID.getSpecificData(0);
+		cr.delete(RawContacts.CONTENT_URI, RawContacts.CONTACT_ID + " = ?",
+				new String[] { id });
+	}
+
+	/**
+	 * Closes the item
+	 */
+	protected void close(ContentResolver cr) {
+		DebugPrint("PIMItem.close()");
+		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
+
+		int rawContactIndex = 0;
+		if (mState == State.ADDED) {
+			rawContactIndex = ops.size();
+			ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+					.withValue(RawContacts.ACCOUNT_TYPE, null)
+					.withValue(RawContacts.ACCOUNT_NAME, null).build());
+			while (fieldsIt.hasNext()) {
+				fieldsIt.next().add(ops, rawContactIndex);
+			}
+		} else if (mState == State.UPDATED) {
+			rawContactIndex = Integer.parseInt(mUID.getSpecificData(0));
+			while (fieldsIt.hasNext()) {
+				fieldsIt.next().update(cr, ops, rawContactIndex);
+			}
+		}
+
+		setState(State.NONE);
+		try {
+			DebugPrint("REQUEST UPDATE");
+			ContentProviderResult[] res = cr.applyBatch(
+					ContactsContract.AUTHORITY, ops);
+			for (int i = 0; i < res.length; i++) {
+				DebugPrint("RESULT " + i + ": " + res[i].toString());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			DebugPrint("Exception: " + e.getMessage());
+		}
+
+		fieldsIt = mPIMFields.iterator();
+
+		while (fieldsIt.hasNext()) {
+			fieldsIt.next().close();
 		}
 	}
 }

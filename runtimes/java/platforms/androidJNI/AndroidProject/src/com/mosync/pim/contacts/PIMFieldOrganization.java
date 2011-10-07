@@ -1,45 +1,43 @@
-package com.mosync.pim;
+package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
-import com.mosync.pim.PIMField.State;
-
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_ORG_INFO_WORK;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_ORG_INFO_OTHER;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_ORG_INFO_CUSTOM;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_ORG_WORK;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_ORG_OTHER;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTR_ORG_CUSTOM;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTRPREFERRED;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_ATTRIBUTE_COMBO_UNSUPPORTED;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_ORG_INFO;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING_ARRAY;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_ORG;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
 
-public class PIMFieldOrganizationInfo extends PIMField {
+import com.mosync.pim.*;
+
+public class PIMFieldOrganization extends PIMFieldContact {
 
 	/**
 	 * Constructor
 	 */
-	public PIMFieldOrganizationInfo() {
-		mType = MA_PIM_FIELD_CONTACT_ORG_INFO;
+	public PIMFieldOrganization() {
+		mType = MA_PIM_FIELD_CONTACT_ORG;
 		mStrType = Organization.CONTENT_ITEM_TYPE;
-		mDataType = MA_PIM_TYPE_STRING_ARRAY;
+		mDataType = MA_PIM_TYPE_STRING;
 
-		mNames = new String[] { Organization._ID, Organization.DEPARTMENT,
-				Organization.JOB_DESCRIPTION, Organization.SYMBOL,
-				Organization.PHONETIC_NAME, Organization.OFFICE_LOCATION,
+		mNames = new String[] { Organization._ID, Organization.COMPANY,
 				Organization.TYPE, Organization.LABEL, Organization.IS_PRIMARY };
 	}
 
-	void createMaps() {
+	protected void createMaps() {
 		// attributes
-		mAttributes.put(MA_PIM_ATTR_ORG_INFO_WORK, Organization.TYPE_WORK);
-		mAttributes.put(MA_PIM_ATTR_ORG_INFO_OTHER, Organization.TYPE_OTHER);
-		mAttributes.put(MA_PIM_ATTR_ORG_INFO_CUSTOM, Organization.TYPE_CUSTOM);
+		mAttributes.put(MA_PIM_ATTR_ORG_WORK, Organization.TYPE_WORK);
+		mAttributes.put(MA_PIM_ATTR_ORG_OTHER, Organization.TYPE_OTHER);
+		mAttributes.put(MA_PIM_ATTR_ORG_CUSTOM, Organization.TYPE_CUSTOM);
 	}
 
 	/**
@@ -47,8 +45,8 @@ public class PIMFieldOrganizationInfo extends PIMField {
 	 * @param cr
 	 * @param contactId
 	 */
-	void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMField.read(" + cr + ", " + contactId + ")");
+	public void read(ContentResolver cr, String contactId) {
+		DebugPrint("PIMFieldOrganization.read(" + cr + ", " + contactId + ")");
 		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
 				+ "=?" + " AND " + Data.MIMETYPE + "=?",
 				new String[] { String.valueOf(contactId), mStrType }, null);
@@ -64,15 +62,7 @@ public class PIMFieldOrganizationInfo extends PIMField {
 					}
 				}
 			}
-
-			boolean canAdd = false;
-			for (int i = 1; i < 6; i++) {
-				if (val[i] != null) {
-					canAdd = true;
-					break;
-				}
-			}
-			if (canAdd) {
+			if (val[1] != null) {
 				mValues.add(val);
 				mStates.add(State.NONE);
 			}
@@ -82,7 +72,7 @@ public class PIMFieldOrganizationInfo extends PIMField {
 		print();
 	}
 
-	int checkForPreferredAttribute(int index) {
+	protected int checkForPreferredAttribute(int index) {
 		if (Integer.parseInt(getColumnValue(index, Organization.IS_PRIMARY)) != 0)
 			return MA_PIM_ATTRPREFERRED;
 		return 0;
@@ -91,7 +81,7 @@ public class PIMFieldOrganizationInfo extends PIMField {
 	/**
 	 * Gets the field attribute.
 	 */
-	int getAndroidAttribute(int index) {
+	protected int getAndroidAttribute(int index) {
 		String attribute = null;
 		if ((attribute = getColumnValue(index, Organization.TYPE)) == null) {
 			return -1;
@@ -104,7 +94,7 @@ public class PIMFieldOrganizationInfo extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	char[] getLabel(int index) {
+	protected char[] getLabel(int index) {
 		return getColumnValue(index, Organization.LABEL).toCharArray();
 	}
 
@@ -113,7 +103,7 @@ public class PIMFieldOrganizationInfo extends PIMField {
 	 * @param index
 	 * @return
 	 */
-	void setLabel(int index, String label) {
+	protected void setLabel(int index, String label) {
 		setColumnValue(index, Organization.LABEL, label);
 	}
 
@@ -121,53 +111,39 @@ public class PIMFieldOrganizationInfo extends PIMField {
 	 * Checks to see if the given field has a custom label.
 	 * @param index
 	 */
-	boolean hasCustomLabel(int index) {
+	protected boolean hasCustomLabel(int index) {
 		return ((Integer.parseInt(getColumnValue(index, Organization.TYPE)) == Organization.TYPE_CUSTOM) ? true
 				: false);
 	}
 
-	char[] getData(int index) {
-		String[] val = getSpecificData(index);
-		DebugPrint("DATA SIZE = " + getDataSize(val));
+	protected char[] getData(int index) {
+		String val = getSpecificData(index);
 		char[] buffer = new char[getDataSize(val)];
-		PIMUtil.writeStringArray(val, buffer);
+		PIMUtil.writeString(val, buffer);
 		return buffer;
 	}
 
-	String[] getSpecificData(int index) {
+	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		String[] ret = new String[val.length - 4];
-		for (int i = 0; i < val.length - 4; i++) {
-			ret[i] = val[i + 1];
-		}
-		return ret;
+		return val[1];
 	}
 
-	int getDataSize(String[] val) {
-		int size = 4;
-		for (int i = 0; i < val.length; i++) {
-			if (val[i] != null) {
-				size += val[i].length();
-			}
-			size += 1;
-		}
-		return size;
+	int getDataSize(String val) {
+		return val.length() + 1;
 	}
 
-	void setData(int index, char[] buffer) {
-		String[] val = PIMUtil.readStringArray(buffer);
+	protected void setData(int index, char[] buffer) {
+		String val = PIMUtil.readString(buffer);
 		setSpecificData(val, index);
 	}
 
-	void setSpecificData(String[] data, int index) {
+	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		for (int i = 0; i < data.length; i++) {
-			val[i + 1] = data[i];
-		}
+		val[1] = data;
 		mValues.set(index, val);
 	}
 
-	int setAttribute(int index, int attribute) {
+	protected int setAttribute(int index, int attribute) {
 		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
 			setColumnValue(index, Organization.IS_PRIMARY, Integer.toString(1));
 		}
@@ -188,15 +164,13 @@ public class PIMFieldOrganizationInfo extends PIMField {
 	/**
 	 * Print field values.
 	 */
-	void print() {
-		DebugPrint("*****ORGANIZATION INFO*****");
+	protected void print() {
+		DebugPrint("*******ORGANIZATIONS*******");
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
-			DebugPrint("###Organization info " + i);
-			for (int j = 0; j < val.length; j++) {
-				DebugPrint(mNames[j] + ": " + val[j]);
-			}
+			DebugPrint("###Organization " + i);
+			DebugPrint(mNames[1] + ": " + val[1]);
 		}
 		DebugPrint("***************************");
 	}

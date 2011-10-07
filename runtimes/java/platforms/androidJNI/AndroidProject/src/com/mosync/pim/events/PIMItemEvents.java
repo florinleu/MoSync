@@ -1,4 +1,4 @@
-package com.mosync.pim;
+package com.mosync.pim.events;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
@@ -6,17 +6,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+
+import com.mosync.pim.*;
+import com.mosync.pim.contacts.PIMFieldContact;
 
 public class PIMItemEvents extends PIMItem {
 
-	public PIMItemEvents(boolean isNew) {
-		setState(State.NONE);
-		if (isNew) {
-			setState(State.ADDED);
-		}
-		// mPIMFields = new ArrayList<PIMField>();
-		// mAddress = new PIMFieldAddress();
-		// mPIMFields.add(mAddress);
+	PIMItemEvents(boolean isNew) {
+		super(isNew);
 	}
 
 	/**
@@ -25,12 +24,12 @@ public class PIMItemEvents extends PIMItem {
 	 * @param contactId
 	 */
 	void read(Cursor cur, String calendarId) {
-		DebugPrint("PIMItem.read(" + cr + ", " + contactId + ")");
+		DebugPrint("PIMItem.read(" + cur + ", " + calendarId + ")");
 
 		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
 
 		while (fieldsIt.hasNext()) {
-			fieldsIt.next().read(cr, contactId);
+			fieldsIt.next().read(cur, calendarId);
 		}
 	}
 }
