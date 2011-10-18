@@ -15,7 +15,7 @@ import android.provider.ContactsContract.CommonDataKinds.Photo;
 
 import com.mosync.pim.*;
 
-public class PIMFieldPhotoURL extends PIMFieldContact {
+public class PIMFieldPhotoURL extends PIMFieldContacts {
 
 	/**
 	 * Constructor
@@ -98,6 +98,9 @@ public class PIMFieldPhotoURL extends PIMFieldContact {
 
 	protected char[] getData(int index) {
 		String val = getSpecificData(index);
+		if (val == null) {
+			return null;
+		}
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
 		return buffer;

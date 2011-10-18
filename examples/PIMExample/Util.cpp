@@ -160,6 +160,11 @@ void printResultCode(const int resultCode)
 	case MA_PIM_ERR_OPERATION_NOT_PERMITTED:
 		error = "MA_PIM_ERR_OPERATION_NOT_PERMITTED";
 		break;
+	default:
+		char* tmp = new char[255];
+		sprintf(tmp, "Unknown code: %d." , resultCode);
+		error = tmp;
+		break;
 	}
 
 	error = "Error: " + error;

@@ -18,7 +18,7 @@ import android.provider.ContactsContract.CommonDataKinds.Event;
 
 import com.mosync.pim.*;
 
-public class PIMFieldEvent extends PIMFieldContact {
+public class PIMFieldEvent extends PIMFieldContacts {
 
 	final static int MA_PIM_FIELD_CONTACT_EVENT = 122;
 
@@ -145,6 +145,9 @@ public class PIMFieldEvent extends PIMFieldContact {
 
 	protected char[] getData(int index) {
 		String val = getSpecificData(index);
+		if (val == null) {
+			return null;
+		}
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
 		return buffer;

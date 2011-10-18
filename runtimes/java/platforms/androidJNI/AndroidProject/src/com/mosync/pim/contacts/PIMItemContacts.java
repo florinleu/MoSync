@@ -42,7 +42,8 @@ public class PIMItemContacts extends PIMItem {
 	/**
 	 * Constructor
 	 */
-	public PIMItemContacts() {
+	PIMItemContacts(boolean isNew) {
+		super(isNew);
 		DebugPrint("PIMItemContacts()");
 		mAddress = new PIMFieldAddress();
 		mBirthday = new PIMFieldBirthday();
@@ -90,10 +91,6 @@ public class PIMItemContacts extends PIMItem {
 		mPIMFields.add(mRelation);
 		mPIMFields.add(mOrganizationInfo);
 		// mPIMFields.add(mEvent);
-	}
-
-	PIMItemContacts(boolean isNew) {
-		super(isNew);
 	}
 
 	/**

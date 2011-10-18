@@ -8,7 +8,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_PUBLIC_KEY;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_BINARY;
 
-public class PIMFieldPublicKey extends PIMFieldContact {
+public class PIMFieldPublicKey extends PIMFieldContacts {
 
 	/**
 	 * Constructor

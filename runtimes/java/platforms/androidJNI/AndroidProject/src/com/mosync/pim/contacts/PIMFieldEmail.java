@@ -18,7 +18,7 @@ import android.provider.ContactsContract.CommonDataKinds.Email;
 
 import com.mosync.pim.*;
 
-public class PIMFieldEmail extends PIMFieldContact {
+public class PIMFieldEmail extends PIMFieldContacts {
 
 	/**
 	 * Constructor
@@ -87,6 +87,9 @@ public class PIMFieldEmail extends PIMFieldContact {
 
 	protected char[] getData(int index) {
 		String val = getSpecificData(index);
+		if (val == null) {
+			return null;
+		}
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
 		return buffer;

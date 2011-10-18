@@ -10,7 +10,7 @@ import android.content.ContentResolver;
 
 import com.mosync.pim.*;
 
-public class PIMFieldUID extends PIMFieldContact {
+public class PIMFieldUID extends PIMFieldContacts {
 
 	/**
 	 * Constructor

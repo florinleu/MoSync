@@ -172,7 +172,7 @@ void AppMoblet::openPIMContactsList()
 	printf("\n==============Open contacts list===============");
 
 	// Get a handle to the list of contacts.
-	mContactsListHandle = maPimListOpen(MA_PIM_CONTACTS);
+	mContactsListHandle = maPimListOpen(MA_PIM_CONTACTS, 0);
 	checkResultCode(mContactsListHandle);
 }
 

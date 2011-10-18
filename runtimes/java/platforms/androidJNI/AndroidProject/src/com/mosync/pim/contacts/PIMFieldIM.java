@@ -29,7 +29,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_CONTACT_IM_PROTOCOL_NE
 import android.provider.ContactsContract.CommonDataKinds.Im;
 import com.mosync.pim.*;
 
-public class PIMFieldIM extends PIMFieldContact {
+public class PIMFieldIM extends PIMFieldContacts {
 
 	Map<Integer, String> mProtocols;
 

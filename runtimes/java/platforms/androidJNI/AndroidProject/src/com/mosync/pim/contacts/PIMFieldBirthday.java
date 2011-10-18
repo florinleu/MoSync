@@ -21,7 +21,7 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 
 import com.mosync.pim.*;
 
-public class PIMFieldBirthday extends PIMFieldContact {
+public class PIMFieldBirthday extends PIMFieldContacts {
 
 	/**
 	 * Constructor
@@ -134,6 +134,9 @@ public class PIMFieldBirthday extends PIMFieldContact {
 
 	protected char[] getData(int index) {
 		String val = getSpecificData(index);
+		if (val == null) {
+			return null;
+		}
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
 		return buffer;

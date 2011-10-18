@@ -15,7 +15,7 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredName;
 
 import com.mosync.pim.*;
 
-public class PIMFieldName extends PIMFieldContact {
+public class PIMFieldName extends PIMFieldContacts {
 
 	/**
 	 * Constructor

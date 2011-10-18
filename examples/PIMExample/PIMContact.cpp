@@ -550,7 +550,7 @@ void PIMContact::printAddress()
 
 		// Print the attribute for this value.
 		printAttribute(MA_PIM_FIELD_CONTACT_ADDR, i, getAddressAttributeString);
-
+		printf("\n");
 		// Print data on the screen.
 		for (int j = 0; j < COUNT_ADDRESS_INDICES; j++)
 		{
@@ -560,9 +560,8 @@ void PIMContact::printAddress()
 			{
 				printf("%s %S", addressValueIndex.c_str(), addressValue);
 			}
-
-			printf("\n");
 		}
+		printf("\n");
 	}
 }
 

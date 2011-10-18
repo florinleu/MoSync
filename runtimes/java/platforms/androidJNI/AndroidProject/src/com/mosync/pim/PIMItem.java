@@ -8,17 +8,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_INDEX_INVALID;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.mosync.internal.android.MoSyncError;
-
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
 import android.content.ContentResolver;
-import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.provider.ContactsContract.Contacts;
-import android.provider.ContactsContract.RawContacts;
-
-import com.mosync.pim.contacts.*;
 
 public abstract class PIMItem {
 	protected enum State {
@@ -32,11 +22,6 @@ public abstract class PIMItem {
 	/**
 	 * Constructor
 	 */
-	public PIMItem() {
-		DebugPrint("PIMItem()");
-		mPIMFields = new ArrayList<PIMField>();
-	}
-
 	protected PIMItem(boolean isNew) {
 		DebugPrint("PIMItem(" + isNew + ")");
 		setState(State.NONE);

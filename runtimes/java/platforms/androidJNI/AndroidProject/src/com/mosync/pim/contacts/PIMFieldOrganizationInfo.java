@@ -19,7 +19,7 @@ import android.provider.ContactsContract.CommonDataKinds.Organization;
 
 import com.mosync.pim.*;
 
-public class PIMFieldOrganizationInfo extends PIMFieldContact {
+public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 
 	/**
 	 * Constructor

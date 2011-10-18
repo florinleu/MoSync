@@ -21,7 +21,7 @@ import android.provider.ContactsContract.Data;
 
 import com.mosync.pim.*;
 
-public class PIMFieldPhoto extends PIMFieldContact {
+public class PIMFieldPhoto extends PIMFieldContacts {
 
 	/**
 	 * Constructor
@@ -74,6 +74,7 @@ public class PIMFieldPhoto extends PIMFieldContact {
 	}
 
 	public int loadPhoto(byte[] buffer) {
+		DebugPrint("loadPhoto " + buffer);
 		ByteBuffer bBuffer = ByteBuffer.wrap(buffer);
 
 		int photoHandle = PIMUtil.getThread().nativeCreatePlaceholder();
@@ -144,6 +145,9 @@ public class PIMFieldPhoto extends PIMFieldContact {
 
 	protected char[] getData(int index) {
 		String val = getSpecificData(index);
+		if ((val == null) || val.equals("")) {
+			return null;
+		}
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
 		return buffer;
@@ -231,8 +235,10 @@ public class PIMFieldPhoto extends PIMFieldContact {
 
 	public void close() {
 		for (int i = 0; i < mValues.size(); i++) {
-			PIMUtil.getThread().destroyBinary(
-					Integer.parseInt(mValues.get(i)[1]));
+			if (!mValues.get(i)[1].equals("")) {
+				PIMUtil.getThread().destroyBinary(
+						Integer.parseInt(mValues.get(i)[1]));
+			}
 		}
 	}
 

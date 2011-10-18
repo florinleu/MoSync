@@ -1,14 +1,65 @@
 package com.mosync.pim.events;
 
-public class PIMFieldTitle {// extends PIMFieldEvent {
+public class PIMFieldTitle extends PIMFieldEvents {
 
-	protected char[] getData(int index) {
+	@Override
+	protected void createMaps() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void print() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected int checkForPreferredAttribute(int index) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected int getAndroidAttribute(int index) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	protected char[] getLabel(int index) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
-	protected void setData(int index, char[] buffer) {
+	@Override
+	protected void setLabel(int index, String label) {
+		// TODO Auto-generated method stub
+
 	}
 
-	protected void print() {
+	@Override
+	protected boolean hasCustomLabel(int index) {
+		// TODO Auto-generated method stub
+		return false;
 	}
+
+	@Override
+	protected char[] getData(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected void setData(int index, char[] buffer) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected int setAttribute(int index, int attribute) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

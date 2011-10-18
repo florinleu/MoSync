@@ -24,5 +24,13 @@ import android.provider.ContactsContract.Data;
 
 import com.mosync.pim.*;
 
-public abstract class PIMFieldEvent extends PIMField {
+public abstract class PIMFieldEvents extends PIMField {
+
+	/**
+	 * 
+	 */
+	public void read(Cursor cur, String calendarId) {
+
+	}
+
 }

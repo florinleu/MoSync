@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.mosync.internal.android.MoSyncError;
-
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -58,35 +56,7 @@ public abstract class PIMField {
 
 	protected abstract void createMaps();
 
-	/**
-	 * Read field
-	 * @param cr
-	 * @param contactId
-	 */
 	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMField.read(" + cr + ", " + contactId + ")");
-		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
-				+ "=?" + " AND " + Data.MIMETYPE + "=?",
-				new String[] { String.valueOf(contactId), mStrType }, null);
-
-		while (cursor.moveToNext()) {
-			String[] val = new String[mNames.length];
-			for (int i = 0; i < mNames.length; i++) {
-				val[i] = new String("");
-				if (!mNames[i].equals(DUMMY)) {
-					int index = cursor.getColumnIndex(mNames[i]);
-					if (index >= 0) {
-						val[i] = cursor.getString(index);
-					}
-				}
-			}
-			mValues.add(val);
-			mStates.add(State.NONE);
-		}
-		preProcessData();
-
-		print();
-		DebugPrint("MAX SIZE = " + MAX_SIZE);
 	}
 
 	public void read(Cursor cur, String calendarId) {
@@ -163,6 +133,9 @@ public abstract class PIMField {
 		}
 
 		char[] buffer = getLabel(index);
+		if (buffer == null) {
+			return 0;
+		}
 
 		if (buffer.length > (buffSize >> 1))
 			return (buffer.length << 1);
@@ -205,8 +178,9 @@ public abstract class PIMField {
 
 		char[] buffer = PIMUtil
 				.readBufferFromMemory(buffPointer, buffSize >> 1);
-
-		setLabel(index, new String(buffer));
+		if (buffer != null) {
+			setLabel(index, new String(buffer));
+		}
 
 		return MA_PIM_ERR_NONE;
 	}
@@ -243,6 +217,9 @@ public abstract class PIMField {
 		}
 
 		char[] buffer = getData(index);
+		if (buffer == null) {
+			return 0;
+		}
 
 		if (buffer.length > (buffSize >> 1))
 			return (buffer.length << 1);
@@ -274,7 +251,7 @@ public abstract class PIMField {
 
 		char[] buffer = PIMUtil
 				.readBufferFromMemory(buffPointer, buffSize >> 1);
-		if (buffer.length == 0) {
+		if ((buffer == null) || (buffer.length == 0)) {
 			return MA_PIM_ERR_BUFFER_INVALID;
 		}
 
@@ -304,7 +281,7 @@ public abstract class PIMField {
 
 		char[] buffer = PIMUtil
 				.readBufferFromMemory(buffPointer, buffSize >> 1);
-		if (buffer.length == 0) {
+		if ((buffer == null) || (buffer.length == 0)) {
 			return MA_PIM_ERR_BUFFER_INVALID;
 		}
 

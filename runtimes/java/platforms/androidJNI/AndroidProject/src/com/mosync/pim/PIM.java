@@ -37,7 +37,7 @@ public class PIM {
 	/**
 	 * Handle for PIM
 	 */
-	private int mResourceIndex = 0;
+	private int mResourceIndex = 100;
 
 	/**
 	 * @return The Activity object.
@@ -92,13 +92,14 @@ public class PIM {
 			String selection, String path) {
 		DebugPrint("getCalendarManagedCursor(" + projection + ", " + selection
 				+ ", " + path + ")");
+		String sortOrder = "_id";
 		try {
 			Uri calendars = Uri.parse("content://calendar/" + path);
 
 			Cursor managedCursor = null;
 			try {
-				managedCursor = getActivity().managedQuery(calendars,
-						projection, selection, null, null);
+				managedCursor = getContentResolver().query(calendars,
+						projection, selection, null, sortOrder);
 			} catch (IllegalArgumentException e) {
 				DebugPrint("Failed to get provider at [" + calendars.toString()
 						+ "]");
@@ -108,8 +109,8 @@ public class PIM {
 				// try again
 				calendars = Uri.parse("content://com.android.calendar/" + path);
 				try {
-					managedCursor = getActivity().managedQuery(calendars,
-							projection, selection, null, null);
+					managedCursor = getContentResolver().query(calendars,
+							projection, selection, null, sortOrder);
 				} catch (IllegalArgumentException e) {
 					DebugPrint("Failed to get provider at ["
 							+ calendars.toString() + "]");
@@ -122,8 +123,8 @@ public class PIM {
 	}
 
 	int countEventsList() {
-		String[] projection = new String[] { "_id", "displayName" };
-		String selection = null;// "selected=1";
+		String[] projection = new String[] { "_id" };
+		String selection = null;
 		String path = "calendars";
 
 		Cursor managedCursor = getCalendarManagedCursor(projection, selection,
@@ -229,8 +230,8 @@ public class PIM {
 					PIMError.sStrListAlreadyOpened);
 		}
 
-		String[] projection = new String[] { "_id", "displayName" };
-		String selection = null;// "selected=1";
+		String[] projection = new String[] { "_id" };
+		String selection = null;
 		String path = "calendars";
 
 		Cursor managedCursor = getCalendarManagedCursor(projection, selection,
@@ -253,6 +254,9 @@ public class PIM {
 			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
+
+		DebugPrint("Size = " + pimList.mList.size());
+		DebugPrint("Pos = " + pimList.mListIterator);
 
 		if (pimList.hasNext()) {
 			mPIMItems.put(mResourceIndex, pimList.next());

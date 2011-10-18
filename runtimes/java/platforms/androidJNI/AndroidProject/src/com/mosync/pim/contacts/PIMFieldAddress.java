@@ -17,7 +17,7 @@ import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 
 import com.mosync.pim.*;
 
-public class PIMFieldAddress extends PIMFieldContact {
+public class PIMFieldAddress extends PIMFieldContacts {
 
 	/**
 	 * Constructor
@@ -90,7 +90,6 @@ public class PIMFieldAddress extends PIMFieldContact {
 
 	protected char[] getData(int index) {
 		String[] val = getSpecificData(index);
-		DebugPrint("DATA SIZE = " + getDataSize(val));
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeStringArray(val, buffer);
 		return buffer;

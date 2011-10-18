@@ -10,12 +10,17 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.mosync.pim.*;
-import com.mosync.pim.contacts.PIMFieldContact;
+import com.mosync.pim.contacts.PIMFieldAddress;
+import com.mosync.pim.contacts.PIMFieldContacts;
 
 public class PIMItemEvents extends PIMItem {
 
+	PIMFieldTitle mTitle;
+
 	PIMItemEvents(boolean isNew) {
 		super(isNew);
+		mTitle = new PIMFieldTitle();
+		mPIMFields.add(mTitle);
 	}
 
 	/**

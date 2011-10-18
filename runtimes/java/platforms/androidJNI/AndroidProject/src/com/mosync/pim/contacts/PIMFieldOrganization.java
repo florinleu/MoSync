@@ -19,7 +19,7 @@ import android.provider.ContactsContract.CommonDataKinds.Organization;
 
 import com.mosync.pim.*;
 
-public class PIMFieldOrganization extends PIMFieldContact {
+public class PIMFieldOrganization extends PIMFieldContacts {
 
 	/**
 	 * Constructor
@@ -118,6 +118,9 @@ public class PIMFieldOrganization extends PIMFieldContact {
 
 	protected char[] getData(int index) {
 		String val = getSpecificData(index);
+		if (val == null) {
+			return null;
+		}
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeString(val, buffer);
 		return buffer;
