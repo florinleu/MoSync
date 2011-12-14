@@ -196,6 +196,8 @@ public class MoSyncSensor implements SensorEventListener {
 						orientation = UIDEVICE_ORIENTATION_UNKNOWN;
 					}
 					event[SEVENT_SENSOR_VALUES] = Float.floatToIntBits(orientation);
+					//compass orientation value
+					event[SEVENT_SENSOR_VALUES + 1] = Float.floatToIntBits(arg0.values[0]);
 					break;
 				case SENSOR_TYPE_PROXIMITY:
 					event[SEVENT_SENSOR_VALUES] =
@@ -243,7 +245,7 @@ public class MoSyncSensor implements SensorEventListener {
 		{
 			return SENSOR_ERROR_NOT_AVAILABLE;
 		}
-		mSensorRates[sensor - 1] = interval;
+		mSensorRates[sensor - 1] = rate;
 		if (!mSensorManager.registerListener(this, mSensorList[sensor - 1], rate))
 		{
 			return SENSOR_ERROR_INTERVAL_NOT_SET;

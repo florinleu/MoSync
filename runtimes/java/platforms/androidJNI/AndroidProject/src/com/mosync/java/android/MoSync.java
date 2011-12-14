@@ -55,13 +55,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 
+import com.google.android.c2dm.C2DMBaseReceiver;
 import com.mosync.internal.android.Mediator;
 import com.mosync.internal.android.MoSyncMultiTouchHandler;
 import com.mosync.internal.android.MoSyncSingleTouchHandler;
 import com.mosync.internal.android.MoSyncThread;
 import com.mosync.internal.android.MoSyncTouchHandler;
 import com.mosync.internal.android.MoSyncView;
+import com.mosync.internal.android.nfc.MoSyncNFCForegroundUtil;
 import com.mosync.internal.android.nfc.MoSyncNFCService;
+import com.mosync.internal.android.notifications.PushNotificationsManager;
 
 /**
  * Main MoSync activity
@@ -77,6 +80,7 @@ public class MoSync extends Activity
 	private MoSyncTouchHandler mTouchHandler;
 	private BroadcastReceiver mShutdownListener;
 	private boolean mEventTypeCloseHasBeenSent = false;
+	private MoSyncNFCForegroundUtil nfcForegroundHandler;
 
 	/**
 	 * Sets screen and window properties.
@@ -86,12 +90,17 @@ public class MoSync extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
 	{
-		//Log.i("MoSync", "onCreate");
+//		Log.i("MoSync", "MoSync onCreate");
 
 		super.onCreate(savedInstanceState);
 
-		// If triggered by an NFC event, must handle it this way.
-		MoSyncNFCService.handleNFCIntent(this, getIntent());
+		try {
+			// If triggered by an NFC event, must handle it this way.
+			MoSyncNFCService.handleNFCIntent(this, getIntent());
+			nfcForegroundHandler = MoSyncNFCForegroundUtil.create(this);
+		}catch(Throwable t){
+			SYSLOG("No NFC");
+		}
 
 		// Initialize.
 		mMoSyncView = null;
@@ -115,6 +124,17 @@ public class MoSync extends Activity
 				ex);
 			finish();
 			return;
+		}
+
+		try {
+			// If triggered by a C2DM message, handle it here.
+			// Call this after the MoSyncThread is created.
+			if ( getIntent().getAction().equals(C2DMBaseReceiver.C2DM_INTENT) )
+			{
+				PushNotificationsManager.handlePushNotificationIntent(getIntent());
+			}
+		}catch(Throwable t){
+			SYSLOG("No C2DM message");
 		}
 
 		// Create the view.
@@ -203,7 +223,9 @@ public class MoSync extends Activity
 		mMoSyncThread.acquireHardware();
 
 		mMoSyncThread.onResume();
-
+		if (nfcForegroundHandler != null) {
+			nfcForegroundHandler.enableForeground();
+		}
 		SYSLOG("Posting EVENT_TYPE_FOCUS_GAINED to MoSync");
 		int[] event = new int[1];
 		event[0] = EVENT_TYPE_FOCUS_GAINED;
@@ -223,7 +245,9 @@ public class MoSync extends Activity
 		mMoSyncThread.setMoSyncView(null);
 
 		mMoSyncThread.onPause();
-
+		if (nfcForegroundHandler != null) {
+			nfcForegroundHandler.disableForeground();
+		}
 		SYSLOG("Posting EVENT_TYPE_FOCUS_LOST to MoSync");
 		int[] event = new int[1];
 		event[0] = EVENT_TYPE_FOCUS_LOST;

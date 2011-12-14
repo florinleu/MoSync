@@ -49,6 +49,7 @@ PIPE_DIRS = ["tools/protobuild", "tools/pipe-tool", "tools/DefaultSkinGenerator"
 EXAM_DIRS = ["tests/unitTest", "examples"]
 TOOL_DIRS = ["tools/debugger", "tools/FontGenerator", "tools/PanicDoc", "tools/Bundle",
 	"tests/unitTestServer", "tools/iphone-builder", "tools/icon-injector", "tools/e32hack",
+	"tools/winphone-builder",
 	"tools/mx-invoker",
 	"tools/mx-config",
 	"tools/mifconv", "tools/rcomp", "tools/package", "tools/uidcrc",
@@ -113,12 +114,16 @@ target :default => :base do
 	Work.invoke_subdirs(MAIN_DIRS)
 end
 
-target :examples => :base do
-	Work.invoke_subdirs(PIPE_DIRS + EXAM_DIRS)
+target :libs => :base do
+	Work.invoke_subdirs(PIPE_DIRS)
+end
+
+target :examples => :libs do
+	Work.invoke_subdirs_ex(true, EXAM_DIRS)
 end
 
 target :all => :default do
-	Work.invoke_subdirs(EXAM_DIRS)
+	Work.invoke_subdirs_ex(true, EXAM_DIRS)
 end
 
 target :more => :base do
@@ -127,10 +132,6 @@ end
 
 target :newlib => :base do
 	Work.invoke_subdirs(NEWLIB_DIRS)
-end
-
-target :libs => :base do
-	Work.invoke_subdirs(PIPE_DIRS)
 end
 
 target :version do
@@ -162,22 +163,27 @@ target :clean do
 end
 
 target :clean_examples do
-	Work.invoke_subdirs(EXAM_DIRS, "clean")
+	Work.invoke_subdirs_ex(true, EXAM_DIRS, "clean")
 end
 
 
+def all_configs(target)
+	sh "ruby workfile.rb #{target}"
+	sh "ruby workfile.rb #{target} CONFIG="
+	sh "ruby workfile.rb #{target} USE_NEWLIB="
+	sh "ruby workfile.rb #{target} USE_NEWLIB= CONFIG="
+end
+
 target :all_configs do
-	sh 'ruby workfile.rb all'
-	sh 'ruby workfile.rb all CONFIG='
-	sh 'ruby workfile.rb all USE_NEWLIB='
-	sh 'ruby workfile.rb all USE_NEWLIB= CONFIG='
+	all_configs('all')
 end
 
 target :all_libs do
-	sh 'ruby workfile.rb libs'
-	sh 'ruby workfile.rb libs CONFIG='
-	sh 'ruby workfile.rb libs USE_NEWLIB='
-	sh 'ruby workfile.rb libs USE_NEWLIB= CONFIG='
+	all_configs('libs')
+end
+
+target :all_ex do
+	all_configs('examples')
 end
 
 Targets.invoke

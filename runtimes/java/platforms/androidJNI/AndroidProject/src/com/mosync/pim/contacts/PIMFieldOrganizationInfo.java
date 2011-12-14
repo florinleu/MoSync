@@ -78,6 +78,10 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 				mStates.add(State.NONE);
 			}
 		}
+
+		cursor.close();
+		cursor = null;
+
 		preProcessData();
 
 		print();

@@ -27,7 +27,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 #include <jni.h>
 #include <GLES/gl.h>
+#ifndef _android_1
 #include <GLES2/gl2.h>
+#endif
 
 #include "helpers/CPP_IX_AUDIOBUFFER.h"
 #include "helpers/CPP_IX_OPENGL_ES.h"
@@ -35,6 +37,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "helpers/CPP_IX_GL2.h"
 //#include "helpers/CPP_IX_GL_OES_FRAMEBUFFER_OBJECT.h"
 #include "helpers/CPP_IX_PIM.h"
+#include "helpers/CPP_IX_CELLID.h"
 
 #define ERROR_EXIT { MoSyncErrorExit(-1); }
 
@@ -45,8 +48,16 @@ namespace Base
 {
 	Syscall* gSyscall;
 
+	/**
+	* TODO: Remove this Global Reference to JNIEnv
+	*/
 	JNIEnv* mJNIEnv = 0;
 	jobject mJThis;
+
+	/**
+	* A Reference to the Java Virtual Machine
+	*/
+	JavaVM * mJavaVM;
 
 	int mReloadHandle = 0;
 	bool mIsReloading = false;
@@ -66,6 +77,7 @@ namespace Base
 	int gClipRectIsSet = 0;
 
 	MAHandle gDrawTargetHandle = HANDLE_SCREEN;
+
 
 	/**
 	* Syscall constructor
@@ -92,7 +104,30 @@ namespace Base
 	*/
 	JNIEnv* Syscall::getJNIEnvironment()
 	{
-		return mJNIEnv;
+		JNIEnv* env = NULL;
+		if (mJavaVM->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK)
+		{
+			return NULL;
+		}
+		return env;
+	}
+
+	/**
+	* Returns the Java Virtual Machine instance.
+	*
+	* @ return The JNI Environment
+	*/
+	JavaVM* Syscall::getJavaVM()
+	{
+		return mJavaVM;
+	}
+
+	/**
+	* sets the current JavaVM, Used for accessing JNI environmental variables
+	*/
+	void Syscall::setJavaVM(JavaVM* jvm)
+	{
+		mJavaVM = jvm;
 	}
 
 	/**
@@ -132,25 +167,26 @@ namespace Base
 	char* Syscall::loadBinary(int resourceIndex, int size)
 	{
 		SYSLOG("loadBinary");
-
+		//get current thread's JNIEnvrionmental variable
+		JNIEnv * env = getJNIEnvironment();
 		char* b = (char*)malloc(200);
 		sprintf(b, "loadBinary index:%d size:%d", resourceIndex, size);
 		//__android_log_write(ANDROID_LOG_INFO, "MoSync Syscall", b);
 		free(b);
 
 		char* buffer = (char*)malloc(size);
-		jobject byteBuffer = mJNIEnv->NewDirectByteBuffer((void*)buffer, size);
+		jobject byteBuffer = env->NewDirectByteBuffer((void*)buffer, size);
 
 		if(byteBuffer == NULL) return NULL;
 
-		jclass cls = mJNIEnv->GetObjectClass(mJThis);
-		jmethodID methodID = mJNIEnv->GetMethodID(cls, "loadBinary", "(ILjava/nio/ByteBuffer;)Z");
+		jclass cls = env->GetObjectClass(mJThis);
+		jmethodID methodID = env->GetMethodID(cls, "loadBinary", "(ILjava/nio/ByteBuffer;)Z");
 		if (methodID == 0) return NULL;
 
-		jboolean ret = mJNIEnv->CallBooleanMethod(mJThis, methodID, resourceIndex, byteBuffer);
+		jboolean ret = env->CallBooleanMethod(mJThis, methodID, resourceIndex, byteBuffer);
 
-		mJNIEnv->DeleteLocalRef(cls);
-		mJNIEnv->DeleteLocalRef(byteBuffer);
+		env->DeleteLocalRef(cls);
+		env->DeleteLocalRef(byteBuffer);
 
 		if(ret == false)
 		{
@@ -1267,18 +1303,20 @@ return 0; \
             void* src = GVMR(stringsArray[i], MAAddress);
             strCopies[i] = (GLchar*)src;
         }
-
+#ifndef _android_1
         glShaderSource(shader, count, strCopies, length);
+#endif
         delete strCopies;
     }
 
     void wrap_glGetVertexAttribPointerv(GLuint index, GLenum pname, void* pointer) {
         GLvoid* outPointer;
+#ifndef _android_1
         glGetVertexAttribPointerv(index, pname, &outPointer);
 
         if(pname != GL_VERTEX_ATTRIB_ARRAY_POINTER)
             return;
-
+#endif
         *(int*)pointer = gSyscall->TranslateNativePointerToMoSyncPointer(outPointer);
     }
 
@@ -1341,7 +1379,9 @@ return 0; \
 		{
 		maIOCtl_IX_OPENGL_ES_caselist
 		maIOCtl_IX_GL1_caselist
+#ifndef _android_1
 		maIOCtl_IX_GL2_caselist
+#endif
 	//	maIOCtl_IX_GL_OES_FRAMEBUFFER_OBJECT_caselist
 
 		case maIOCtl_maWriteLog:
@@ -1614,6 +1654,7 @@ return 0; \
 			// Allocate memory for the output buffer
 			int _outText = (int) SYSCALL_THIS->GetValidatedMemRange(
 				c,
+				// TODO: Should this not be wchar !?
 				_maxSize * sizeof(char));
 			// Call the actual internal _maTextBox function
 			return _maTextBox(
@@ -1626,6 +1667,8 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 		}
+
+		// ********** Widget API **********
 
 		case maIOCtl_maWidgetCreate:
 			SYSLOG("maIOCtl_maWidgetCreate");
@@ -1686,6 +1729,8 @@ return 0; \
 			SYSLOG("maIOCtl_maWidgetStackScreenPop");
 			return _maWidgetStackScreenPop(a, mJNIEnv, mJThis);
 
+		// ********** Notification API **********
+
 		case maIOCtl_maNotificationAdd:
 			SYSLOG("maIOCtl_maNotificationAdd");
 			return _maNotificationAdd(
@@ -1700,6 +1745,9 @@ return 0; \
 		case maIOCtl_maNotificationRemove:
 			SYSLOG("maIOCtl_maNotificationRemove");
 			return _maNotificationRemove(a, mJNIEnv, mJThis);
+
+		// ********** Various APIs **********
+		// TODO: Group with related APIs.
 
 		case maIOCtl_maSendToBackground:
 			SYSLOG("maIOCtl_maSendToBackground");
@@ -1796,6 +1844,8 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 			}
+
+		// ********** File API **********
 
 		case maIOCtl_maFileOpen:
 			SYSLOG("maIOCtl_maFileOpen");
@@ -1940,6 +1990,8 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 
+		// ********** Font API **********
+
 		case maIOCtl_maFontLoadDefault:
 			SYSLOG("maIOCtl_maFontLoadDefault");
 			return _maFontLoadDefault(
@@ -1988,6 +2040,8 @@ return 0; \
 				a,
 				mJNIEnv,
 				mJThis);
+
+		// ********** Camera API **********
 
 		case maIOCtl_maCameraStart:
 			return _maCameraStart(
@@ -2070,6 +2124,8 @@ return 0; \
 
 			return _maCameraGetProperty((int)gCore->mem_ds, _property, _valueBuffer, _valueBufferSize, mJNIEnv, mJThis);
 		}
+
+		// ********** Sensor API **********
 
 		case maIOCtl_maSensorStart:
 			SYSLOG("maIOCtl_maSensorStart");
@@ -2267,6 +2323,8 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 
+		// ********** NFC API **********
+
 		case maIOCtl_maNFCStart:
 			SYSLOG("maIOCtl_maNFCStart");
 			return _maNFCStart(mJNIEnv, mJThis);
@@ -2317,6 +2375,9 @@ return 0; \
 					mJThis);
 		}
 
+		case maIOCtl_maNFCGetSize:
+			return _maNFCGetSize(a, mJNIEnv, mJThis);
+
 		case maIOCtl_maNFCGetNDEFMessage:
 			return _maNFCGetNDEFMessage(a, mJNIEnv, mJThis);
 
@@ -2335,8 +2396,8 @@ return 0; \
 		case maIOCtl_maNFCGetNDEFRecordCount:
 			return _maNFCGetNDEFRecordCount(a, mJNIEnv, mJThis);
 
-		case maIOCtl_maNFCGetId:
-			return _maNFCGetId(
+		case maIOCtl_maNFCGetNDEFId:
+			return _maNFCGetNDEFId(
 				a,
 				(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
 				c,
@@ -2344,8 +2405,8 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCGetPayload:
-			return _maNFCGetPayload(
+		case maIOCtl_maNFCGetNDEFPayload:
+			return _maNFCGetNDEFPayload(
 				a,
 				(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
 				c,
@@ -2353,23 +2414,14 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCGetTnf:
-			return _maNFCGetTnf(
+		case maIOCtl_maNFCGetNDEFTnf:
+			return _maNFCGetNDEFTnf(
 				a,
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCGetType:
-			return _maNFCGetType(
-				a,
-				(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
-				c,
-				(int)gCore->mem_ds,
-				mJNIEnv,
-				mJThis);
-
-		case maIOCtl_maNFCSetId:
-			return _maNFCSetId(
+		case maIOCtl_maNFCGetNDEFType:
+			return _maNFCGetNDEFType(
 				a,
 				(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
 				c,
@@ -2377,8 +2429,8 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCSetPayload:
-			return _maNFCSetPayload(
+		case maIOCtl_maNFCSetNDEFId:
+			return _maNFCSetNDEFId(
 				a,
 				(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
 				c,
@@ -2386,15 +2438,24 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCSetTnf:
-			return _maNFCSetTnf(
+		case maIOCtl_maNFCSetNDEFPayload:
+			return _maNFCSetNDEFPayload(
+				a,
+				(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
+				c,
+				(int)gCore->mem_ds,
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maNFCSetNDEFTnf:
+			return _maNFCSetNDEFTnf(
 				a,
 				b,
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCSetType:
-			return _maNFCSetType(
+		case maIOCtl_maNFCSetNDEFType:
+			return _maNFCSetNDEFType(
 				a,
 				(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
 				c,
@@ -2402,11 +2463,11 @@ return 0; \
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCAuthenticateSector:
+		case maIOCtl_maNFCAuthenticateMifareSector:
 		{
 			int keyAddr = SYSCALL_THIS->GetValidatedStackValue(0);
 			int keyLen = SYSCALL_THIS->GetValidatedStackValue(4);
-			return _maNFCAuthenticateSector(
+			return _maNFCAuthenticateMifareSector(
 					a,
 					b,
 					c,
@@ -2417,30 +2478,30 @@ return 0; \
 					mJThis);
 		}
 
-		case maIOCtl_maNFCGetSectorCount:
-			return _maNFCGetSectorCount(
+		case maIOCtl_maNFCGetMifareSectorCount:
+			return _maNFCGetMifareSectorCount(
 					a,
 					mJNIEnv,
 					mJThis);
 
-		case maIOCtl_maNFCGetBlockCountInSector:
-			return _maNFCGetBlockCountInSector(
+		case maIOCtl_maNFCGetMifareBlockCountInSector:
+			return _maNFCGetMifareBlockCountInSector(
 					a,
 					b,
 					mJNIEnv,
 					mJThis);
 
-		case maIOCtl_maNFCSectorToBlock:
-			return _maNFCSectorToBlock(
+		case maIOCtl_maNFCMifareSectorToBlock:
+			return _maNFCMifareSectorToBlock(
 				a,
 				b,
 				mJNIEnv,
 				mJThis);
 
-		case maIOCtl_maNFCReadBlocks:
+		case maIOCtl_maNFCReadMifareBlocks:
 		{
 			int len = SYSCALL_THIS->GetValidatedStackValue(0);
-			return _maNFCReadBlocks(
+			return _maNFCReadMifareBlocks(
 					a,
 					b,
 					(int) SYSCALL_THIS->GetValidatedMemRange( c, len * sizeof(byte)),
@@ -2450,10 +2511,10 @@ return 0; \
 					mJThis);
 		}
 
-		case maIOCtl_maNFCReadPages:
+		case maIOCtl_maNFCReadMifarePages:
 		{
 			int len = SYSCALL_THIS->GetValidatedStackValue(0);
-			return _maNFCReadPages(
+			return _maNFCReadMifarePages(
 					a,
 					b,
 					(int) SYSCALL_THIS->GetValidatedMemRange( c, len * sizeof(byte)),
@@ -2463,10 +2524,10 @@ return 0; \
 					mJThis);
 		}
 
-		case maIOCtl_maNFCWriteBlocks:
+		case maIOCtl_maNFCWriteMifareBlocks:
 		{
 			int len = SYSCALL_THIS->GetValidatedStackValue(0);
-			return _maNFCWriteBlocks(
+			return _maNFCWriteMifareBlocks(
 					a,
 					b,
 					(int) SYSCALL_THIS->GetValidatedMemRange( c, len * sizeof(byte)),
@@ -2476,10 +2537,10 @@ return 0; \
 					mJThis);
 		}
 
-		case maIOCtl_maNFCWritePages:
+		case maIOCtl_maNFCWriteMifarePages:
 		{
 			int len = SYSCALL_THIS->GetValidatedStackValue(0);
-			return _maNFCWritePages(
+			return _maNFCWriteMifarePages(
 					a,
 					b,
 					(int) SYSCALL_THIS->GetValidatedMemRange( c, len * sizeof(byte)),
@@ -2501,6 +2562,156 @@ return 0; \
 					mJNIEnv,
 					mJThis);
 
+		// ********** ADS API **********
+
+		case maIOCtl_maAdsBannerCreate:
+		{
+			const char *_publisher = SYSCALL_THIS->GetValidatedStr(b);
+			return _maAdsBannerCreate(
+					a,
+					_publisher,
+					mJNIEnv,
+					mJThis);
+		}
+
+		case maIOCtl_maAdsAddBannerToLayout:
+			return _maAdsAddBannerToLayout(a, b, mJNIEnv, mJThis);
+
+		case maIOCtl_maAdsRemoveBannerFromLayout:
+			return _maAdsRemoveBannerFromLayout(a, b, mJNIEnv, mJThis);
+
+		case maIOCtl_maAdsBannerDestroy:
+			return _maAdsBannerDestroy(a, mJNIEnv, mJThis);
+
+		case maIOCtl_maAdsBannerSetProperty:
+		{
+			const char *_prop = SYSCALL_THIS->GetValidatedStr(b);
+			const char *_value = SYSCALL_THIS->GetValidatedStr(c);
+			return _maAdsBannerSetProperty(
+					a,
+					_prop,
+					_value,
+					mJNIEnv,
+					mJThis);
+		}
+
+		case maIOCtl_maAdsBannerGetProperty:
+		{
+			int _ad = a;
+			const char *_property = SYSCALL_THIS->GetValidatedStr(b);
+			//Read the fourth parameter from the register
+			//(the first three can be read directly)
+			int _valueBufferSize = SYSCALL_THIS->GetValidatedStackValue(0);
+			int _valueBuffer = (int) SYSCALL_THIS->GetValidatedMemRange(
+				c,
+				_valueBufferSize * sizeof(char));
+
+			return _maAdsBannerGetProperty((int)gCore->mem_ds, _ad, _property, _valueBuffer, _valueBufferSize, mJNIEnv, mJThis);
+		}
+
+		// ********** Notifications API **********
+
+		case maIOCtl_maNotificationLocalCreate:
+			return _maNotificationLocalCreate(mJNIEnv, mJThis);
+
+		case maIOCtl_maNotificationLocalDestroy:
+			return _maNotificationLocalDestroy(a, mJNIEnv, mJThis);
+
+		case maIOCtl_maNotificationLocalSetProperty:
+		{
+			const char *_prop = SYSCALL_THIS->GetValidatedStr(b);
+			const char *_value = SYSCALL_THIS->GetValidatedStr(c);
+			return _maNotificationLocalSetProperty(
+					a,
+					_prop,
+					_value,
+					mJNIEnv,
+					mJThis);
+		}
+
+		case maIOCtl_maNotificationLocalGetProperty:
+		{
+			int _notification = a;
+			const char *_property = SYSCALL_THIS->GetValidatedStr(b);
+			//Read the fourth parameter from the register
+			//(the first three can be read directly)
+			int _valueBufferSize = SYSCALL_THIS->GetValidatedStackValue(0);
+			int _valueBuffer = (int) SYSCALL_THIS->GetValidatedMemRange(
+				c,
+				_valueBufferSize * sizeof(char));
+
+			return _maNotificationLocalGetProperty((int)gCore->mem_ds, _notification, _property, _valueBuffer, _valueBufferSize, mJNIEnv, mJThis);
+		}
+
+		case maIOCtl_maNotificationLocalSchedule:
+			return  _maNotificationLocalSchedule(a, mJNIEnv, mJThis);
+
+		case maIOCtl_maNotificationLocalUnschedule:
+			return _maNotificationLocalUnschedule(a, mJNIEnv, mJThis);
+
+		case maIOCtl_maNotificationPushRegister:
+		{
+			const char *_account = SYSCALL_THIS->GetValidatedStr(b);
+			return _maNotificationPushRegister(a, _account, mJNIEnv, mJThis);
+		}
+
+		case maIOCtl_maNotificationPushGetRegistration:
+		{
+			int _valueBufferSize = b;
+			int _valueBuffer = (int) SYSCALL_THIS->GetValidatedMemRange(
+				a,
+				_valueBufferSize * sizeof(char));
+
+			return _maNotificationPushGetRegistration(
+				(int)gCore->mem_ds,
+				_valueBuffer,
+				_valueBufferSize,
+				mJNIEnv,
+				mJThis);
+		}
+
+		case maIOCtl_maNotificationPushUnregister:
+			return _maNotificationPushUnregister(mJNIEnv, mJThis);
+
+		case maIOCtl_maNotificationPushGetData:
+		{
+			MAPushNotificationData* data = (MAPushNotificationData*) SYSCALL_THIS->GetValidatedMemRange(b,sizeof(MAPushNotificationData));
+			int _valueBufferSize = data->alertMessageSize;
+			int _valueBuffer = (int) SYSCALL_THIS->GetValidatedMemRange(
+				data->alertMessage,
+				_valueBufferSize * sizeof(char));
+
+			// The type, badge icon and soundFile are used only on iOS.
+			return _maNotificationPushGetData(
+				a,
+				(int)gCore->mem_ds,
+				_valueBuffer,
+				_valueBufferSize,
+				mJNIEnv,
+				mJThis);
+		}
+
+		case maIOCtl_maNotificationPushDestroy:
+			return _maNotificationPushDestroy(a, mJNIEnv, mJThis);
+
+		case maIOCtl_maNotificationPushSetTickerText:
+		{
+			const char *_text = SYSCALL_THIS->GetValidatedStr(a);
+			return _maNotificationPushSetTickerText(
+					_text,
+					mJNIEnv,
+					mJThis);
+		}
+
+		case maIOCtl_maNotificationPushSetMessageTitle:
+		{
+			const char *_text = SYSCALL_THIS->GetValidatedStr(a);
+			return _maNotificationPushSetMessageTitle(
+					_text,
+					mJNIEnv,
+					mJThis);
+		}
+
 		case maIOCtl_maSyscallPanicsEnable:
 			SYSLOG("maIOCtl_maSyscallPanicsEnable");
 			return _maSyscallPanicsEnable(
@@ -2510,6 +2721,87 @@ return 0; \
 		case maIOCtl_maSyscallPanicsDisable:
 			SYSLOG("maIOCtl_maSyscallPanicsDisable");
 			return _maSyscallPanicsDisable(
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maGetCellInfo:
+			return _maGetCellInfo(
+				(int) SYSCALL_THIS->GetValidatedMemRange(a, sizeof(MACellInfo)),
+				(int)gCore->mem_ds,
+				mJNIEnv,
+				mJThis);
+
+
+		// ********** Database API **********
+
+		case maIOCtl_maDBOpen:
+			return _maDBOpen(
+				SYSCALL_THIS->GetValidatedStr(a),
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maDBClose:
+			return _maDBClose(
+				a,
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maDBExecSQL:
+			return _maDBExecSQL(
+				a,
+				SYSCALL_THIS->GetValidatedStr(b),
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maDBCursorDestroy:
+			return _maDBCursorDestroy(
+				a,
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maDBCursorNext:
+			return _maDBCursorNext(
+				a,
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maDBCursorGetColumnData:
+			return _maDBCursorGetColumnData(
+				a,
+				b,
+				c,
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maDBCursorGetColumnText:
+		{
+			// Get fourth parameter.
+			int d = SYSCALL_THIS->GetValidatedStackValue(0);
+			return _maDBCursorGetColumnText(
+				a,
+				b,
+				(int)SYSCALL_THIS->GetValidatedMemRange(c, d)
+					- (int)gCore->mem_ds,
+				d,
+				mJNIEnv,
+				mJThis);
+		}
+
+		case maIOCtl_maDBCursorGetColumnInt:
+			return _maDBCursorGetColumnInt(
+				a,
+				b,
+				(int)SYSCALL_THIS->GetValidatedMemRange(c, sizeof(int))
+					- (int)gCore->mem_ds,
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maDBCursorGetColumnDouble:
+			return _maDBCursorGetColumnDouble(
+				a,
+				b,
+				(int)SYSCALL_THIS->GetValidatedMemRange(c, sizeof(float))
+					- (int)gCore->mem_ds,
 				mJNIEnv,
 				mJThis);
 

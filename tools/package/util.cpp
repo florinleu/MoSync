@@ -128,12 +128,6 @@ string readFileToString(const char* src) {
 	setName(in, src);
 	beGood(in);
 
-	streamoff size;
-	in.seekg(0, ios_base::end);
-	size = in.tellg();
-	in.seekg(0, ios_base::beg);
-	beGood(in);
-
 	ostringstream oss;
 	oss << in.rdbuf();
 	beGood(in);
@@ -217,7 +211,7 @@ std::string getDir(const std::string& name) {
 	size_t index = name.find_last_of('/');
 #ifdef WIN32
 	size_t bi = name.find_last_of('\\');
-	if(bi > index || index == string::npos)
+	if((bi > index || index == string::npos) && bi != string::npos)
 		index = bi;
 #endif
 	return name.substr(0, index);
@@ -259,7 +253,9 @@ void write72line(std::ostream& output, const std::string& input) {
 
 string arg(const char* arg) {
 	string result = string(arg);
-	if (result.find(' ') != string::npos) {
+	bool isQuoted = (result.size() > 2) &&
+			(result.at(0) == '\"');
+	if (!isQuoted && result.find(' ') != string::npos) {
 		result = "\"" + result + "\"";
 	}
 	return result;

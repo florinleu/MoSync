@@ -455,6 +455,11 @@ void PIMContact::waitForClick()
 		{
 			break;
 		}
+		else if (EVENT_TYPE_CLOSE == event.type)
+		{
+			// Close the app.
+			maExit(0);
+		}
 	}
 }
 
@@ -522,7 +527,7 @@ void PIMContact::printContactName()
 	{
 		MAUtil::String contactNameType = getContactNameIndexString(i);
 		const wchar* contactNameValue = getWCharArrayFromBuf(mArgs.buf, i);
-		if (*contactNameValue != 0)
+		if (contactNameValue && *contactNameValue != 0)
 		{
 			printf("%s %S", contactNameType.c_str(), contactNameValue);
 		}
@@ -556,9 +561,10 @@ void PIMContact::printAddress()
 		{
 			MAUtil::String addressValueIndex = getAddressIndexString(j);
 			const wchar* addressValue = getWCharArrayFromBuf(mArgs.buf, j);
-			if (*addressValue != 0)
+			if (addressValue && *addressValue != 0)
 			{
 				printf("%s %S", addressValueIndex.c_str(), addressValue);
+				printf("\n");
 			}
 		}
 		printf("\n");
@@ -572,6 +578,8 @@ void PIMContact::printBirthday()
 {
 	printf("Birthday field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_BIRTHDAY;
+
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_BIRTHDAY);
 
 	// Get value from birthday field at position 0.
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
@@ -615,6 +623,8 @@ void PIMContact::printFormattedAddress()
 	printf("Formatted address field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_FORMATTED_ADDR;
 
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_FORMATTED_ADDR);
+
 	// Get the value from formatted address at position 0.
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
 	printf("Formatted address: %S", (wchar*) mArgs.buf);
@@ -628,6 +638,8 @@ void PIMContact::printNickname()
 	printf("Nickname field:");
 	mArgs.field = MA_PIM_FIELD_CONTACT_NICKNAME;
 
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_NICKNAME);
+
 	// Get value from nickname field at position 0.
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
 	printf("Nickname: %S", (wchar*) mArgs.buf);
@@ -640,6 +652,8 @@ void PIMContact::printNote()
 {
 	printf("Note field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_NOTE;
+
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_NOTE);
 
 	// Get value from note field at position 0.
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
@@ -675,6 +689,8 @@ void PIMContact::printPhoto()
 	printf("Photo field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_PHOTO;
 
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_PHOTO);
+
 	// Get value from photo field at position 0.
 	// A data handle to the image will be returned.
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
@@ -690,6 +706,9 @@ void PIMContact::printPublicKey()
 {
 	printf("Public key field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_PUBLIC_KEY;
+
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_PUBLIC_KEY);
+
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
 }
 
@@ -700,6 +719,9 @@ void PIMContact::printPublicKeyString()
 {
 	printf("Public key string field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_PUBLIC_KEY_STRING;
+
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_PUBLIC_KEY_STRING);
+
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
 	printf("Public key string: %S", (wchar*) mArgs.buf);
 }
@@ -711,6 +733,8 @@ void PIMContact::printRevision()
 {
 	printf("Revision field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_REVISION;
+
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_REVISION);
 
 	// Get value from revision field at position 0;
 	// Returned value is a date in milliseconds(UNIX time).
@@ -773,6 +797,9 @@ void PIMContact::printUID()
 {
 	printf("UID field:\n\n");
 	mArgs.field = MA_PIM_FIELD_CONTACT_UID;
+
+	checkIfFieldIsSupported(mItemHandle, MA_PIM_FIELD_CONTACT_UID);
+
 	checkResultCode(maPimItemGetValue(&mArgs, 0));
 	printf("UID: %S", (wchar*) mArgs.buf);
 }

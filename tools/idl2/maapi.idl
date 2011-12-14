@@ -66,8 +66,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 * There is an event queue which contains keypad events and results from asynchronous operations.
 * Use maWait() and maGetEvent() to handle it.
 
-* There are different types of connection operations.
-* For each connection, only one of each type of operation may be active at the same time.
+* MoSync socket/Bluetooth/HTTP connections are asynchronous. Read all about it \link connApiOverview here\endlink.
 */
 
 interface MAAPI {
@@ -412,7 +411,7 @@ interface MAAPI {
 
 	/**
 	* Draws an image.
-	* The source is an array of ints that represent pixels in XRGB format.
+	* The source is an array of ints that represent pixels in ARGB format.
 	* \param dstPoint The top-left point on the draw target.
 	* \param src The address to the source image.
 	* \param srcRect The portion of the source image to be drawn.
@@ -495,6 +494,7 @@ interface MAAPI {
 	 */
 	int maFindLabel(in MAString name);
 
+	// TODO: Should we change RES_OK to be zero? Many
 	constset int RES_ {
 		OUT_OF_MEMORY = -1;
 		BAD_INPUT = -2;
@@ -782,6 +782,7 @@ interface MAAPI {
 	*
 	* \returns The connecting handle \>0, or one of the \link #CONNERR_GENERIC CONNERR \endlink values.
 	* \see maGetEvent()
+	* \see \ref connApiOverview
 	*/
 	MAHandle maConnect(in MAString url);
 
@@ -801,6 +802,7 @@ interface MAAPI {
 	* The success value is the number of bytes read.
 	*
 	* \see maGetEvent
+	* \see \ref connApiOverview
 	*/
 	void maConnRead(in MAHandle conn, out MAAddress dst, in int size);
 
@@ -814,6 +816,7 @@ interface MAAPI {
 	* \warning The source data must remain available until the operation is complete,
 	* so if it was dynamically allocated, don't free it too early.
 	* \see maGetEvent
+	* \see \ref connApiOverview
 	*/
 	void maConnWrite(in MAHandle conn, in MAAddress src, in int size);
 
@@ -828,6 +831,7 @@ interface MAAPI {
 	* The success value is is the number of bytes read.
 	*
 	* \see maGetEvent
+	* \see \ref connApiOverview
 	*/
 	void maConnReadToData(in MAHandle conn, in MAHandle data, in int offset, in int size);
 
@@ -842,6 +846,7 @@ interface MAAPI {
 	* The success value is \> 0.
 	*
 	* \see maGetEvent
+	* \see \ref connApiOverview
 	*/
 	void maConnWriteFromData(in MAHandle conn, in MAHandle data, in int offset, in int size);
 
@@ -975,6 +980,7 @@ interface MAAPI {
 	*
 	* \param conn An unfinished HTTP connection handle.
 	* \see maGetEvent
+	* \see \ref connApiOverview
 	*/
 	void maHttpFinish(in MAHandle conn);
 
@@ -1150,7 +1156,7 @@ interface MAAPI {
 		RALT			= 307;
 		LALT			= 308;
 
-		SEARCH          = 309;
+		SEARCH			 = 309;
 	}
 
 	constset int MAKB_ { // Key Bits
@@ -1378,7 +1384,39 @@ interface MAAPI {
 		* Send by maOptionsBox dialog when one of the option buttons is clicked.
 		*/
 		OPTIONS_BOX_BUTTON_CLICKED = 41;
-	}
+
+		/**
+		* \brief Send by a banner ad.
+		*/
+		ADS_BANNER = 42;
+
+		/**
+		* \brief Send when the application receives a local notification.
+		*/
+		LOCAL_NOTIFICATION = 43;
+
+		/**
+		* \brief Send when the application receives a registration result.
+		* The application tries to register to Apple Push Service, or Google C2DM Service,
+		* and the received result ( either success, either fail) is sending this event.
+		* After this event is received, get the result of the registration request by
+		* calling maNotificationPushGetRegistration.
+		*/
+		PUSH_NOTIFICATION_REGISTRATION = 44;
+
+		/**
+		* \brief Send when the application receives an unregistration result.
+		* The application unregistered from Apple Push Service, or Google C2DM Service,
+		* and will not receive anymore push messages.
+		* Platform: Android only.
+		*/
+		PUSH_NOTIFICATION_UNREGISTRATION = 45;
+
+		/**
+		* \brief Send when the application receives a push notification.
+		*/
+		PUSH_NOTIFICATION = 46;
+		}
 
 	/**
 	* \brief Data for a connection event, including an indicator or success or failure.
@@ -1412,6 +1450,20 @@ interface MAAPI {
 		/// The destination of any read or write operation. Could be a memory
 		/// address, a block number, or some other value depending on the operation.
 		int dstId;
+	}
+
+	/**
+	* \brief An event send by a banner widget.
+	*/
+	struct MAAdsEventData {
+		/// Banner's handle that send the event.
+		MAHandle bannerHandle;
+		/// One of the \link #MA_ADS_EVENT_FAILED MA_ADS_EVENT \endlink constants.
+		int bannerEventType;
+		/// If bannerEventType is #\link #MA_ADS_EVENT_FAILED MA_ADS_EVENT_FAILED \endlink
+		/// this variable will contain the error code.
+		/// One of the \link #MA_ADS_ERROR_INTERNAL MA_ADS_ERROR \endlink constants.
+		int bannerErrorCode;
 	}
 
 	/**
@@ -1475,9 +1527,9 @@ interface MAAPI {
 			} textbox;
 
 			struct {
-                /**
-			    * #EVENT_TYPE_IMAGE_PICKER events, this will be 0 if canceled or 1 if Ok was pressed.
-			    */
+				/**
+				 * #EVENT_TYPE_IMAGE_PICKER events, this will be 0 if canceled or 1 if Ok was pressed.
+				 */
 				int imagePickerState;
 
 				/**
@@ -1514,6 +1566,23 @@ interface MAAPI {
 			* NFC event data
 			*/
 			MANFCEventData nfc;
+
+			/**
+			* Ads event data.
+			*/
+			MAAdsEventData adsData;
+
+			/**
+			* Local notification's handle that send the event.
+			* Valid only if the event type is \link #EVENT_TYPE_LOCAL_NOTIFICATION LOCAL_NOTIFICATION \endlink.
+			*/
+			MAHandle localNotificationHandle;
+
+			/**
+			* Push notification's handle that send the event.
+			* Valid only if the event type is \link #EVENT_TYPE_PUSH_NOTIFICATION PUSH_NOTIFICATION \endlink.
+			*/
+			MAHandle pushNotificationHandle;
 
 			/**
 			* Used by custom events. See invididual event descriptions.
@@ -3000,6 +3069,19 @@ interface MAAPI {
 		* "mosync.device" is a description of the device. May include vendor, model name
 		* and firmware version.
 		* The format of this description is not specified. It varies from device to device.
+		*
+		* "mosync.device.name" is the name of the device. Usually set by the user.
+		*
+		* "mosync.device.UUID" is the Unique identifier of the device.
+		*
+		* "mosync.device.OS" is the operating system or platform that the device is using.
+		* It might contain version detail as well.
+		*
+		* "mosync.device.OS.version" is the the version of the operating system that is running on the device.
+		* It might contain minor revision information, e.g. 2.1Update-1.
+		*
+		* "mosync.network.type" it the type of the current active network connection.
+		* It can one of the following four values: "none", "wifi", "mobile", or "unknown".
 		*
 		* "mosync.path.local" is the absolute path to the local file system,
 		* on devices that have a local file system. The returned path has a
@@ -4951,12 +5033,12 @@ group WidgetAPI "Widget API" {
 		/**
 		* @copydoc MAW_SCREEN_TITLE
 		*/
-		TITLE = MAW_SCREEN_TITLE;
+		TITLE = "title";
 
 		/**
 		* @copydoc MAW_SCREEN_ICON
 		*/
-		ICON = MAW_SCREEN_ICON;
+		ICON = "icon";
 
 		/**
 		* @brief Sets or gets the currently open tab to the tab with the given index.
@@ -4996,12 +5078,12 @@ group WidgetAPI "Widget API" {
 		/**
 		* @copydoc #MAW_SCREEN_TITLE
 		*/
-		TITLE = MAW_SCREEN_TITLE;
+		TITLE = "title";
 
 		/**
 		* @copydoc #MAW_SCREEN_ICON
 		*/
-		ICON = MAW_SCREEN_ICON;
+		ICON = "icon";
 
 		/**
 		* @brief Specifies whether the back button automatically should pop the stack screen.
@@ -5427,6 +5509,70 @@ group WidgetAPI "Widget API" {
 	}
 	} // end of WidgetImageProperties
 
+	group WidgetEditBoxConstants "Edit box constants" {
+	    constset int MAW_EDIT_BOX_TYPE_ {
+	        /**
+			* The user is allowed to enter any text, including line breaks.
+			*/
+			ANY = 0;
+			/**
+			* The user is allowed to enter an e-mail address.
+			*/
+			EMAILADDR = 1;
+			/**
+			* The user is allowed to enter an integer value.
+			*/
+			NUMERIC = 2;
+			/**
+			* The user is allowed to enter a phone number.
+			*/
+			PHONENUMBER = 3;
+			/**
+			* The user is allowed to enter a URL.
+			*/
+			URL = 4;
+			/**
+            * The user is allowed to enter a real number value.
+			* This extends #MAW_EDIT_BOX_TYPE_NUMERIC by allowing a decimal point.
+			*/
+			DECIMAL = 5;
+			/**
+			* The user is allowed to enter any text, except for line breaks.
+			* Unavailable on some platforms.
+			*/
+			SINGLE_LINE = 6;
+	    }
+
+	    constset int MAW_EDIT_BOX_FLAG_ {
+			/**
+			* Indicates that the text entered is confidential data that should be
+			* obscured whenever possible. This implies #MAW_EDIT_BOX_FLAG_SENSITIVE.
+			*/
+			PASSWORD = 0;
+			/**
+			* Indicates that the text entered is sensitive data that the implementation
+			* must never store into a dictionary or table for use in predictive, auto-completing,
+			* or other accelerated input schemes. A credit card number is an example of sensitive data.
+			* Only for Android platform.
+			*/
+			SENSITIVE = 1;
+			/**
+			* This flag is a hint to the implementation that during text editing,
+			* the initial letter of each word should be capitalized.
+			*/
+			INITIAL_CAPS_WORD = 2;
+			/**
+			* This flag is a hint to the implementation that during text editing,
+			* the initial letter of each sentence should be capitalized.
+			*/
+			INITIAL_CAPS_SENTENCE = 3;
+			/**
+			* Capitalize all characters automatically.
+			*/
+			INITIAL_CAPS_ALL_CHARACTERS = 4;
+	    }
+	} // end of WidgetEditBoxConstants
+
 	/**
 	* The available widget properties for a #MAW_EDIT_BOX. See of \ref WidgetProperties "Widget properties" for more properties.
 	*/
@@ -5486,7 +5632,7 @@ group WidgetAPI "Widget API" {
 
 		/**
 		* @brief Specifies what editing mode the edit box should have.
-		*
+		* @deprecated use #MAW_EDIT_BOX_INPUT_FLAG instead.
 		* @validvalue Either 'password' or 'text'.
 		*
 		* @setonly
@@ -5497,6 +5643,52 @@ group WidgetAPI "Widget API" {
 		* \endcode
 		*/
 		EDIT_MODE = "editMode";
+
+		/**
+		* @brief Specifies what editing mode the edit box should have.
+		*
+		* @validvalue One of the values #MAW_EDIT_BOX_TYPE_ANY, #MAW_EDIT_BOX_TYPE_EMAILADDR,
+		* #MAW_EDIT_BOX_TYPE_NUMERIC, #MAW_EDIT_BOX_TYPE_PHONENUMBER, #MAW_EDIT_BOX_TYPE_URL,
+		* #MAW_EDIT_BOX_TYPE_DECIMAL, #MAW_EDIT_BOX_TYPE_SINGLELINE.
+		*
+		* @setonly
+		*
+		* @par Example
+		* \code
+		*	maWidgetSetProperty(editBoxHandle, MAW_EDIT_BOX_INPUT_MODE, toString(MAW_EDIT_BOX_NUMERIC);
+		* \endcode
+		*/
+		INPUT_MODE = "inputMode";
+
+		/**
+		* @brief Specifies the editing flags applied to the edit box.
+		*
+		* @validvalue One of the values #MAW_EDIT_BOX_FLAG_PASSWORD,
+		* #MAW_EDIT_BOX_FLAG_SENSITIVE, #MAW_EDIT_BOX_FLAG_INITIAL_CAPS_ALL_CHARACTERS,
+		* #MAW_EDIT_BOX_FLAG_INITIAL_CAPS_WORD, #MAW_EDIT_BOX_FLAG_INITIAL_CAPS_SENTENCE.
+		*
+		* @setonly
+		*
+		* @par Example
+		* \code
+		*	maWidgetSetProperty(editBoxHandle, MAW_EDIT_BOX_INPUT_FLAG, toString(MAW_EDIT_BOX_FLAG_PASSWORD));
+		* \endcode
+		*/
+		INPUT_FLAG = "inputFlag";
+
+		/**
+		* @brief Sets the font color of the edit box's text.
+		*
+		* @validvalue A hexadecimal value 0xRRGGBB, where R, G and B are the red, green and blue components respectively.
+		*
+		* @setonly
+		*
+		* @par Example
+		* \code
+		*	maWidgetSetProperty(labelHandle, MAW_EDIT_BOX_FONT_COLOR, "0xff0000");
+		* \endcode
+		*/
+		FONT_COLOR = "fontColor";
 	}
 	} // end of WidgetEditBoxProperties
 
@@ -6173,7 +6365,7 @@ group WidgetAPI "Widget API" {
 	group WidgetProgressBarProperties "Progress bar properties" {
 	constset MAString MAW_PROGRESS_BAR_ {
 		/**
-		* @brief Sets or gets the range of the progress bar to 0...max.
+		* @brief Sets or gets the range of the progress bar to 0..max.
 		*
 		* @validvalue An positive integer that specifies the upper range of this progress bar.
 		*
@@ -6244,7 +6436,7 @@ group WidgetAPI "Widget API" {
 	group WidgetSliderProperties "Slider properties" {
 	constset MAString MAW_SLIDER_ {
 		/**
-		* @brief Sets or gets the range of the slider to 0...max.
+		* @brief Sets or gets the range of the slider to 0..max.
 		*
 		* @validvalue An positive integer that specifies the upper range of this slider.
 		*
@@ -7396,7 +7588,7 @@ group CameraFunctions "Camera Functions" {
 
 		/**
 		 * Add a notification item.
-		 *
+		 * @deprecated use maNotificationCreate instead.
 		 * Note that there can only be one notification of type
 		 * #NOTIFICATION_TYPE_APPLICATION_LAUNCHER. Additional notification
 		 * types may be added in the future. This syscall is available
@@ -7418,6 +7610,7 @@ group CameraFunctions "Camera Functions" {
 
 		/**
 		 * Remove a notification item.
+		 * @deprecated use maNotificationDestroy instead.
 		 * Currently implemented only on Android.
 		 * @param id The id of the notification.
 		 * @return \< 0 on error.
@@ -7630,7 +7823,8 @@ group NFCAPI "NFC API" {
 		* Start listening to NFC events.
 		* \return MA_NFC_NOT_ENABLED if NFC is not enabled on this device,
 		* MA_NFC_NOT_AVAILABLE if NFC is not at all available, or
-		* 0 otherwise.
+		* 0 otherwise. If the proper permissions (NFC) are not set, a panic will
+		* be raised.
 		*/
 		int maNFCStart();
 
@@ -7678,8 +7872,9 @@ group NFCAPI "NFC API" {
 		* a certain type (see maNFCIsType), the tag received
 		* must be converted to the proper type (see MA_NFC_TAG_TYPE_*
 		* constants).
-		* Clients are responsible for destroying the returned handle
-		* using maNFCDestroyTag.
+		* All typed tags returned by this function will be destroyed
+		* when the tag used to produce them is destroyed. Ie no
+		* explicit destruction of typed tags is necessary (but allowed).
 		* \return A handle if the type was convertable to the specified
 		* type.
 		*/
@@ -7742,6 +7937,12 @@ group NFCAPI "NFC API" {
 		int maNFCIsReadOnly(in MAHandle tag);
 
 		/**
+		* Returns the capacity/size of a tag,
+		* or -1 if unknown.
+		*/
+		int maNFCGetSize(in MAHandle tag);
+
+		/**
 		* Reads an NDEF message from the given tag, which must
 		* be of the MA_NFC_TAG_TYPE_NDEF type.
 		* The response will come a an EVENT_TYPE_NFC_TAG_DATA_READ
@@ -7749,21 +7950,20 @@ group NFCAPI "NFC API" {
 		* and the result field set to 0 on success and a value < 0 on error.
 		* After receiving the event, clients may call
 		* maNFCGetNDEFMessage() to get the actual message.
-		*
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
 		int maNFCReadNDEFMessage(in MAHandle tag);
 
 		/**
 		* Writes an NDEF message to the given tag, which must
-		* be of the MA_NFC_TAG_TYPE_NDEF type.
+		* be of the MA_NFC_TAG_TYPE_NDEF or MA_NFC_TAG_TYPE_NDEF_FORMATTABLE type.
 		* The response will come a an EVENT_TYPE_NFC_TAG_DATA_WRITE
-		* event with the handle set to the handle passed into this method
-		* and the result field set to 0 on success and a value < 0 on error.
+		* event with the handle set to the handle passed into this method,
+		* the result field set to 0 on success and a value < 0 on error,
+		* and the dstId field set to the ndefMessage written.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		* \param tag The tag handle to write to
 		* \param ndefMessage The message to write
-		* \return MA_NFC_INVALID_TAG_TYPE if the handle given as argument
-		* does not represent an NDEF message.
-		*
 		*/
 		int maNFCWriteNDEFMessage(in MAHandle tag, in MAHandle ndefMessage);
 
@@ -7779,6 +7979,7 @@ group NFCAPI "NFC API" {
 		/**
 		* Gets the NDEF message from a tag, which must
 		* be of the MA_NFC_TAG_TYPE_NDEF type.
+		* * If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		* \return The handle to the NDEF message, which
 		* may be subsequently used in NDEF specfic functions,
 		* or the zero handle if the tag has no NDEF message
@@ -7793,72 +7994,76 @@ group NFCAPI "NFC API" {
 		int maNFCGetNDEFMessage(in MAHandle tag);
 
 		/**
-		* \return A handle to the ith NDEF record of an NDEF message,
-		* or a zero handle if the handle given as argument does no
-		* represent an NDEF message.
+		* \return A handle to the ith NDEF record of an NDEF message.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
 		MAHandle maNFCGetNDEFRecord(in MAHandle ndef, in int ix);
 
 		/**
-		* \return The number of NDEF records in an NDEF message,
-		* or MA_NFC_INVALID_TAG_TYPE if the handle given as argument
-		* does not represent an NDEF record.
+		* \return The number of NDEF records in an NDEF message.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
 		int maNFCGetNDEFRecordCount(in MAHandle ndef);
 
 		/**
 		* Reads the variable length id of an NDEF record.
-		* \return NFC_INVALID_TAG_TYPE if the handle given as
-		* argument does not represent an NDEF record.
+		* \param ndefRecord the handle to the record to read from.
+		* \param dst Where the result should be written to.
+		* \param len The maximum length to write.
+		* \return The number of bytes written.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCGetId(in MAHandle ndefRecord, out MAAddress dst, in int len);
+		int maNFCGetNDEFId(in MAHandle ndefRecord, out MAAddress dst, in int len);
 
 		/**
 		* Reads the variable length payload of an NDEF record.
-		* Returns NFC_INVALID_TAG_TYPE if the handle given as argument does not represent an NDEF record.
+		* \param ndefRecord the handle to the record to read from.
+		* \param dst Where the result should be written to.
+		* \param len The maximum length to write.
+		* \return The number of bytes written.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCGetPayload(in MAHandle ndefRecord, out MAAddress dst, in int len);
+		int maNFCGetNDEFPayload(in MAHandle ndefRecord, out MAAddress dst, in int len);
 
 		/**
-		 * Returns the 3-bit TNF of an NDEF record,
-		 * or NFC_INVALID_TAG_TYPE if the handle given as argument
-		 * does not represent an NDEF record.
-		 */
-		int maNFCGetTnf(in MAHandle ndefRecord);
+		* Returns the 3-bit TNF of an NDEF record.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
+		*/
+		int maNFCGetNDEFTnf(in MAHandle ndefRecord);
 
 		/**
-		* Returns the variable length type field of an NDEF record,
-		* or NFC_INVALID_TAG_TYPE if the handle given as argumen
-		* does not represent an NDEF record.
+		* Returns the variable length type field of an NDEF record.
+		* \param ndefRecord the handle to the record to read from.
+		* \param dst Where the result should be written to.
+		* \param len The maximum length to write.
+		* \return The number of bytes written.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCGetType(in MAHandle ndefRecord, out MAAddress dst, in int len);
+		int maNFCGetNDEFType(in MAHandle ndefRecord, out MAAddress dst, in int len);
 
 		/**
 		* Sets the variable length id of an NDEF record.
-		* \return NFC_INVALID_TAG_TYPE if the handle given as
-		* argument does not represent an NDEF message.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCSetId(in MAHandle ndefRecord, in MAAddress dst, in int len);
+		int maNFCSetNDEFId(in MAHandle ndefRecord, in MAAddress dst, in int len);
 
 		/**
 		* Sets the variable length payload of an NDEF record.
-		* \return NFC_INVALID_TAG_TYPE if the handle given as argument does not represent an NDEF message.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCSetPayload(in MAHandle ndefRecord, in MAAddress dst, in int len);
+		int maNFCSetNDEFPayload(in MAHandle ndefRecord, in MAAddress dst, in int len);
 
 		/**
-		 * Sets the 3-bit TNF of an NDEF record,
-		 * \return NFC_INVALID_TAG_TYPE if the handle given as argument
-		 * does not represent an NDEF record.
-		 */
-		int maNFCSetTnf(in MAHandle ndefRecord, in int tnf);
+		* Sets the 3-bit TNF of an NDEF record,
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
+		*/
+		int maNFCSetNDEFTnf(in MAHandle ndefRecord, in int tnf);
 
 		/**
-		* Returns the variable length type field of an NDEF record,
-		* or NFC_INVALID_TAG_TYPE if the handle given as argumen
-		* does not represent an NDEF record.
+		* Returns the variable length type field of an NDEF record.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCSetType(in MAHandle ndefRecord, in MAAddress dst, in int len);
+		int maNFCSetNDEFType(in MAHandle ndefRecord, in MAAddress dst, in int len);
 
 		/**
 		* Authenticates a MIFARE Classic tag using the A or B key. Authentication must take place
@@ -7870,36 +8075,31 @@ group NFCAPI "NFC API" {
 		* \param sectorIndex The sector to authenticate
 		* \param keySrc The address to the key to authenticate with
 		* \param keyLen The length of the key to authenticate with
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), 0 if authentication can take place.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCAuthenticateSector(in MAHandle tagHandle, in int keyType, in int sectorIndex, in MAAddress keySrc, in int keyLen);
+		int maNFCAuthenticateMifareSector(in MAHandle tagHandle, in int keyType, in int sectorIndex, in MAAddress keySrc, in int keyLen);
 
 		/**
-		* Returns the number of sectors of a MIFARE Classic tag.
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), otherwise the number of sectors
-		* is returned.
+		* \return The number of sectors of a MIFARE Classic tag.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCGetSectorCount(in MAHandle tagHandle);
+		int maNFCGetMifareSectorCount(in MAHandle tagHandle);
 
 		/**
 		* Returns the number of blocks in a sector of a MIFARE Classic tag.
 		* \param sector The sector to get the number of blocks in.
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), otherwise the number of sectors
-		* is returned.
+		* \return The number of blocks in a given sector.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCGetBlockCountInSector(in MAHandle tagHandle, in int sector);
+		int maNFCGetMifareBlockCountInSector(in MAHandle tagHandle, in int sector);
 
 		/**
 		* Returns the first block of a sector of a MIFARE Classic tag.
 		* \param sector The sector of which to get the first block.
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), otherwise the index of the
-		* first block of the sector is returned.
+		* \return The index of the first block of the sector is returned.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCSectorToBlock(in MAHandle tagHandle, in int sector);
+		int maNFCMifareSectorToBlock(in MAHandle tagHandle, in int sector);
 
 		/**
 		* Reads a number of blocks of a MIFARE Classic tag.
@@ -7909,10 +8109,9 @@ group NFCAPI "NFC API" {
 		* \param dst The memory address to write to.
 		* \param len The number of bytes to read. Several blocks may be read, depending
 		* on len (A block is 16 bytes).
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), 0 if a read operation can be performed.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCReadBlocks(in MAHandle tagHandle, in int firstBlock, out MAAddress dst, in int len);
+		int maNFCReadMifareBlocks(in MAHandle tagHandle, in int firstBlock, out MAAddress dst, in int len);
 
 		/**
 		* Writes a number of blocks to a MIFARE Classic tag.
@@ -7922,10 +8121,9 @@ group NFCAPI "NFC API" {
 		* \param dst The memory address to read from.
 		* \param len The number of bytes to write. Several blocks may be written, depending
 		* on len (A block is 16 bytes).
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), 0 if a write operation can be performed.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCWriteBlocks(in MAHandle tagHandle, in int firstBlock, in MAAddress dst, in int len);
+		int maNFCWriteMifareBlocks(in MAHandle tagHandle, in int firstBlock, in MAAddress dst, in int len);
 
 		/**
 		* Reads a number of blocks of a MIFARE Ultralight tag.
@@ -7935,10 +8133,9 @@ group NFCAPI "NFC API" {
 		* \param dst The memory address to write to.
 		* \param len The number of bytes to read. Several pages may be read, depending
 		* on len (A page is 16 bytes).
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), 0 if a read operation can be performed.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCReadPages(in MAHandle tagHandle, in int firstPage, out MAAddress dst, in int len);
+		int maNFCReadMifarePages(in MAHandle tagHandle, in int firstPage, out MAAddress dst, in int len);
 
 		/**
 		* Writes a number of blocks of a MIFARE Ultralight tag.
@@ -7948,10 +8145,9 @@ group NFCAPI "NFC API" {
 		* \param dst The memory address to read from.
 		* \param len The number of bytes to write. Several pages may be written, depending
 		* on len (A page is 16 bytes).
-		* \return MA_NFC_INVALID_TAG_TYPE if this is not the proper tag (or if the
-		* tag type is not supported by the device), 0 if a write operation can be performed.
+		* If the handle is not an NDEF tag, MA_NFC_INVALID_TAG_TYPE will be returned.
 		*/
-		int maNFCWritePages(in MAHandle tagHandle, in int firstPage, in MAAddress dst, in int len);
+		int maNFCWriteMifarePages(in MAHandle tagHandle, in int firstPage, in MAAddress dst, in int len);
 
 		constset int MA_NFC_ {
 			/**
@@ -7979,6 +8175,12 @@ group NFCAPI "NFC API" {
 			* tag.
 			*/
 			TAG_NOT_CONNECTED = -4;
+
+			/**
+			* An error code used by maNFCWriteNDEF if maNFCWriteNDEF was
+			* performed on an NDEF_FORMATTABLE tag and failed.
+			*/
+			FORMAT_FAILED = -5;
 
 			/**
 			* An error code if some general I/O error occurred,
@@ -8020,6 +8222,61 @@ group NFCAPI "NFC API" {
 			*/
 			ISO_DEP = 6;
 
+			/**
+			* Represents an 'abstract' tag that can
+			* accept requests for formatting it into
+			* an NDEF tag.
+			*/
+			NDEF_FORMATTABLE = 128;
+		}
+
+		constset int MA_NFC_NDEF_TNF_ {
+
+			/**
+			* Indicates the NDEF message is empty.
+			*/
+			EMPTY = 0;
+
+			/**
+			* Indicates the NDEF message is of a 'well-known' type;
+			* it may be further identified using the MA_NFC_NDEF_RTD_*
+			* constants.
+			*/
+			WELL_KNOWN = 1;
+
+			/**
+			* Indicates the NDEF message contains mime media;
+			* use maNFCGetType() to get the mime type.
+			*/
+			MIME_MEDIA = 2;
+
+			/**
+			* Indicates the NDEF message contains an absolute URI,
+			* the type conforming to RFC 3986.
+			*/
+			ABSOLUTE_URI = 3;
+
+			/**
+			* Indicates the type of the NDEF message being 'external'.
+			*/
+			EXTERNAL_TYPE = 4;
+
+			/**
+			* Indicates the contents of the NDEF message to be of
+			* an unknown type. The type of the NDEF message should
+			* be empty.
+			*/
+			UNKNOWN = 5;
+
+			/**
+			* Constant for chunked NDEF messages.
+			*/
+			UNCHANGED = 6;
+
+			/**
+			* Reserved constant.
+			*/
+			RESERVED = 7;
 		}
 
 		constset int MA_NFC_MIFARE_ {
@@ -8037,20 +8294,1303 @@ group NFCAPI "NFC API" {
 		}
 	}//end of NFC API
 
+	group DBAPI "DB API" {
+		struct MADBBlob {
+			MAAddress data;
+			int size;
+		}
+		struct MADBText {
+			MAString addr;
+			/// Length in bytes of the string pointed to by \a addr.
+			/// May be \< 0, in which case the string is null-terminated.
+			int length;
+		}
+
+		constset int MA_DB_TYPE_ {
+			NULL = 1;
+			INT = 2;
+			INT64 = 3;
+			DOUBLE = 4;
+			BLOB = 5;
+			DATA = 6;
+			TEXT = 7;
+		}
+
+		/// Input value for maDBExecSQLParams().
+		struct MADBValue {
+			union {
+				int i;
+				double d;
+				MADBBlob blob;
+				MAHandle dataHandle;
+				MADBText text;
+				longlong i64;
+			}
+			// has to be last. otherwise this struct would get an alignment mismatch
+			// due to the double union member, which has to be 8-byte-aligned on x86 platforms.
+			/// One of the MA_DB_TYPE_ constants.
+			int type;
+		}
+
+		/**
+		 * Open a database file. The database is created if it does not exist.
+		 * \note The application needs file read/write permissions to
+		 * access database files.
+		 * @param path Absolute path to the database file.
+		 * @return Handle to the database >0 on success, #MA_DB_ERROR on error.
+		 */
+		MAHandle maDBOpen(in MAString path);
+
+		/**
+		 * Close a database.
+		 * @param databaseHandle Handle to the database.
+		 * @return #MA_DB_OK on success, #MA_DB_ERROR on error.
+		 */
+		int maDBClose(in MAHandle databaseHandle);
+
+		/**
+		 * Executes an SQL statement. If the statement returns a
+		 * query result, a cursor handle is returned.
+		 * @param databaseHandle Handle to the database.
+		 * @param sql The SQL statement.
+		 * @return #MA_DB_ERROR on error, #MA_DB_OK on success,
+		 * > 0 if there is a cursor to a query result, in this
+		 * case the return value is the cursor handle.
+		 */
+		MAHandle maDBExecSQL(in MAHandle databaseHandle, in MAString sql);
+
+		/**
+		 * @copydoc maDBExecSQL()
+		 * @param params Array of values to bind to parameters.
+		 * Parameters are specified by question marks (?)
+		 * in the SQL statement.
+		 *
+		 * If this function returns a cursor,
+		 * any text or blob values being pointed to by elements of the array must remain valid until
+		 * the cursor has been destroyed by maDBCursorDestroy().
+		 * The array itself does not need to remain valid after this function returns.
+		 *
+		 * @param paramCount Number of elements in the array pointed to by \a params.
+		 */
+		MAHandle maDBExecSQLParams(in MAHandle databaseHandle, in MAString sql,
+			in MADBValue params, in int paramCount);
+
+		/**
+		 * Destroys a cursor. You must call this function
+		 * when you are done with the cursor to release
+		 * its resources.
+		 * @param cursorHandle Handle to the cursor.
+		 * @return #MA_DB_OK on success, #MA_DB_ERROR on error.
+		 */
+		int maDBCursorDestroy(in MAHandle cursorHandle);
+
+		/**
+		 * Move the cursor to the next row in the result set.
+		 * Note that you must call this function before retrieving
+		 * column data. The initial position of the cursor is
+		 * before the first row in the result set. If the result
+		 * set is empty, this function will return #MA_DB_NO_ROW.
+		 * @param cursorHandle Handle to the cursor.
+		 * @return #MA_DB_OK if successfully moved to next row,
+		 * #MA_DB_NO_ROW if there are no more rows in the result set,
+		 * #MA_DB_ERROR on error.
+		 */
+		int maDBCursorNext(in MAHandle cursorHandle);
+
+		/**
+		 * Get the column value at the current row pointed to
+		 * by the cursor as a data object. Use this function for
+		 * blob data or text data.
+		 * @param cursorHandle Handle to the cursor.
+		 * @param columnIndex Index of the column to retrieve value from.
+		 * First column has index zero.
+		 * @param placeholder Handle created with maCreatePlaceholder.
+		 * A data object will be created with the column data, and the handle
+		 * will refer to that data.
+		 * @return #MA_DB_OK on success, #MA_DB_NULL if the column value
+		 * is NULL, #MA_#MA_DB_ERROR on error.
+		 */
+		int maDBCursorGetColumnData(
+			in MAHandle cursorHandle,
+			in int columnIndex,
+			in MAHandle placeholder);
+
+		/**
+		 * Get the column value at the current row pointed to
+		 * by the cursor as a text data buffer. Use this function for
+		 * text data.
+		 * @param cursorHandle Handle to the cursor.
+		 * @param columnIndex Index of the column to retrieve value from.
+		 * First column has index zero.
+		 * @param buffer Pointer to buffer to receive the data.
+		 * The result is NOT zero terminated.
+		 * @param bufferSize Max size of the buffer.
+		 * @return The actual length of the data, if the actual length
+		 * returned is > bufferSize, data was not copied (buffer too small),
+		 * returns #MA_DB_ERROR on other errors, returns #MA_DB_NULL if the
+		 * column value is NULL.
+		 */
+		int maDBCursorGetColumnText(
+			in MAHandle cursorHandle,
+			in int columnIndex,
+			out MAAddress buffer,
+			in int bufferSize);
+
+		/**
+		 * Get the column value at the current row pointed to
+		 * by the cursor as an int value.
+		 * @param cursorHandle Handle to the cursor.
+		 * @param columnIndex Index of the column to retrieve value from.
+		 * First column has index zero.
+		 * @param value Pointer to int to receive the value.
+		 * @return #MA_DB_OK on success, #MA_DB_NULL if the column value
+		 * is NULL, #MA_#MA_DB_ERROR on error.
+		 */
+		int maDBCursorGetColumnInt(
+			in MAHandle cursorHandle,
+			in int columnIndex,
+			out int value);
+
+		// todo: maDBCursorGetColumnInt64
+
+		/**
+		 * Get the column value at the current row pointed to
+		 * by the cursor as a double value.
+		 * @param cursorHandle Handle to the cursor.
+		 * @param columnIndex Index of the column to retrieve value from.
+		 * First column has index zero.
+		 * @param value Pointer to double to receive the value.
+		 * @return #MA_DB_OK on success, #MA_DB_NULL if the column value
+		 * is NULL, #MA_#MA_DB_ERROR on error.
+		 */
+		int maDBCursorGetColumnDouble(
+			in MAHandle cursorHandle,
+			in int columnIndex,
+			out double value);
+
+		/**
+		 * Status codes returned by the maDB functions.
+		 */
+		constset int MA_DB_ {
+			/**
+			 * Success return value.
+			 */
+			OK = 0;
+
+			/**
+			 * Error return value (-1 reserved for IOCtl not implemented).
+			 */
+			ERROR = -2;
+
+			/**
+			 * The cursor is beyond the last row
+			 * when calling #maDBCursorNext.
+			 */
+			NO_ROW = -3;
+
+			/**
+			 * A database field value was NULL when calling
+			 * the maDBCursorGetColumn* functions.
+			 */
+			NULL = -4;
+		}
+	} // End of DB API
+
+#if IX_AUDIO
+	group AudioAPI "Audio API" {
+		typedef int MAAudioData;
+		typedef int MAAudioInstance;
+
+		group AudioAPIConsts "Audio API Constants" {
+			constset int MA_AUDIO_DATA_ {
+				// Bit in maAudioDataCreate flags to specify if the sound should be streamed instead of fully decoded to memory.
+				STREAM = 1;
+			}
+
+			constset int MA_AUDIO_ERR_ {
+				OK = 0;
+				INVALID_INSTANCE = -2;
+				INVALID_DATA = -3;
+				INVALID_FILENAME = -4;
+				INVALID_FILE = -5;
+				STREAMING_NOT_SUPPORTED = -6;
+				VOLUME_OUT_OF_RANGE = -7;
+				POSITION_OUT_OF_RANGE = -8;
+				INVALID_SOUND_FORMAT = -9;
+				OUT_OF_MEMORY = -10;
+			}
+		} // end of Audio API constants
+
+		group AudioAPIFunctions "Audio API Functions" {
+			MAAudioData maAudioDataCreateFromResource(in MAString mime, in MAHandle data, in int offset, in int length, in int flags);
+			MAAudioData maAudioDataCreateFromFile(in MAString mime, in MAString filename, in int flags);
+			int maAudioDataDestroy(in MAAudioData audioData);
+			MAAudioInstance maAudioInstanceCreate(in MAAudioData audioData);
+			int maAudioInstanceDestroy(in MAAudioInstance audioInstance);
+			int maAudioGetLength(in MAAudioInstance audio);
+			int maAudioSetNumberOfLoops(in MAAudioInstance audio, in int loops);
+			int maAudioPlay(in MAAudioInstance audio);
+			int maAudioSetPosition(in MAAudioInstance audio, in int milliseconds);
+			int maAudioGetPosition(in MAAudioInstance audio);
+			int maAudioSetVolume(in MAAudioInstance audio, in float volume);
+			int maAudioStop(in MAAudioInstance audio);
+		}// End of Audio API Functions
+	} // End of Audio API group
+#endif // IX_AUDIO
+
 	/**
-	* Enable panic system.
+	* Enable panics for programmer errors.
+	* Such panics are enabled by default, but can be disabled by maSyscallPanicsDisable().
 	* If a panic is raised a message will be displayed to the user and the program will be shut down.
 	* \return #RES_OK.
 	*/
 	int maSyscallPanicsEnable();
 
 	/**
-	* Disable panic system.
-	* If an error occurs in the syscall, an error code will be returned by the syscall and the
+	* Disable panics for programmer errors.
+	* Some errors, such as feeding invalid parameters to certain syscalls,
+	* can be prevented by the programmer. By default, these errors cause a MoSync Panic.
+	* After this function is called,
+	* if such an error occurs in a syscall, an error code will be returned by the syscall and the
 	* program will continue running.
+	* Panics can be re-enabled by maSyscallPanicsEnable().
 	* \return #RES_OK.
 	*/
 	int maSyscallPanicsDisable();
+
+group AdsAPI "Ads API" {
+	group AdsResultCodes "Ads result codes" {
+		constset int MA_ADS_RES_ {
+			/**
+			* @brief Indicates that the call was successful.
+			*/
+			OK = 0;
+
+			/**
+			* @brief Indicates that the call to a maAdsAddBannerToScreen or maAdsRemoveBannerFromScreen received
+			* an invalid layout handle.
+			*/
+			INVALID_LAYOUT_HANDLE = -1;
+
+			/**
+			* @brief Indicates that the call to a banner function received an invalid banner handle.
+			*/
+			INVALID_BANNER_HANDLE = -2;
+
+			/**
+			* @brief Indicates that the call to maAdsBannerSetProperty or maAdsBannerGetProperty received
+			* an invalid property name.
+			*/
+			INVALID_PROPERTY_NAME = -3;
+
+			/**
+			* @brief Indicates that the call to maAdsBannerSetProperty or maAdsBannerGetProperty received
+			* an invalid property value.
+			*/
+			INVALID_PROPERTY_VALUE = -4;
+
+			/**
+			* @brief Indicates that the call to maAdsBannerSetProperty needs a larger buffer.
+			*/
+			INVALID_STRING_BUFFER_SIZE = -5;
+
+			/**
+			* @brief Indicates that the call to an Ad syscall was unsuccessful.
+			*/
+			ERROR = -6;
+
+			/**
+			* @brief Indicates that ads are not supported on current platform.
+			*/
+			UNSUPPORTED = -7;
+		}
+	} // end of Ads Result Codes
+
+	group AdsErrorCodes "Ads error codes" {
+		constset int MA_ADS_ERROR_ {
+			/**
+			* @brief Indicates that something happened internally: for instance, the Activity may have been destroyed mid-refresh.
+			* Platform: Android.
+			*/
+			INTERNAL = -1;
+
+			/**
+			* @brief Indicates that the ad request is invalid.
+			* Platform: Android.
+			*/
+			INVALID_REQUEST = -2;
+
+			/**
+			* @brief Indicates that the connection to the advertisements server failed.
+			* Platform: Android and iOS.
+			*/
+			NETWORK = -3;
+
+			/**
+			* @brief Indicates that no ad was returned due to lack of ad inventory.
+			* Platform: Android and iOS.
+			*/
+			NO_FILL = -4;
+
+			/**
+			* @brief Indicates that your application has not been configured to receive advertisements.
+			* Platform: iOS.
+			*/
+			CONFIGURATION = -5;
+
+			/**
+			* @brief Indicates that the banner is visible, but no advertisement is shown.
+			* Your application must always hide the banner when it does not have an advertisement to display.
+			* Platform: iOS.
+			*/
+			NO_CONTENT = -6;
+
+			/**
+			* @brief Indicates that ad content is not available because the application is not currently active.
+			* Platform: iOS.
+			*/
+			APPLICATION_INACTIVE = -7;
+		}
+	} // end of Ads Error Codes
+
+	group AdsProperties "Ads Properties" {
+		constset MAString MA_ADS_ {
+			/**
+			* @brief Gets the height of the ads banner.
+			* The view will have no size until the ad is loaded.
+			*
+			* @validvalue an int.
+			*
+			* @getonly
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maAdsBannerGetProperty(MA_ADS_HEIGHT, buf);
+			* \endcode
+			*/
+			HEIGHT = "height";
+
+			/**
+			* @brief Gets the width of the ads banner.
+			* The view will have no size until the ad is loaded.
+			*
+			* @validvalue an int.
+			*
+			* @getonly
+			*
+			* @par Example
+			* \code
+			*    char buf[256];
+			*	maAdsBannerGetProperty(MA_ADS_WIDTH, buf);
+			* \endcode
+			*/
+			WIDTH = "width";
+
+			/**
+			* @brief Sets whether the banner is visible or not. Layouts ignore invisible widgets.
+			* The banner is visible by default.
+			*
+			* @validvalue A boolean string 'true' or 'false', where true is visible and false is invisible.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_VISIBLE, "false");
+			* \endcode
+			*/
+			VISIBLE = "visible";
+
+			/**
+			* @brief Sets whether the banner is enabled or not. If disabled, the user cannot interact with it.
+			* Ads are enabled by default.
+			*
+			* @validvalue A boolean string 'true' or 'false', where true is enabled and false is disabled.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_ENABLED, "false");
+			* \endcode
+			*/
+			ENABLED = "enabled";
+
+			/**
+			* @brief Sets the devices that are going to receive test ads only.
+			* You should utilize this property during development to avoid generating false impressions.
+			* Available only on Android.
+			*
+			* @validvalue String that holds the device ID.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_TEST_DEVICE, "E83D20734F72FB3108F104ABC0FFC738"); // My T-Mobile G1 test phone
+			* \endcode
+			*/
+			TEST_DEVICE = "testDevice";
+
+			/**
+			* @brief Sets the request state of the ads.
+			* If set to true ads are starting to be requested, if set to false the request for ads is stopped.
+			* After requesting for content no other property setter will be taken into account.
+			* @validvalue A boolean string 'true' or 'false'.
+			* Available only on Android.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_REQUEST_CONTENT, "true");
+			* \endcode
+			*/
+			REQUEST_CONTENT = "requestContent";
+
+			/**
+			* @brief Returns true if the ad is successfully loaded and is ready to be shown.
+			* Available only on Android.
+			*
+			* @validvalue A boolean string 'true' or 'false'.
+			*
+			* @getonly
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maAdsBannerGetProperty(bannerHandle, MA_ADS_IS_READY, buf);
+			* \endcode
+			*/
+			IS_READY = "isReady";
+
+			/**
+			* @brief Sets the coloration of test ads, specifically the background color.
+			*
+			* @validvalue A hexadecimal value 0xRRGGBB, where R, G and B are the red, green and blue components respectively.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_COLOR_BG, "0xAAAAFF");
+			* \endcode
+			*/
+			COLOR_BG = "colorBg";
+
+			/**
+			* @brief Sets the coloration of test ads,specifically the gradient background color at top.
+			*
+			* @validvalue A hexadecimal value 0xRRGGBB, where R, G and B are the red, green and blue components respectively.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_COLOR_BG_TOP, "0xFFFFFF");
+			* \endcode
+			*/
+			COLOR_BG_TOP = "colorBgTop";
+
+			/**
+			* @brief Sets the coloration of test ads, specfiically the border color.
+			*
+			* @validvalue A hexadecimal value 0xRRGGBB, where R, G and B are the red, green and blue components respectively.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_COLOR_BORDER, "0xFFFFFF");
+			* \endcode
+			*/
+			COLOR_BORDER = "colorBorder";
+
+			/**
+			* @brief Sets the coloration of test ads, specfiically the link text color.
+			*
+			* @validvalue A hexadecimal value 0xRRGGBB, where R, G and B are the red, green and blue components respectively.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_COLOR_LINK, "0xFFFFFF");
+			* \endcode
+			*/
+			COLOR_LINK = "colorLink";
+
+			/**
+			* @brief Sets the coloration of test ads, specfiically the text color.
+			*
+			* @validvalue A hexadecimal value 0xRRGGBB, where R, G and B are the red, green and blue components respectively.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_COLOR_TEXT, "0xFFFFFF");
+			* \endcode
+			*/
+			COLOR_TEXT = "colorText";
+
+			/**
+			* @brief Sets the coloration of test ads, specfiically the url color.
+			*
+			* @validvalue A hexadecimal value 0xRRGGBB, where R, G and B are the red, green and blue components respectively.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maAdsBannerSetProperty(bannerHandle, MA_ADS_COLOR_URL, "0xFFFFFF");
+			* \endcode
+			*/
+			COLOR_URL = "colorUrl";
+		}
+	} // end of Ads properties
+
+	group AdsConstants "Ads Constants" {
+		constset int MA_ADS_SIZE_ {
+			// An Ad can be created ony with those predefined sizes.
+			// This is the default banner of size 320*50.
+			BANNER = 0;
+			// Standard medium rectange of size 300*250.
+			// Availabe only on Android.
+			RECT = 1;
+			// Full size banner of size 468*60.
+			// Availabe only on Android.
+			IAB_BANNER = 2;
+			// Of size 728*90.
+			// Availabe only on Android.
+			LEADERBOARD = 3;
+		}
+	} // end of Ads Constants
+
+	group AdsEventTypes "Ads Event Types" {
+		constset int MA_ADS_EVENT_ {
+			// This event is send when a banner view fails to load a new advertisement.
+			FAILED = 0;
+			// This event is send when a new banner advertisement is loaded.
+			LOADED = 1;
+			// This event is send after a banner view finishes executing an action that
+			// covered your application's user interface.
+			ON_DISMISS = 2;
+			// This event is send when the user taps the banner view.
+			// The application is moved to background after this event is send.
+			ON_LEAVE_APPLICATION = 3;
+		}
+	} // end of Ads Constants
+
+	group AdsFunctions "Ads Functions" {
+		/**
+		* \brief Creates a new banner.
+		* \param bannerSize One of the MA_ADS_SIZE_ constants. Only for Android platform.
+		* \param publisherID Only for Android platform.
+		* This param is ignored on iOS platform.
+		*
+		* \note A banner is a widget type object.
+		* For more info see Widget API.
+		*
+		* \returns
+		*  - MA_ADS_RES_UNSUPPORTED if ads are not supported on current system.
+		*  - MA_ADS_RES_ERROR if a error occurred while creating the banner widget.
+		*  - a handle to a new banner widget(the handle value is >= 0).
+		*/
+		int maAdsBannerCreate(in int bannerSize, in MAString publisherID);
+
+		/**
+		* \brief Destroy a banner.
+		*
+		* \param bannerHandle Handle to a banner.
+		*
+		* \returns One of the next constants:
+		* - MA_ADS_RES_OK if no error occurred.
+		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		*/
+		int maAdsBannerDestroy(in MAHandle bannerHandle);
+
+		/**
+		* \brief Add a banner to a layout widget.
+		*
+		* \param bannerHandle Handle to a banner.
+		* \param layoutHandle Handle to a layout.
+		*
+		* \returns One of the next constants:
+		* - MA_ADS_RES_OK if no error occurred.
+		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - MA_ADS_RES_INVALID_LAYOUT_HANDLE if the layout handle is invalid.
+		*/
+		int maAdsAddBannerToLayout(in MAHandle bannerHandle, in MAHandle layoutHandle);
+
+		/**
+		* \brief Remove a banner from a layout widget.
+		*
+		* \param bannerHandle Handle to a banner.
+		* \param layoutHandle Handle to a layout.
+		*
+		* \returns One of the next constants:
+		* - MA_ADS_RES_OK if no error occurred.
+		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - MA_ADS_RES_INVALID_LAYOUT_HANDLE if the layout handle is invalid.
+		*/
+		int maAdsRemoveBannerFromLayout(in MAHandle bannerHandle, in MAHandle layoutHandle);
+
+		/**
+		* \brief Set a banner property.
+		*
+		* \param bannerHandle Handle to the banner.
+		* \param property A string representing which property to set.
+		* \param value The value that will be assigned to the property.
+		*
+		* \returns One of the next result codes:
+		* - MA_ADS_RES_OK if no error occurred.
+		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - MA_ADS_RES_INVALID_PROPERTY_NAME if the property name is not valid.
+		* - MA_ADS_RES_INVALID_PROPERTY_VALUE if the property value is not valid.
+		*/
+		int maAdsBannerSetProperty(in MAHandle bannerHandle, in MAString property, in MAString value);
+
+		/**
+		* \brief Retrieves a specified property from the given banner.
+		*
+		* \param bannerHandle Handle to the banner.
+		* \param property A string representing for which property to get the value.
+		* \param value A buffer that will hold the value of the property, represented as a string.
+		* \param bufSize Size of the buffer.
+		*
+		* \returns One of the next result codes:
+		* - MA_ADS_RES_OK if no error occurred.
+		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - MA_ADS_RES_INVALID_PROPERTY_NAME if the property name is not valid.
+		* - MA_ADS_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
+		*/
+		int maAdsBannerGetProperty(in MAHandle bannerHandle, in MAString property, out MAString value range("bufSize"), in int bufSize);
+	}//End of Ads Functions
+} // End of Ads API
+
+group NotificationAPI "Notification API" {
+	group NotificationResultCodes "Notification result codes" {
+		constset int MA_NOTIFICATION_RES_ {
+			/**
+			* @brief Indicates that the call was successful.
+			*/
+			OK = 0;
+
+			/**
+			* @brief Indicates that the syscall received an invalid local notification handle.
+			*/
+			INVALID_HANDLE = -1;
+
+			/**
+			* @brief Indicates that the call to maNotificationSetProperty or maNotificationGetProperty received
+			* an invalid property name.
+			*/
+			INVALID_PROPERTY_NAME = -3;
+
+			/**
+			* @brief Indicates that the call to maNotificationSetProperty or maNotificationGetProperty received
+			* an invalid property value.
+			*/
+			INVALID_PROPERTY_VALUE = -4;
+
+			/**
+			* @brief Indicates that the call to maNotificationGetProperty or maNotificationPushGetData needs a larger buffer.
+			*/
+			INVALID_STRING_BUFFER_SIZE = -5;
+
+			/**
+			* @brief Indicates that notifications are not supported on current platform.
+			*/
+			UNSUPPORTED = -6;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushRegister was unsuccessful because
+			* the application is already registered for receiving push notification.
+			*/
+			ALREADY_REGISTERED = -7;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushUnregister was unsuccessful because
+			* the application is not registered for receiving push notification.
+			*/
+			NOT_REGISTERED = -8;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushRegister was unsuccessful because
+			* the application did not finish processing a previous registration request.
+			*/
+			REGISTRATION_IN_PROGRESS = -9;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushRegister was unsuccesfull because the
+			* device can't read the response, or there was a 500/503 from the server that can be retried later.
+			* The application should use exponential back off and retry.
+			* Platform: Android only.
+			*/
+			REGISTRATION_SERVICE_NOT_AVAILABLE = -10;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushRegister was unsuccesfull because there is no
+			* Google account on the phone.
+			* The application should ask the user to open the account manager and add a Google account.
+			* Platform: Android only.
+			*/
+			REGISTRATION_ACCOUNT_MISSING = -11;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushRegister was unsuccesfull because the password was bad.
+			* The application should ask the user to enter his/her password, and let user retry manually later.
+			* Platform: Android only.
+			*/
+			REGISTRATION_AUTHENTICATION_FAILED = -12;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushRegister was unsuccesfull because the user has too many
+			* applications registered.
+			* The application should tell the user to uninstall some other applications, let user retry manually.
+			* Platform: Android only.
+			*/
+			REGISTRATION_TOO_MANY_REGISTRATIONS = -13;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushRegister was unsuccesfull because the sender account
+			* is not recognized.
+			* Platform: Android only.
+			*/
+			REGISTRATION_INVALID_SENDER = -14;
+
+			/**
+			* @brief  Indicates that the call to maNotificationPushRegister was unsuccesfull because of incorrect
+			* phone registration with Google. This phone doesn't currently support C2DM.
+			* Platform: Android only.
+			*/
+			REGISTRATION_PHONE_REGISTRATION_ERROR = -15;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushGetRegistration needs a larger buffer.
+			*/
+			REGISTRATION_MESSAGE_BUF_TOO_SMALL = -16;
+
+			/**
+			* @brief Indicates that the call to maNotificationPushGetRegistration occured before trying to register.
+			*/
+			REGISTRATION_NOT_CALLED = -17;
+
+			/**
+			* @brief Indicates that the call to an notification syscall was unsuccessful.
+			*/
+			ERROR = -18;
+		}
+	} // end of Notification Result Codes
+
+	group NotificationFlags "Notification Flags" {
+		constset int MA_NOTIFICATION_FLAG_ {
+			/**
+			* If set, the audio will be repeated until the notification is canceled or the
+			* notification window is opened.
+			* Platform: Android only.
+			*/
+			INSISTENT = 4;
+
+			/**
+			* Should be set if the notification should not be canceled when the user clicks the
+			* Clear all button.
+			* Platform: Android only.
+			*/
+			NO_CLEAR = 32;
+
+			/**
+			* Should be set if this notification represents a high-priority event that may be shown to
+			* the user even if notifications are otherwise unavailable (that is, when the status bar is hidden).
+			* Platform: Android only.
+			*/
+			HIGH_PRIORITY = 128;
+
+			/**
+			* Should be set if the notification should be canceled when it is clicked by the user.
+			* Platform: Android only.
+			*/
+			AUTO_CANCEL = 16;
+		}
+	} // end of Notification Flags
+
+	group NotificationPushTypes "Notification Push Types" {
+		constset int MA_NOTIFICATION_PUSH_TYPE_ {
+			/**
+			* @brief The application accepts notifications that badge the application icon.
+			* Platform: iOS only.
+			*/
+			BADGE = 1;
+
+			/**
+			* @brief The application accepts alert sounds as notifications.
+			* Platform: iOS only.
+			*/
+			SOUND = 2;
+
+			/**
+			* @brief The application accepts alert messages as notifications.
+			* This is the only push notification type that is supported by
+			* both Android and iOS.
+			*/
+			ALERT = 4;
+		}
+	} // end of Notification Push Types
+
+	group LocalNotificationProperties "Local Notification Properties" {
+		constset MAString MA_NOTIFICATION_LOCAL_ {
+			/**
+			* @brief Set the number displayed on the application's icon badge.
+			* Platform: iOS.
+			*
+			* @validvalue an int.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maNotificationLocalGetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_BADGE_NUMBER, buf);
+			* \endcode
+			*/
+			BADGE_NUMBER = "badge_number";
+
+			/**
+			* @brief Set the date and time when the system should deliver the notification.
+			*
+			* @validvalue an int.
+			* The date is in seconds(UNIX time - seconds elapsed since January 1, 1970).
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*   char buf[256];
+			*	maNotificationLocalGetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_FIRE_DATE, buf);
+			* \endcode
+			*/
+			FIRE_DATE = "fire_date";
+
+			/**
+			* @brief Set the message displayed in the notification alert.
+			* Platform: Android and iOS.
+			*
+			* @validvalue an string.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_ALERT_BODY, "Did you forget something?");
+			* \endcode
+			*/
+			CONTENT_BODY = "content_body";
+
+			/**
+			* @brief Set the title of the action button or slider.
+			* Platform: iOS.
+			*
+			* @validvalue a string.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_ALERT_ACTION, "Show");
+			* \endcode
+			*/
+			ALERT_ACTION = "alert_action";
+
+			/**
+			* @brief Enable/disable the sound played when an alert is displayed.
+			* Platform: iOS and Android.
+			* If set to true, it will play the default sound.
+			*
+			* @validvalue "true" or "false" strings.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_PLAY_SOUND, "true");
+			* \endcode
+			*/
+			PLAY_SOUND = "play_sound";
+
+			/**
+			* @brief Set the sound to play when an alert is displayed.
+			* Platform: Android.
+			*
+			* @validvalue a valid path to an audio file.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_SOUND_PATH, "....");
+			* \endcode
+			*/
+			SOUND_PATH = "soundPath";
+
+			/**
+			* @brief Set the title that goes in the expanded entry of the notification.
+			* Platform: Android.
+			*
+			* @validvalue a string.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*     maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_CONTENT_TITLE, "My message");
+			* \endcode
+			*/
+			CONTENT_TITLE = "contentTitle";
+
+			/**
+			* @brief The text that flows by in the status bar when the notification first activates.
+			* Platform: Android.
+			*
+			* @validvalue a string.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*     maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_TICKER_TEXT, "You got new message");
+			* \endcode
+			*/
+			TICKER_TEXT = "tickerText";
+
+			/**
+			* @brief Set or get the flags applied to the local notification.
+			* Platform: Android.
+			*
+			* @validvalue One of the constants:
+			* - MA_NOTIFICATION_FLAG_INSISTENT
+			* - MA_NOTIFICATION_FLAG_AUTO_CANCEL
+			* - MA_NOTIFICATION_FLAG_HIGH_PRIORITY
+			* - MA_NOTIFICATION_FLAG_NO_CLEAR.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*     maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_FLAG, MA_NOTIFICATION_FLAG_AUTO_CANCEL);
+			* \endcode
+			*/
+			FLAG = "flag";
+
+			/**
+			* @brief Enable/disable the the default vibration when an alert is displayed.
+			* Platform: Android only.
+			* If set to true, it will use the default notification vibrate. This will ignore any given vibrate.
+			* Using phone vibration requires the VIBRATE permission.
+			*
+			* @validvalue "true" or "false" strings.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_VIBRATE, "true");
+			* \endcode
+			*/
+			VIBRATE = "vibrate";
+
+			/**
+			* @brief Set the vibration duration when an alert is displayed.
+			* Platform: Android only.
+			* Using phone vibration requires the VIBRATE permission.
+			*
+			* @validvalue an int The number of milliseconds to vibrate.
+			*
+			* @setonly
+			*
+			* @par Example
+			* \code
+			*   // Vibrate for 3 seconds.
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_VIBRATE_DURATION, "3000");
+			* \endcode
+			*/
+			VIBRATE_DURATION = "vibrateDuration";
+
+			/**
+			* @brief Enable/Disable the default notification lights.
+			* This will ignore the #MA_NOTIFICATION_LOCAL_FLASH_LIGHTS_PATTERN.
+			* Not every color in the spectrum is supported by the device LEDs, and not every device supports the same
+			* colors, so the hardware estimates to the best of its ability. Green is the most common notification color.
+			* Platform: Android only.
+			*
+			* @validvalue "true" or "false" strings.
+			*
+			* @setandget
+			*
+			* @par Example
+			* \code
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_FLASH_LIGHTS, "true");
+			*/
+			FLASH_LIGHTS = "flashLights";
+
+			/**
+			* @brief Define your own color and pattern for the lights.
+			* Not every color in the spectrum is supported by the device LEDs, and not every device supports the same
+			* colors, so the hardware estimates to the best of its ability. Green is the most common notification color.
+			* Also, not all Android devices support this feature.
+			* Platform: Android only.
+			*
+			* @validvalue An int array containing 3 values:
+			* - a value for the ledARGB field (for the color),
+			* - the ledOffMS field (length of time, in milliseconds, to keep the light off),
+			* - the ledOnMS (length of time, in milliseconds, to keep the light on).
+			*  returns MA_NOTIFICATION_ERROR if the current device doesn't support flashing LED.
+			* @setonly
+			*
+			* @par Example
+			* \code
+			* 	// In this example, the green light repeatedly flashes on for 300 milliseconds and turns off for one second.
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_FLASH_LIGHTS_PATTERN, "0xff00ff00,300,1000");
+			*/
+			FLASH_LIGHTS_PATTERN = "flashLightsPattern";
+		}
+	} // end of Notification Properties
+
+	group NotificationPushStruct "Push Notification Struct" {
+		/**
+		* \brief An push notification event.
+		*/
+		struct MAPushNotificationData {
+			/// A bit mask specifying the types of notifications.
+			/// The bit mask is created using \link #MA_NOTIFICATION_PUSH_TYPE_BADGE
+			/// MA_NOTIFICATION_PUSH_TYPE \endlink type values.
+			/// Specific to iOS. On Android it will be #MA_NOTIFICATION_PUSH_TYPE_ALERT.
+			int type;
+
+			/// The  buffer that will contain the message displayed in the notification alert.
+			/// This buffer will be filled only if the type is MA_NOTIFICATION_PUSH_TYPE_ALERT.
+			/// Platform: iOS only.
+			MAString alertMessage;
+
+			/// The size of the buffer that will contain the notification alert message.
+			int alertMessageSize;
+
+			/// The address to a buffer that will contain the name of the file containing
+			/// the sound to play when an alert is displayed.
+			/// This buffer will be filled only if the type is MA_NOTIFICATION_PUSH_TYPE_SOUND.
+			/// Platform: iOS only.
+			MAString soundFileName;
+
+			/// The size of the buffer that will contain the sound filename.
+			int soundFileNameSize;
+
+			/// Will contain the number to display as the application’s icon badge.
+			/// This value will be set only if the type is MA_NOTIFICATION_PUSH_TYPE_BADGE.
+			/// Platform: iOS only.
+			int badgeIcon;
+		}
+	} // end of Push Notification Struct
+
+	group NotificationFunctions "Notification Functions" {
+		/**
+		* \brief Creates a new local notification object.
+		*
+		* \returns
+		*  - MA_NOTIFICATION_RES_UNSUPPORTED if the notifications are not supported on current system.
+		*  - MA_NOTIFICATION_RES_ERROR if a error occurred while creating the notification object.
+		*  - a handle to a new local notification object(the handle value is >= 0).
+		*/
+		MAHandle maNotificationLocalCreate();
+
+		/**
+		* \brief Destroy a local notification object.
+		*
+		* \param notificationHandle Handle to a local notification object.
+		*
+		* \returns One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+		*/
+		int maNotificationLocalDestroy(in MAHandle notificationHandle);
+
+		/**
+		* \brief Set a local notification property.
+		*
+		* \param notificationHandle Handle to the local notification object.
+		* \param property A string representing which property to set.
+		* \param value The value that will be assigned to the property.
+		*
+		* \returns One of the next result codes:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+		* - #MA_NOTIFICATION_RES_INVALID_PROPERTY_NAME if the property name is not valid.
+		* - #MA_NOTIFICATION_RES_INVALID_PROPERTY_VALUE if the property value is not valid.
+		*/
+		int maNotificationLocalSetProperty(in MAHandle notificationHandle, in MAString property, in MAString value);
+
+		/**
+		* \brief Retrieves a specified property from the given notification object.
+		*
+		* \param notificationHandle Handle to the notification object.
+		* \param property A string representing for which property to get the value.
+		* \param value A buffer that will hold the value of the property, represented as a string.
+		* \param bufSize Size of the buffer.
+		*
+		* \returns One of the next result codes:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+		* - #MA_NOTIFICATION_RES_INVALID_PROPERTY_NAME if the property name is not valid.
+		* - #MA_NOTIFICATION_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
+		*/
+		int maNotificationLocalGetProperty(in MAHandle notificationHandle, in MAString property,
+								   out MAString value range("bufSize"), in int bufSize);
+
+		/**
+		* \brief Schedules a local notification for delivery at its encapsulated date and time.
+		*
+		* \param notificationHandle Handle to a local notification object.
+		*
+		* \returns One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+		*/
+		int maNotificationLocalSchedule(in MAHandle notificationHandle);
+
+		/**
+		* \brief Cancels the delivery of the specified scheduled local notification.
+		* Calling this method also programmatically dismisses the notification if
+		* it is currently displaying an alert.
+		*
+		* \param bannerHandle Handle to a local notification object.
+		*
+		* \returns One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+		*/
+		int maNotificationLocalUnschedule(in MAHandle notificationHandle);
+
+		/**
+		* \brief Registers the current application for receiving push notifications.
+		* Note that on Android you might want to store the registrationID that you receive,
+		* and call this again only if it expires at some point.
+		* On Android: if the registration is succesfful, the application receives a registration ID.
+		* The application should store this ID for later use. Note that Google may periodically refresh
+		* the registration ID, so you should design your application with the understanding that this
+		* syscall  may be called multiple times.
+		* \param pushNotificationTypes A bit mask specifying the types of notifications
+		* the application accepts.
+		* See \link #MA_NOTIFICATION_PUSH_TYPE_BADGE MA_NOTIFICATION_PUSH_TYPE_ \endlink
+		* for valid bit-mask values.
+		* On Android platform this param is ignored.
+		* \param accountID Is the ID of the account authorized to send messages to the application,
+		* typically the email address of an account set up by the application's developer.
+		* On iOS platform this param is ignored.
+		*
+		* \returns One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_ALREADY_REGISTERED if the application is already registered for
+		* receiving push notifications.
+		*/
+		int maNotificationPushRegister(in MAHandle pushNotificationTypes, in MAString accountID);
+
+		/**
+		* \brief Unregister application for push notifications.
+		*
+		* \returns One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_NOT_REGISTERED if the application was not registered for receiving
+		* push notification.
+		*/
+		int maNotificationPushUnregister();
+
+		/**
+		* \brief Gets the latest push notification registration response.
+		* \param buffer The registrationID if the registration was successfull, or the error messsage otherwise.
+		* \param bufSize Size of the buffer.
+		* \response  One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if the application registered successfully.
+		* - #MA_NOTIFICATION_RES_REGISTRATION_NOT_CALLED if maNotificationPushRegister was not called.
+		* - MA_NOTIFICATION_RES_REGISTRATION_MESSAGE_BUF_TOO_SMALL if the buffer is too small.
+		* - MA_NOTIFICATION_RES_ERROR if registration has failed.
+		*/
+		int maNotificationPushGetRegistration(out MAString registrationMesssage range("registrationMessageSize"),
+											 in int registrationMessageSize);
+
+		/**
+		* \brief Fills pushNotificationData struct with the values for a given push notification.
+		* Note: Call maNotificationPushDestroy() in order to destroy the push notification object.
+		*
+		* \param pushNotificationHandle Handle to a given push notification.
+		* \param pushNotificationData A struct that will contain the values for a given push notification.
+		*
+		* \return One of the next contants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_INVALID_HANDLE if the pushNotificationHandle is invalid.
+		* - #MA_NOTIFICATION_RES_INVALID_STRING_BUFFER_SIZE if at least one of the buffers from
+		* pushNotificationData are too small.
+		*/
+		int maNotificationPushGetData(in MAHandle pushNotificationHandle,
+									  out MAPushNotificationData pushNotificationData);
+
+		/**
+		* \brief Destroy a push notification object.
+		*
+		* \param notificationHandle Handle to a push notification object.
+		*
+		* \returns One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+		*/
+		int maNotificationPushDestroy(in MAHandle notificationHandle);
+
+		/**
+		* \brief Set the number currently set as the badge of the application icon in Springboard.
+		* Platform: iOS only.
+		*
+		*\param applicationIconBadgeNumber Set to zero to hide the badge number. The default is zero.
+		* If this value is negative the syscall will do nothing.
+		*/
+		void maNotificationSetIconBadge(in int applicationIconBadgeNumber);
+
+		/**
+		* \brief Get the number currently set as the badge of the application icon in Springboard.
+		* Platform: iOS only.
+		*
+		*\return The number displayed as the badge of the application.
+		*/
+		int maNotificationGetIconBadge();
+
+		/**
+		* \brief Set the ticker text in the notification status bar for incoming push notifications.
+		* This call does not alter already received notifications.
+		* Platform: Android only.
+		*
+		* \param tickerText The text that flows by in the status bar when the notification first activates.
+		* \return One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_ERROR.
+		*/
+		int maNotificationPushSetTickerText(in MAString tickerText);
+
+		/**
+		* \brief Set the  message title in the notification area for incoming push notifications.
+		* This call does not alter already received notifications.
+		* Platform: Android only.
+		*
+		* \param messageTitle The title that goes in the expanded entry of the notification.
+		* \return One of the next constants:
+		* - #MA_NOTIFICATION_RES_OK if no error occurred.
+		* - #MA_NOTIFICATION_RES_ERROR.
+		*/
+		int maNotificationPushSetMessageTitle(in MAString messageTitle);
+	}//End of Notification Functions
+} // End of Notification API
 
 }
 	constset int IOCTL_ {

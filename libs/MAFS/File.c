@@ -26,6 +26,12 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include <string.h>
 #endif
 
+// Magic numbers used in the Bubdle file header.
+// The version 2 Bundle format has an Adler32 checksum
+// in the file header.
+#define MAGIC1 0x12345678 // Bundle version 1 (has no checksum)
+#define MAGIC2 0x22345678 // Bundle version 2 (has Adler32 checksum)
+
 // broken header files in linux/native
 int sprintf(char *buf, const char *fmt, ...);
 
@@ -97,6 +103,7 @@ typedef struct {
 	int magic;
 	int startOfVolumes;
 	int startOfData;
+	int checksum;
 } BundleHeader;
 
 static MAHandle sCurrentFileSystem = 0;
@@ -262,24 +269,45 @@ static void readVolumeEntriesRecursively(MAHandle fileSystem, int *offset, Volum
 	}
 }
 
-static void buildDirectoryTree(MAHandle fileSystem) {
-	int offset;
-
+/**
+* Read the header into global variable sHeader.
+* Also set endianess.
+*/
+static void readHeader(MAHandle fileSystem)
+{
 	maReadData(fileSystem, &sHeader, 0, sizeof(BundleHeader));
 
 	LOG("0x%08x", sHeader.magic);
-	if(sHeader.magic != 0x12345678) {
-		// wrong endian, needs flipping;
+	if (sHeader.magic != MAGIC1 && sHeader.magic != MAGIC2)
+	{
+		// Wrong endian, needs flipping.
 		sWrongEndian = 1;
 		LOG("endian flip!");
-	} else {
+	}
+	else
+	{
 		sWrongEndian = 0;
 	}
 
 	FLIP_TO_ENDIAN_INT(sHeader.startOfVolumes);
 	FLIP_TO_ENDIAN_INT(sHeader.startOfData);
-	offset = sHeader.startOfVolumes;
+	FLIP_TO_ENDIAN_INT(sHeader.magic);
+	// We won't flip the checksum, no need for that,
+	// and it would break the old file format.
 
+	if (sHeader.magic != MAGIC2)
+	{
+		maPanic(0, "sHeader.magic != MAGIC2");
+	}
+}
+
+static void buildDirectoryTree(MAHandle fileSystem) {
+	int offset;
+
+	// Read the header into sHeader.
+	readHeader(fileSystem);
+
+	offset = sHeader.startOfVolumes;
 	sRoot = (VolumeEntry*)malloc(sizeof(VolumeEntry));
 	readVolumeEntriesRecursively(fileSystem, &offset, sRoot);
 
@@ -298,6 +326,20 @@ void setCurrentFileSystem(MAHandle fileSystem, int caseSensitive) {
 	buildDirectoryTree(fileSystem);
 	sCurrentFileSystem = fileSystem;
 	sCaseSensitive = caseSensitive;
+}
+
+int MAFS_getFileSystemChecksum(MAHandle fileSystem)
+{
+	readHeader(fileSystem);
+
+	if (MAGIC2 == sHeader.magic)
+	{
+		return sHeader.checksum;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 /**
@@ -432,7 +474,7 @@ static int extractRecursively(VolumeEntry* vol, const char* basePath, int isRoot
 *
 * \return 1 on success, -1 on error.
 */
-int extractCurrentFileSystem(const char* destPath)
+int MAFS_extractCurrentFileSystem(const char* destPath)
 {
 	if (NULL == sRoot) { return -1; }
 	if (NULL == destPath) { return -1; }
@@ -668,13 +710,13 @@ size_t MA_fread ( void * ptr, size_t size, size_t count, MA_FILE * stream) {
 	LOG("fread(%x, %d, %d, %x)", (int)ptr, (int)size, (int)count, (int)stream);
 	if(stream->type==TYPE_WRITEONLY || vol->type!=VOL_TYPE_FILE) {
 		stream->resultFlags|=RES_ERR;
-		return EOF;
+		return 0;
 	}
 
 	bytesToRead = size*count;
 	if(bytesToRead<=0) {
 		stream->resultFlags|=RES_ERR;
-		return EOF;
+		return 0;
 	}
 
 	if(stream->filePtr+bytesToRead > vol->dataOffset+vol->dataLength) {
@@ -688,7 +730,7 @@ size_t MA_fread ( void * ptr, size_t size, size_t count, MA_FILE * stream) {
 		stream->resultFlags|=RES_EOF;
 		if(bytesToRead<=0) {
 			stream->resultFlags|=RES_ERR;
-			return EOF;
+			return 0;
 		}
 	}
 
@@ -707,16 +749,17 @@ size_t MA_fwrite ( const void * ptr, size_t size, size_t count, MA_FILE * stream
 	bytesToWrite = size*count;
 	if(bytesToWrite <= 0) {
 		stream->resultFlags|=RES_ERR;
-		return EOF;
+		return 0;
 	}
 	if(stream->filePtr+bytesToWrite > vol->dataOffset+stream->bufferSize) {
 		byte *newBuffer;
 		int lastBufferSize = stream->bufferSize;
+		if(!stream->bufferSize) stream->bufferSize++;
 		while(stream->filePtr+bytesToWrite >  vol->dataOffset+stream->bufferSize) stream->bufferSize<<=1;
 		newBuffer = (byte*)malloc(stream->bufferSize);
 		if(!newBuffer) {
 			stream->resultFlags|=RES_ERR;
-			return EOF;
+			return 0;
 		}
 		memcpy(newBuffer, stream->buffer, lastBufferSize);
 		free(stream->buffer);

@@ -60,8 +60,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
@@ -74,6 +72,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -84,6 +83,7 @@ import android.graphics.Path;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.opengl.GLUtils;
 import android.os.Build;
@@ -92,10 +92,13 @@ import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
+import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
+import android.provider.Settings.Secure;
+import android.net.ConnectivityManager;
 
 import com.mosync.internal.android.MoSyncFont.MoSyncFontHandle;
 import com.mosync.internal.android.nfc.MoSyncNFC;
@@ -158,6 +161,9 @@ public class MoSyncThread extends Thread
 	MoSyncSensor mMoSyncSensor;
 	MoSyncPIM mMoSyncPIM;
 	MoSyncNFC mMoSyncNFC;
+	MoSyncAds mMoSyncAds;
+	MoSyncNotifications mMoSyncNotifications;
+	MoSyncDB mMoSyncDB;
 
 	static final String PROGRAM_FILE = "program.mp3";
 	static final String RESOURCE_FILE = "resources.mp3";
@@ -182,12 +188,6 @@ public class MoSyncThread extends Thread
 	 * used for maPanic.
 	 */
 	private boolean mHasDied;
-
-	/**
-	 * Boolean used to determine whether to interrupt the trehad or not,
-	 * true if this thread is sleeping in maWait.
-	 */
-	private final AtomicBoolean mIsSleepingInMaWait = new AtomicBoolean(false);
 
 	/**
 	 * a handle used for full screen camera preview
@@ -276,6 +276,12 @@ public class MoSyncThread extends Thread
 	private final Rect mMaDrawImageRegionTempSourceRect = new Rect();
 	private final Rect mMaDrawImageRegionTempDestRect = new Rect();
 
+
+	/**
+	 * An Instance of Connectivity Manager used for detecting connection type
+	 */
+	private ConnectivityManager mConnectivityManager;
+
 	int mMaxStoreId = 0;
 
 	public boolean mIsUpdatingScreen = false;
@@ -294,7 +300,9 @@ public class MoSyncThread extends Thread
 	{
 		mContext = (MoSync) context;
 
-		// TODO: Clean this up! The static reference should be in this class.
+		// TODO: Clean this up! The static reference should be in one place.
+		// Now the instance of MoSyncThread is passed to many classes and
+		// also accessed via the static variables. We use use one consistent way.
 		EventQueue.sMoSyncThread = this;
 		sMoSyncThread = this;
 
@@ -308,8 +316,17 @@ public class MoSyncThread extends Thread
 		mMoSyncHomeScreen = new MoSyncHomeScreen(this);
 		mMoSyncNativeUI = new MoSyncNativeUI(this, mImageResources);
 		mMoSyncFile = new MoSyncFile(this);
-		mMoSyncFont = new MoSyncFont(this);
 
+		try
+		{
+			mMoSyncFont = new MoSyncFont(this);
+		}
+		catch (Throwable e)
+		{
+			mMoSyncFont = null;
+		}
+
+		cameraScreen = 0;
 		//Do not access camera if it is not available
 		try
 		{
@@ -344,16 +361,30 @@ public class MoSyncThread extends Thread
 			mMoSyncSMS = null;
 		}
 
-		nativeInitRuntime();
+		//nativeInitRuntime();
 
 		mMoSyncSensor = new MoSyncSensor(this);
 
 		mMoSyncPIM = new MoSyncPIM(this);
 
-		mMoSyncNFC = MoSyncNFCService.getDefault();
-		if (mMoSyncNFC != null) {
-			mMoSyncNFC.setMoSyncThread(this);
+		try
+		{
+			mMoSyncNFC = MoSyncNFCService.getDefault();
+			if (mMoSyncNFC != null)
+			{
+				mMoSyncNFC.setMoSyncThread(this);
+			}
 		}
+		catch (Throwable t)
+		{
+			mMoSyncNFC = null;
+		}
+
+		mMoSyncAds = new MoSyncAds(this);
+		mMoSyncNotifications = new MoSyncNotifications(this);
+		mMoSyncDB = new MoSyncDB();
+
+		mConnectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
 		nativeInitRuntime();
 	}
@@ -370,7 +401,7 @@ public class MoSyncThread extends Thread
 
 	public void onPause()
 	{
-		mMoSyncSensor.onResume();
+		mMoSyncSensor.onPause();
 	}
 
 	/**
@@ -683,7 +714,7 @@ public class MoSyncThread extends Thread
 	 * @return ByteBuffer with the data.
 	 * @throws Exception
 	 */
-	public ByteBuffer readInputStream(InputStream is) throws Exception
+	public synchronized ByteBuffer readInputStream(InputStream is) throws Exception
 	{
 		ReadableByteChannel byteChannel = Channels.newChannel(is);
 		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(CHUNK_READ_SIZE);
@@ -704,25 +735,40 @@ public class MoSyncThread extends Thread
 	}
 
 	/**
-	 * Create a data object by (indirectly) calling maCreatePlaceholder,
-	 * and maCreateData, then copy the data given in the data parameter
-	 * to the new buffer.
+	 * Create a data object by (indirectly) calling maCreatePlaceholder
+	 * (if no placeholder is supplied), and maCreateData, then copy the
+	 * data given in the data parameter to the new buffer.
+	 * @param placeholder The placeholder that should refer to the data,
+	 * if this parameter is zero, a new placeholder is created.
 	 * @param data The data to fill the new data object with.
 	 * @return The handle to the data if successful, <0 on error.
+	 * If a placeholder is supplied, that value is returned on success.
+	 * TODO: This method needs improved error checking.
 	 */
-	public int createDataObject(byte[] data)
+	public int createDataObject(int placeholder, byte[] data)
 	{
-		// Create handle.
-		int dataHandle = nativeCreatePlaceholder();
+		// The handle to the data.
+		int dataHandle = placeholder;
 
-		// Allocate data.
+		// Create handle if no placeholder is given.
+		if (0 == placeholder)
+		{
+			// This calls maCreatePlaceholder.
+			// TODO: Check return value for error.
+			dataHandle = nativeCreatePlaceholder();
+		}
+
+		// Allocate data. This calls maCreateData and will create a
+		// new data object.
 		int result = nativeCreateBinaryResource(dataHandle, data.length);
 		if (result < 0)
 		{
 			return result;
 		}
 
-		// Get byte buffer for the handle.
+		// Get byte buffer for the handle and copy data
+		// to the data object.
+		// TODO: Handle error if this fails.
 		ByteBuffer buf = getBinaryResource(dataHandle);
 		if (null != buf)
 		{
@@ -750,7 +796,7 @@ public class MoSyncThread extends Thread
 	 *
 	 * @return	The created Bitmap, null if it failed
 	 */
-	Bitmap decodeImageFromData(final byte[] data, final BitmapFactory.Options options)
+	synchronized Bitmap decodeImageFromData(final byte[] data, final BitmapFactory.Options options)
 	{
 		try
 		{
@@ -799,7 +845,7 @@ public class MoSyncThread extends Thread
 	 *
 	 * @return	The created Bitmap, null if it failed
 	 */
-	Bitmap createBitmap(final int width, final int height)
+	synchronized Bitmap createBitmap(final int width, final int height)
 	{
 		try
 		{
@@ -832,7 +878,7 @@ public class MoSyncThread extends Thread
 	 *
 	 * @return	The created Bitmap, null if it failed
 	 */
-	Bitmap createBitmapFromData(final int width, final int height, final int[] pixels)
+	synchronized Bitmap createBitmapFromData(final int width, final int height, final int[] pixels)
 	{
 		try
 		{
@@ -872,18 +918,8 @@ public class MoSyncThread extends Thread
 		// Add event to queue.
 		nativePostEvent(event);
 
-		// Only interrupt if we are sleeping in maWait.
-		if (mIsSleepingInMaWait.get())
-		{
-			// Wake up this thread to make it process events.
-			interrupt();
-		}
-		else
-		{
-			//Log.i(
-			//	"@@@ MoSyncThread.postEvent",
-			//	"Did not call interrupt, not in maWait (this is good!)");
-		}
+		// Wake up thread if sleeping.
+		interrupt();
 	}
 
 	/**
@@ -1230,6 +1266,10 @@ public class MoSyncThread extends Thread
 	*/
 	int maFontLoadDefault(int type, int style, int size)
 	{
+		if(null == mMoSyncFont)
+		{
+			return -1;
+		}
 		SYSLOG("maFontCreateDefault");
 
 		return mMoSyncFont.maFontLoadDefault(type, style, size);
@@ -1243,6 +1283,11 @@ public class MoSyncThread extends Thread
 	*/
 	int maFontSetCurrent(int fontHandle)
 	{
+		if(null == mMoSyncFont)
+		{
+			return -1;
+		}
+
 		SYSLOG("maFontSetCurrent");
 
 		return mMoSyncFont.maFontSetCurrent(fontHandle);
@@ -1255,6 +1300,10 @@ public class MoSyncThread extends Thread
 	*/
 	int maFontGetCount()
 	{
+		if(null == mMoSyncFont)
+		{
+			return -1;
+		}
 		SYSLOG("maFontGetCount");
 
 		return mMoSyncFont.maFontGetCount();
@@ -1274,6 +1323,10 @@ public class MoSyncThread extends Thread
 			final int memBuffer,
 			final int memBufferSize)
 	{
+		if(null == mMoSyncFont)
+		{
+			return -1;
+		}
 		SYSLOG("maFontGetName");
 
 		return mMoSyncFont.maFontGetName(index, memBuffer, memBufferSize);
@@ -1287,6 +1340,10 @@ public class MoSyncThread extends Thread
 	*/
 	int maFontLoadWithName(final String postScriptName, int size)
 	{
+		if(null == mMoSyncFont)
+		{
+			return -1;
+		}
 		SYSLOG("maFontLoadWithName");
 
 		return mMoSyncFont.maFontLoadWithName(postScriptName, size);
@@ -1299,6 +1356,10 @@ public class MoSyncThread extends Thread
 	*/
 	int maFontDelete(int fontHandle)
 	{
+		if(null == mMoSyncFont)
+		{
+			return -1;
+		}
 		SYSLOG("maFontDelete");
 
 		return mMoSyncFont.maFontDelete(fontHandle);
@@ -1972,7 +2033,7 @@ public class MoSyncThread extends Thread
 	/**
 	 * maOpenStore
 	 */
-	int maOpenStore(String name, int flags)
+	synchronized int maOpenStore(String name, int flags)
 	{
 		SYSLOG("maOpenStore");
 
@@ -2018,7 +2079,7 @@ public class MoSyncThread extends Thread
 	/**
 	 * maWriteStore
 	 */
-	int maWriteStore(int store, int data)
+	synchronized int maWriteStore(int store, int data)
 	{
 		SYSLOG("maWriteStore");
 		try
@@ -2078,7 +2139,7 @@ public class MoSyncThread extends Thread
 	 * _maReadStore
 	 * @return RES_OUT_OF_MEMORY on error.
 	 */
-	int _maReadStore(int store, int resourceIndex)
+	synchronized int _maReadStore(int store, int resourceIndex)
 	{
 		SYSLOG("_maReadStore");
 
@@ -2183,8 +2244,6 @@ public class MoSyncThread extends Thread
 
 		try
 		{
-			mIsSleepingInMaWait.set(true);
-
 	 		if (timeout<=0)
 			{
 				Thread.sleep(Long.MAX_VALUE);
@@ -2196,15 +2255,13 @@ public class MoSyncThread extends Thread
 		}
 		catch (InterruptedException ie)
 		{
-			SYSLOG("Sleeping thread interrupted!");
+			SYSLOG("Sleeping thread interrupted (this is normal behaviour)");
 		}
 		// TODO: This exception is never thrown! Remove it.
 		catch (Exception e)
 		{
 			logError("Thread sleep failed : " + e.toString(), e);
 		}
-
-		mIsSleepingInMaWait.set(false);
 
 		SYSLOG("maWait returned");
 	}
@@ -2406,6 +2463,23 @@ public class MoSyncThread extends Thread
 		{
 			property = Build.FINGERPRINT;
 		}
+		else if(key.equals("mosync.device.name"))
+		{
+			property = Build.DEVICE;
+		}
+		else if(key.equals("mosync.device.UUID"))
+		{
+			property = Secure.getString( mContext.getContentResolver(),
+					Secure.ANDROID_ID);
+		}
+		else if(key.equals("mosync.device.OS"))
+		{
+			property = "Android";
+		}
+		else if(key.equals("mosync.device.OS.version"))
+		{
+			property = Build.VERSION.RELEASE;
+		}
 		else if (key.equals("mosync.path.local"))
 		{
 			String path = getActivity().getFilesDir().getAbsolutePath() + "/";
@@ -2422,6 +2496,12 @@ public class MoSyncThread extends Thread
 				getActivity().getFilesDir().getAbsolutePath() + "/";
 			//Log.i("@@@ MoSync", "Property mosync.path.local.url: " + url);
 			property = url;
+		}
+		else if (key.equals("mosync.network.type"))
+		{
+			//get the connection that we are using right now
+			NetworkInfo info = mConnectivityManager.getActiveNetworkInfo();
+			property = getNetworkNameFromInfo(info);
 		}
 
 		if (null == property) { return -2; }
@@ -2451,6 +2531,39 @@ public class MoSyncThread extends Thread
 		slicedBuffer.put((byte)0);
 
 		return property.length() + 1;
+	}
+
+	/**
+	 * converts the network information into a single string indicating
+	 * the type of the network.
+	 *
+	 * @param info NetowrkInformation obtained from a ConnectivityManager instance
+	 * @return a String indicating the type of the connection, for Mobile networks
+	 * it returns the exact type of mobile network, e.g. GSM, GPRS, or HSDPA...
+	 * The result might contain the full name and version of the mobiel network type
+	 */
+	private String getNetworkNameFromInfo(NetworkInfo info)
+	{
+	       if (info != null) {
+	            String type = info.getTypeName();
+	            if(type == null)
+	            {
+					return "unknown";
+	            }
+	            else if (type.toLowerCase().equals("mobile"))
+	            {
+					//return a generic default
+					return "mobile";
+	            }
+	            else
+	            {
+					return "wifi";
+	            }
+	        }
+	        else
+	        {
+				return "none";
+	        }
 	}
 
 	/**
@@ -2543,9 +2656,16 @@ public class MoSyncThread extends Thread
 	}
 
 	/**
+	 * TODO: Consider renaming this method to for example setBinaryResource.
+	 * No loading is going on here. And rewrite the comment.
+	 *
 	 * Load and store a binary resource. Since Android differs a lot from
 	 * the other runtimes this is necessary. There isn't a duplicate stored
 	 * on the JNI side.
+	 *
+	 * @param resourceIndex The handle/placeholder id.
+	 * @param buffer Data referenced by the handle with id resourceIndex.
+	 * @return true on success, false on error.
 	 */
 	public boolean loadBinary(int resourceIndex, ByteBuffer buffer)
 	{
@@ -2808,8 +2928,46 @@ public class MoSyncThread extends Thread
 		return mMoSyncNativeUI.maOptionsBox(title, destructiveButtonTitle, cancelButtonTitle, buffPointer, buffSize);
 	}
 
+	int maAdsBannerCreate(final int bannerSize, final String publisherID)
+	{
+		return mMoSyncAds.maAdsBannerCreate(bannerSize, publisherID);
+	}
+
+	int maAdsAddBannerToLayout(int bannerHandle, int layoutHandle)
+	{
+		return mMoSyncAds.maAdsAddBannerToLayout(bannerHandle, layoutHandle, mMoSyncNativeUI.getWidget(layoutHandle));
+	}
+
+	int maAdsRemoveBannerFromLayout(int bannerHandle, int layoutHandle)
+	{
+		return mMoSyncAds.maAdsRemoveBannerFromLayout(bannerHandle, layoutHandle, mMoSyncNativeUI.getWidget(layoutHandle));
+	}
+
+	int maAdsBannerDestroy(int bannerHandle)
+	{
+		return mMoSyncAds.maAdsBannerDestroy(bannerHandle);
+	}
+
+	int maAdsBannerSetProperty(
+		final int adHandle,
+		final String key,
+		final String value)
+	{
+		return mMoSyncAds.maAdsBannerSetProperty(adHandle, key, value);
+	}
+
+	int maAdsBannerGetProperty(
+		final int adHandle,
+		final String key,
+		final int memBuffer,
+		final int memBufferSize)
+	{
+		return mMoSyncAds.maAdsBannerGetProperty(adHandle, key, memBuffer, memBufferSize);
+	}
+
 	/**
 	 * Display a notification.
+	 * @deprecated use maNotificationCreate() instead.
 	 * @param type
 	 * @param id
 	 * @param title
@@ -2841,6 +2999,7 @@ public class MoSyncThread extends Thread
 	 * Depending of whether this is a NOTIFICATION_TYPE_APPLICATION_LAUNCHER
 	 * or a regular notification we either stop the service or remove the
 	 * notification.
+	 * @deprecated use maNotificationDestroy() instead.
 	 * @param notificationId
 	 * @return
 	 */
@@ -2864,6 +3023,171 @@ public class MoSyncThread extends Thread
 		// TODO: Implement case for regular notifications.
 
 		return -1;
+	}
+
+	/**
+	 * Create a local notification.
+	 * @return a handle to a new local notification object, or
+	 * MA_NOTIFICATION_RES_UNSUPPORTED if the notifications are not supported on current system..
+	 */
+	int maNotificationLocalCreate()
+	{
+		//Log.i("MoSync", "maNotificationLocalCreate");
+		return mMoSyncNotifications.maNotificationLocalCreate(mContext);
+	}
+
+	/**
+	 * Destroys a local notification object, and clears it from the notifications list.
+	 * @param handle Handle to a local notification object.
+	 * @return MA_NOTIFICATION_RES_OK, or MA_NOTIFICATION_RES_INVALID_HANDLE.
+	 */
+	int maNotificationLocalDestroy(int handle)
+	{
+		return mMoSyncNotifications.maNotificationLocalDestroy(handle);
+	}
+
+	/**
+	 * Set a specific property on a notification.
+	 * @param handle Handle to a local notification object.
+	 * @param propertyName
+	 * @param propertyValue
+	 * @return
+	 */
+	int maNotificationLocalSetProperty(int handle, String propertyName, String propertyValue)
+	{
+		return mMoSyncNotifications.maNotificationLocalSetProperty(handle, propertyName, propertyValue);
+	}
+
+	/**
+	 * Get a specific property of a notification.
+	 * @param handle Handle to a local notification object.
+	 * @param propertyName
+	 * @param propertyValue
+	 * @return
+	 */
+	int maNotificationLocalGetProperty(int handle, String propertyName, int memBuffer, int memBufferSize)
+	{
+		return mMoSyncNotifications.maNotificationLocalGetProperty(handle, propertyName, memBuffer, memBufferSize);
+	}
+
+	/**
+	 * Schedules a local notification for delivery at its encapsulated date and time.
+	 * @param handle Handle to a local notification object.
+	 * @return MA_NOTIFICATION_RES_OK if no error occurred,
+	 * MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid,
+	 * MA_NOTIFICATION_RES_ALREADY_SCHEDULED if it was already scheduled.
+	 */
+	int maNotificationLocalSchedule(int handle)
+	{
+		return mMoSyncNotifications.maNotificationLocalSchedule(handle, mContext.getApplicationContext());
+	}
+
+	/**
+	 * Cancels the delivery of the specified scheduled local notification.
+	 * @param handle Handle to a local notification object.
+	 * @return MA_NOTIFICATION_RES_OK if no error occurred,
+	 * MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+	 * MA_NOTIFICATION_RES_CANNOT_UNSCHEDULE if it wasn't scheduled before.
+	 */
+	int maNotificationLocalUnschedule(int handle)
+	{
+		return mMoSyncNotifications.maNotificationLocalUnschedule(handle);
+	}
+
+	/**
+	 * Registers the current application for receiving push notifications for C2DM server.
+	 * @param pushNotificationTypes ignored on Android.
+	 * @param accountID Is the ID of the account authorized to send messages to the application,
+	 * typically the email address of an account set up by the application's developer.
+	 * @return MA_NOTIFICATION_RES_OK if no error occurred.
+     * MA_NOTIFICATION_RES_ALREADY_REGISTERED if the application is already registered for receiving push notifications.
+	 */
+	int maNotificationPushRegister(int pushNotificationTypes, String accountID)
+	{
+		Log.e("@@MoSync", "maNotificationPushRegister");
+
+		// Ignore the first param on Android.
+		return mMoSyncNotifications.maNotificationPushRegister(accountID);
+	}
+
+	/**
+	 * Unregister application for push notifications.
+	 * @return One of the next constants:
+	 * - MA_NOTIFICATION_RES_OK if no error occurred.
+	 * - MA_NOTIFICATION_NOT_REGISTERED if the application was not registered for receiving
+	 * push notification.
+	 */
+	int maNotificationPushUnregister()
+	{
+		return mMoSyncNotifications.maNotificationPushUnregister();
+	}
+
+	/**
+	 * Gets the latest registration response.
+	 * \param registrationMesssage The registrationID if the registration was successfull,
+	 * or the error messsage otherwise.
+	 * \return  One of the next constants:
+	 * - MA_NOTIFICATION_RES_OK if the application registered successfully.
+	 * - MA_NOTIFICATION_RES_REGISTRATION_SERVICE_NOT_AVAILABLE
+	 * - MA_NOTIFICATION_RES_REGISTRATION_ACCOUNT_MISSING
+	 * - MA_NOTIFICATION_RES_REGISTRATION_AUTHENTICATION_FAILED
+	 * - MA_NOTIFICATION_RES_REGISTRATION_TOO_MANY_REGISTRATIONS
+	 * - MA_NOTIFICATION_RES_REGISTRATION_INVALID_SENDER
+	 * - MA_NOTIFICATION_RES_REGISTRATION_PHONE_REGISTRATION_ERROR
+	 */
+	int maNotificationPushGetRegistration(int buf, int bufSize)
+	{
+		return mMoSyncNotifications.maNotificationPushGetRegistration(buf, bufSize);
+	}
+
+	/**
+	 * Get info about for a given push notification.
+	 * @param handle The push notification handle.
+	 * @param type By default is 1.
+	 * @param allertMessage Address to buffer to receive the data.
+	 * The result is NOT zero terminated.
+	 * @param allertMessageSize Max size of the buffer.
+	 * @return  One of the next constants:
+	 *  - MA_NOTIFICATION_RES_OK
+	 *  - MA_NOTIFICATION_RES_INVALID_HANDLE
+	 *  - MA_NOTIFICATION_RES_INVALID_STRING_BUFFER_SIZE
+	 */
+	int maNotificationPushGetData(int handle, int allertMessage,
+			int allertMessageSize)
+	{
+		return mMoSyncNotifications.maNotificationPushGetData(handle, allertMessage, allertMessageSize);
+	}
+
+	/**
+	 * Destroy a push notification object.
+	 * @param handle Handle to a push notification object.
+	 * @return One of the next constants:
+	 * - #MA_NOTIFICATION_RES_OK if no error occurred.
+	 * - #MA_NOTIFICATION_RES_INVALID_HANDLE if the notificationHandle is invalid.
+	 */
+	int maNotificationPushDestroy(int handle)
+	{
+		return mMoSyncNotifications.maNotificationPushDestroy(handle);
+	}
+
+	/**
+	 * Set the ticker text in the notification status bar for incoming push notifications.
+	 * @param tickerText The text that flows by in the status bar when the notification first activates.
+	 * @return MA_NOTIFICATION_RES_OK, MA_NOTIFICATION_RES_ERROR.
+	 */
+	int maNotificationPushSetTickerText(String tickerText)
+	{
+		return mMoSyncNotifications.maNotificationPushSetTickerText(tickerText);
+	}
+
+	/**
+	 * Set the  message title in the notification area for incoming push notifications.
+	 * @param title The title that goes in the expanded entry of the notification.
+	 * @return MA_NOTIFICATION_RES_OK, MA_NOTIFICATION_RES_ERROR.
+	 */
+	int maNotificationPushSetMessageTitle(String title)
+	{
+		return mMoSyncNotifications.maNotificationPushSetMessageTitle(title);
 	}
 
 	/**
@@ -3374,6 +3698,7 @@ public class MoSyncThread extends Thread
 		if(cameraScreen != 0)
 		{
 			maWidgetDestroy(cameraScreen);
+			mMoSyncCameraController.removePreview();
 			maWidgetScreenShow(IX_WIDGET.MAW_CONSTANT_MOSYNC_SCREEN_HANDLE);
 			cameraScreen = 0;
 		}
@@ -4042,6 +4367,10 @@ public class MoSyncThread extends Thread
 		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCTransceive(tagHandle, src, len, dst, dstLen, dstPtr);
 	}
 
+	public int maNFCGetSize(int tagHandle) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetSize(tagHandle);
+	}
+
 	void maNFCConnectTag(int tagHandle) {
 		if (mMoSyncNFC != null) {
 			mMoSyncNFC.maNFCConnectTag(tagHandle);
@@ -4078,68 +4407,68 @@ public class MoSyncThread extends Thread
 		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetNDEFRecordCount(ndefHandle);
 	}
 
-	int maNFCGetId(int ndefRecordHandle, int dst, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetId(ndefRecordHandle, dst, len);
+	int maNFCGetNDEFId(int ndefRecordHandle, int dst, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetNDEFId(ndefRecordHandle, dst, len);
 	}
 
-	int maNFCGetPayload(int ndefRecordHandle, int dst, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetPayload(ndefRecordHandle, dst, len);
+	int maNFCGetNDEFPayload(int ndefRecordHandle, int dst, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetNDEFPayload(ndefRecordHandle, dst, len);
 	}
 
-	int maNFCGetTnf(int ndefRecordHandle) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetTnf(ndefRecordHandle);
+	int maNFCGetNDEFTnf(int ndefRecordHandle) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetNDEFTnf(ndefRecordHandle);
 	}
 
-	int maNFCGetType(int ndefRecordHandle, int dst, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetType(ndefRecordHandle, dst, len);
+	int maNFCGetNDEFType(int ndefRecordHandle, int dst, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetNDEFType(ndefRecordHandle, dst, len);
 	}
 
-	int maNFCSetId(int ndefRecordHandle, int src, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetId(ndefRecordHandle, src, len);
+	int maNFCSetNDEFId(int ndefRecordHandle, int src, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetNDEFId(ndefRecordHandle, src, len);
 	}
 
-	int maNFCSetPayload(int ndefRecordHandle, int src, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetPayload(ndefRecordHandle, src, len);
+	int maNFCSetNDEFPayload(int ndefRecordHandle, int src, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetNDEFPayload(ndefRecordHandle, src, len);
 	}
 
-	int maNFCSetTnf(int ndefRecordHandle, int tnf) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetTnf(ndefRecordHandle, tnf);
+	int maNFCSetNDEFTnf(int ndefRecordHandle, int tnf) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetNDEFTnf(ndefRecordHandle, tnf);
 	}
 
-	int maNFCSetType(int ndefRecordHandle, int src, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetType(ndefRecordHandle, src, len);
+	int maNFCSetNDEFType(int ndefRecordHandle, int src, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSetNDEFType(ndefRecordHandle, src, len);
 	}
 
-	public int maNFCAuthenticateSector(int tagHandle, int keyType, int sectorIndex, int keySrc, int keyLen) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCAuthenticateSector(tagHandle, keyType, sectorIndex, keySrc, keyLen);
+	public int maNFCAuthenticateMifareSector(int tagHandle, int keyType, int sectorIndex, int keySrc, int keyLen) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCAuthenticateMifareSector(tagHandle, keyType, sectorIndex, keySrc, keyLen);
 	}
 
-	public int maNFCGetSectorCount(int tagHandle) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetSectorCount(tagHandle);
+	public int maNFCGetMifareSectorCount(int tagHandle) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetMifareSectorCount(tagHandle);
 	}
 
-	public int maNFCGetBlockCountInSector(int tagHandle, int sectorIndex) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetBlockCountInSector(tagHandle, sectorIndex);
+	public int maNFCGetMifareBlockCountInSector(int tagHandle, int sectorIndex) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetMifareBlockCountInSector(tagHandle, sectorIndex);
 	}
 
-	public int maNFCSectorToBlock(int tagHandle, int sectorIndex) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCSectorToBlock(tagHandle, sectorIndex);
+	public int maNFCMifareSectorToBlock(int tagHandle, int sectorIndex) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCMifareSectorToBlock(tagHandle, sectorIndex);
 	}
 
-	public int maNFCReadBlocks(int tagHandle, int block, int dst, int resultSize) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCReadBlocks(tagHandle, block, dst, resultSize);
+	public int maNFCReadMifareBlocks(int tagHandle, int block, int dst, int resultSize) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCReadMifareBlocks(tagHandle, block, dst, resultSize);
 	}
 
-	public int maNFCReadPages(int tagHandle, int firstPage, int dst, int resultSize) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCReadPages(tagHandle, firstPage, dst, resultSize);
+	public int maNFCReadMifarePages(int tagHandle, int firstPage, int dst, int resultSize) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCReadMifarePages(tagHandle, firstPage, dst, resultSize);
 	}
 
-	int maNFCWriteBlocks(int tagHandle, int firstBlock, int src, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCWriteBlocks(tagHandle, firstBlock, src, len);
+	int maNFCWriteMifareBlocks(int tagHandle, int firstBlock, int src, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCWriteMifareBlocks(tagHandle, firstBlock, src, len);
 	}
 
-	int maNFCWritePages(int tagHandle, int firstPage, int src, int len) {
-		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCWritePages(tagHandle, firstPage, src, len);
+	int maNFCWriteMifarePages(int tagHandle, int firstPage, int src, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCWriteMifarePages(tagHandle, firstPage, src, len);
 	}
 
 	int maNFCSetReadOnly(int tagHandle) {
@@ -4148,6 +4477,129 @@ public class MoSyncThread extends Thread
 
 	int maNFCIsReadOnly(int tagHandle) {
 		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCIsReadOnly(tagHandle);
+	}
+
+	int maGetCellInfo(int cellinfo)
+	{
+		// Check that the Coarse Location permission is set,
+		//  otherwise the CellID request will freeze the device
+		if(!(mContext.getPackageManager().checkPermission("android.permission.ACCESS_COARSE_LOCATION",
+				mContext.getPackageName()) == PackageManager.PERMISSION_GRANTED))
+		{
+			return -3;
+		}
+
+		TelephonyManager manager = (TelephonyManager)
+				mContext.getSystemService(Context.TELEPHONY_SERVICE);
+
+		// Only works with GSM type phone, no CDMA
+		if(manager.getPhoneType() != TelephonyManager.PHONE_TYPE_GSM)
+			return -2;
+
+		// Get the Cell information
+		GsmCellLocation gsmcell = (GsmCellLocation) manager.getCellLocation();
+
+		if(gsmcell == null)
+			return -2;
+
+		int cell = gsmcell.getCid();
+		int lac = gsmcell.getLac();
+
+		// Get the mcc and mnc strings
+		String mcc_mnc = manager.getNetworkOperator();
+		if (mcc_mnc == null)
+			return -2;
+
+		byte[] mcc = mcc_mnc.substring(0, 3).getBytes();
+		byte[] mnc = mcc_mnc.substring(3).getBytes();
+
+		// Store everything in the correct memory location
+		ByteBuffer mem = getMemorySlice(cellinfo, 64);
+		mem.put(mcc);
+		mem.put((byte)0);
+		mem.put(mnc);
+		mem.put((byte)0);
+		mem.putInt(lac);
+		mem.putInt(cell);
+
+		return 0;
+	}
+
+	// ********** Database API **********
+
+	int maDBOpen(String path)
+	{
+		return mMoSyncDB.maDBOpen(path);
+	}
+
+	int maDBClose(int databaseHandle)
+	{
+		return mMoSyncDB.maDBClose(databaseHandle);
+	}
+
+	int maDBExecSQL(int databaseHandle, String sql)
+	{
+		return mMoSyncDB.maDBExecSQL(databaseHandle, sql);
+	}
+
+	int maDBCursorDestroy(int cursorHandle)
+	{
+		return mMoSyncDB.maDBCursorDestroy(cursorHandle);
+	}
+
+	int maDBCursorNext(int cursorHandle)
+	{
+		return mMoSyncDB.maDBCursorNext(cursorHandle);
+	}
+
+	int maDBCursorGetColumnData(
+		int cursorHandle,
+		int columnIndex,
+		int placeholder)
+	{
+		return mMoSyncDB.maDBCursorGetColumnData(
+			cursorHandle,
+			columnIndex,
+			placeholder,
+			this);
+	}
+
+	int maDBCursorGetColumnText(
+		int cursorHandle,
+		int columnIndex,
+		int bufferAddress,
+		int bufferSize)
+	{
+		return mMoSyncDB.maDBCursorGetColumnText(
+			cursorHandle,
+			columnIndex,
+			bufferAddress,
+			bufferSize,
+			this);
+	}
+
+	int maDBCursorGetColumnInt(
+		int cursorHandle,
+		int columnIndex,
+		int intValueAddress)
+	{
+		return mMoSyncDB.maDBCursorGetColumnInt(
+			cursorHandle,
+			columnIndex,
+			intValueAddress,
+			this);
+	}
+
+	int maDBCursorGetColumnDouble(
+		int cursorHandle,
+		int columnIndex,
+		int doubleValueAddress)
+	{
+		return mMoSyncDB.maDBCursorGetColumnDouble(
+			cursorHandle,
+			columnIndex,
+			doubleValueAddress,
+			this);
 	}
 
 	/**

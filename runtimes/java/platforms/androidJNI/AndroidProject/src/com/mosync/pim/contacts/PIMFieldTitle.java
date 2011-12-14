@@ -67,6 +67,10 @@ public class PIMFieldTitle extends PIMFieldContacts {
 				mStates.add(State.NONE);
 			}
 		}
+
+		cursor.close();
+		cursor = null;
+
 		preProcessData();
 
 		print();

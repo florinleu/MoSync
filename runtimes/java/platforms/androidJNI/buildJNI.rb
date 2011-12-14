@@ -52,7 +52,9 @@ androidNDKPath = ARGV[0]
 androidSDKPath = ARGV[1]
 androidSDKTools = ARGV[2]
 configPath = ARGV[3]
-debugFlag = ARGV[4]
+androidVersion = ARGV[4]
+debugFlag = ARGV[5]
+
 
 if ENV['MOSYNC_SRC'] == nil
 	cd "../../../../"
@@ -72,8 +74,20 @@ cd cpath
 
 ENV['MOSYNC_JAVA_SRC'] = cpath
 
+#We need two different make files for android due to some restrictions in JNI
+
+puts "android version is: #{androidVersion}"
+if((androidVersion == "3") ||(androidVersion == "4"))
+	ENV['ANDROID_API_BELOW_7'] = "true"
+end
+
 if androidNDKPath == nil
 	puts "missing argument, android NDK path is unknown!"
+	exit 1
+end
+
+if androidVersion == nil
+	puts "missing argument, android version is unknown!"
 	exit 1
 end
 
@@ -162,6 +176,7 @@ end
 sh( "#{File.join(androidSDKTools, "/aapt")} package -f -v " +
 	"-M #{File.join(package_root,"AndroidManifest.xml")} -F resources.ap_ " +
 	"-I #{File.join(androidSDKPath, "android.jar")} " +
+	"-I #{File.join("#{package_root}libs/", "GoogleAdMobAdsSdk.jar")} " +
 	"-S #{File.join(package_root, "res")} " +
 	"-m -J #{File.join(package_root, "gen")}");
 
@@ -183,6 +198,13 @@ packages = ["gen/com/mosync/java/android/*.java",
             "src/com/mosync/pim/*.java",
             "src/com/mosync/pim/contacts/*.java",
             "src/com/mosync/pim/events/*.java",
+			"src/com/mosync/nativeui/ui/custom/*.java",
+			"gen/com/mosync/java/android/*.java",
+            "src/com/mosync/internal/android/nfc/*.java",
+            "src/com/mosync/internal/android/nfc/ops/*.java",
+	        "src/com/mosync/nativeui/ui/ads/*.java",
+			"src/com/google/android/c2dm/*.java",
+			"src/com/mosync/internal/android/notifications/*.java"
             ]
 
 # Concatenate each list element with package_root, and flatten the list to a string
@@ -191,15 +213,23 @@ java_files = packages.map { |package| File.join(package_root, package) }.join(" 
 
 
 # Compile all the java files into class files
-sh(
-	"javac -source 1.6 -target 1.6 -g -d #{class_dir} " +
-	"-classpath " +
-	"#{File.join(androidSDKPath, "android.jar")} " + java_files)
+if ENV['OS'] == "Windows_NT"
+	sh(
+		"javac -source 1.6 -target 1.6 -g -d #{class_dir} " +
+		"-classpath " +
+		"\"#{File.join(androidSDKPath, "android.jar")};#{File.join("#{package_root}libs/", "GoogleAdMobAdsSdk.jar")}\" " + java_files);
+else
+	sh(
+		"javac -source 1.6 -target 1.6 -g -d #{class_dir} " +
+		"-classpath " +
+		"\"#{File.join(androidSDKPath, "android.jar")}:#{File.join("#{package_root}libs/", "GoogleAdMobAdsSdk.jar")}\" " + java_files);
+end
 
 puts "Copy Generated Library File\n\n"
 
 # copy the library file
 FileUtils.copy_file( "#{File.join(cpath, "AndroidProject/libs/armeabi/libmosync.so")}", "temp/libmosync.so")
+FileUtils.copy_file( "#{File.join(cpath, "AndroidProject/libs/GoogleAdMobAdsSdk.jar")}", "temp/GoogleAdMobAdsSdk.jar")
 
 puts "Build Zip Package\n\n"
 

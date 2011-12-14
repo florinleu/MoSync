@@ -20,7 +20,7 @@ public abstract class PIMList {
 	 * Checks if we reached the end of the list.
 	 */
 	boolean hasNext() {
-		return mListIterator < mList.size();
+		return ((mList.size() > 0) && (mListIterator < mList.size()));
 	}
 
 	/**

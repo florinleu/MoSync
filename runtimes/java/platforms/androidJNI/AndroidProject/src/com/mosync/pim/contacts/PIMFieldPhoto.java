@@ -53,7 +53,6 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 		while (cursor.moveToNext()) {
 			String[] val = new String[mNames.length];
 			for (int i = 0; i < mNames.length; i++) {
-				val[i] = new String("");
 				int index = cursor.getColumnIndex(mNames[i]);
 				if (index >= 0) {
 					if (mNames[i].equals(Photo.PHOTO)) {
@@ -66,9 +65,14 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 					}
 				}
 			}
-			mValues.add(val);
-			mStates.add(State.NONE);
+			if ((val[1] != null) && val[1].equals("")) {
+				mValues.add(val);
+				mStates.add(State.NONE);
+			}
 		}
+
+		cursor.close();
+		cursor = null;
 
 		print();
 	}

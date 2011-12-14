@@ -348,6 +348,29 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 	{
 		event.optionsBoxButtonIndex = intArray[1];
 	}
+	else if (event.type == EVENT_TYPE_ADS_BANNER)
+	{
+		event.adsData.bannerEventType = intArray[1];
+		event.adsData.bannerHandle = intArray[2];
+		event.adsData.bannerErrorCode = intArray[3];
+	}
+	else if (event.type == EVENT_TYPE_LOCAL_NOTIFICATION)
+	{
+		event.localNotificationHandle = intArray[1];
+	}
+	else if (event.type == EVENT_TYPE_PUSH_NOTIFICATION_REGISTRATION)
+	{
+		// Just signals that we have a result to the request,
+		// and the result can be taken with maNotificationPushGetRegistration.
+	}
+	else if (event.type == EVENT_TYPE_PUSH_NOTIFICATION_UNREGISTRATION)
+	{
+		// Just signals that we've unregistered. No data needed.
+	}
+	else if (event.type == EVENT_TYPE_PUSH_NOTIFICATION)
+	{
+		event.pushNotificationHandle = intArray[1];
+	}
 	else if (event.type == EVENT_TYPE_WIDGET)
 	{
 		/*
@@ -360,7 +383,7 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 		 *
 		 * Optional:
 		 * WIDGET_EVENT_MESSAGE
-		 * intArray[3] - The id of the message being sent (if it has 
+		 * intArray[3] - The id of the message being sent (if it has
 		 *               dynamically allocated data)
 		 * intARray[4] - Size of the message.
 		 *
@@ -478,6 +501,17 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 		event.sensor.type = intArray[1];
 		memcpy( event.sensor.values, intArray + 2, (arrayLength - 2) * sizeof(jint) );
 	}
+	else if (event.type == EVENT_TYPE_NFC_TAG_RECEIVED ||
+			event.type == EVENT_TYPE_NFC_TAG_DATA_READ ||
+			event.type == EVENT_TYPE_NFC_TAG_DATA_WRITTEN ||
+			event.type == EVENT_TYPE_NFC_BATCH_OP ||
+			event.type == EVENT_TYPE_NFC_TAG_AUTH_COMPLETE ||
+			event.type == EVENT_TYPE_NFC_TAG_READ_ONLY)
+	{
+		event.nfc.handle = intArray[1];
+		event.nfc.result = intArray[2];
+		event.nfc.dstId = intArray[3];
+	}
 
 	// Release the memory used for the int array.
 	env->ReleaseIntArrayElements(eventBuffer, intArray, 0);
@@ -486,9 +520,8 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 }
 
 /**
- * TODO: This function has a fix for the problem of accessing JNIEnv on the wrong thread.
- * Use the JavaVM object to get the current thread. Requires lots of code rewrite.
- * Pointers:
+ * This function now uses the JavaVM object to get the current thread.
+ * Please see the links below and file SyscallImpl.cpp:
  * http://www.netmite.com/android/mydroid/1.6/dalvik/docs/jni-tips.html
  * http://www.milk.com/kodebase/dalvik-docs-mirror/docs/jni-tips.html (same as above?)
  * http://books.google.se/books?id=8M3F_sSSvWkC&pg=PA103&lpg=PA103&dq=JavaVM+obtain+the+JNIEnv+pointer&source=bl&ots=QlZ8PhF_dl&sig=9P_s_GGaN6jmWHkwokMvPAOadtQ&hl=sv&ei=kPAJToLnDsjPsga7kMjTDg&sa=X&oi=book_result&ct=result&resnum=4&ved=0CD4Q6AEwAw#v=onepage&q=JavaVM%20obtain%20the%20JNIEnv%20pointer&f=false
@@ -500,15 +533,7 @@ static int nativeCreateBinaryResource(
 	int resourceIndex,
 	int size)
 {
-	JNIEnv* prevJNIEnv = Base::gSyscall->getJNIEnvironment();
-	jobject prevJThis = Base::gSyscall->getJNIThis();
-
-	Base::gSyscall->setJNIEnvironment(env, jthis);
-
 	int result = Base::gSyscall->loadBinaryStore(resourceIndex, size);
-
-	Base::gSyscall->setJNIEnvironment(prevJNIEnv, prevJThis);
-
 	return result;
 }
 
@@ -517,14 +542,7 @@ static int nativeCreateBinaryResource(
  */
 static int nativeCreatePlaceholder( JNIEnv* env, jobject jthis )
 {
-	JNIEnv* prevJNIEnv = Base::gSyscall->getJNIEnvironment();
-	jobject prevJThis = Base::gSyscall->getJNIThis();
-
-	Base::gSyscall->setJNIEnvironment(env, jthis);
-
 	int result = maCreatePlaceholder();
-
-	Base::gSyscall->setJNIEnvironment(prevJNIEnv, prevJThis);
 
 	return result;
 }
@@ -581,7 +599,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
 	JNIEnv* env = NULL;
 	jint result = -1;
-
 	SYSLOG("JNI_OnLoad");
 
 	SYSLOG("Check JNI version");
@@ -590,6 +607,9 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 	{
 		return result;
 	}
+
+	//Load the JavaVirtual Machine to have access to differentJNI environments
+	Base::gSyscall->setJavaVM(vm);
 
 	jniRegisterNativeMethods(
 		env,

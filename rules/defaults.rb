@@ -1,14 +1,14 @@
 # Copyright (C) 2009 Mobile Sorcery AB
-# 
+#
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License, version 2, as published by
 # the Free Software Foundation.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
 # or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 # for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; see the file COPYING.  If not, write to the Free
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
@@ -16,6 +16,10 @@
 
 require "#{File.dirname(__FILE__)}/util.rb"
 require "#{File.dirname(__FILE__)}/targets.rb"
+
+# load local_config.rb, if it exists.
+lc = "#{File.dirname(__FILE__)}/local_config.rb"
+require lc if(File.exists?(lc))
 
 # Defines default values for all variables that can be used by individual workfiles.
 module Defaults
@@ -38,6 +42,9 @@ def set_defaults
 	default(:EXTRA_SOURCETASKS, [])
 	# Array of FileTasks, precompiled object files, to link with.
 	default(:EXTRA_OBJECTS, [])
+	# Array of Tasks that should be invoked before the others.
+	# For example, resource generation.
+	default(:PREREQUISITES, [])
 	# Array of Strings, names of static libraries built earlier, to link with.
 	default(:LOCAL_LIBS, [])
 	# Array of Strings, names of shared libraries built earlier, to link with.
@@ -59,11 +66,20 @@ def set_defaults
 	default(:BUILDDIR_PREFIX, "")
 	# String, added to the beginning of the common build directories.
 	default(:COMMOM_BUILDDDIR_PREFIX, "")
-	
+
 	# String, configuration identifier.
 	# Valid values are "debug" and "" (optimized).
 	default_const(:CONFIG, "debug")
-	
+
+	# If true, the GCC version number will be added to BUILDDIR names for native projects.
+	# Useful if you often switch between different versions of GCC.
+	default_const(:USE_GCC_VERSION_IN_BUILDDIR_NAME, false)
+	if(USE_GCC_VERSION_IN_BUILDDIR_NAME && self.class.const_defined?(:NativeGccWork) && self.is_a?(NativeGccWork))
+		builddir_postfix = @gcc_version
+	else
+		builddir_postfix = ''
+	end
+
 	# @BUILDDIR is the name of the build directory, where generated files are stored.
 	# @CONFIG_NAME is the name of the configuration.
 	if(CONFIG == "debug") then
@@ -73,21 +89,21 @@ def set_defaults
 	else
 		error "wrong configuration: " + CONFIG
 	end
-	default(:BUILDDIR_NAME, @BUILDDIR_PREFIX + @CONFIG_NAME)
+	default(:BUILDDIR_NAME, @BUILDDIR_PREFIX + @CONFIG_NAME + builddir_postfix)
 	default(:BUILDDIR, @BUILDDIR_BASE + @BUILDDIR_NAME + "/")
-	
-	default(:COMMON_BUILDDIR_NAME, @COMMOM_BUILDDDIR_PREFIX + @CONFIG_NAME)
-	
+
+	default(:COMMON_BUILDDIR_NAME, @COMMOM_BUILDDDIR_PREFIX + @CONFIG_NAME + builddir_postfix)
+
 	# String, path to a common base directory for all workfiles in the project.
 	default(:COMMON_BASEDIR, File.expand_path_fix(File.dirname(__FILE__) + "/.."))
 	# String, path to a common build directory.
 	default(:COMMON_BUILDDIR, @COMMON_BASEDIR + "/" + @BUILDDIR_BASE + @COMMON_BUILDDIR_NAME + "/")
 	# String, path to a base directory which will be used as a target for executables and libraries.
 	default(:TARGETDIR, @COMMON_BASEDIR)
-	
+
 	# String, path to a directory. If set, the Work's target will be copied there.
 	default(:INSTALLDIR, nil)
-	
+
 	# Array of Arrays of Strings, list of extensions to use.
 	# Each sub-array must contain two strings: [path to idl file, name of extension].
 	# Only used by PipeExeWork.

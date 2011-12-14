@@ -57,14 +57,23 @@ public class MoSyncFile {
 
 	int mFileHandleNext = 1;
 
+	// TODO: Move logging to a central place?
+	final boolean mIsLoggingOn = false;
+
 	void log(String s)
 	{
-		Log.i("MoSyncFile", s);
+		if (mIsLoggingOn)
+		{
+			Log.i("MoSyncFile", s);
+		}
 	}
 
 	void logerr(String s)
 	{
-		Log.e("MoSyncFile ERROR", s);
+		if (mIsLoggingOn)
+		{
+			Log.e("MoSyncFile ERROR", s);
+		}
 	}
 
 	/**
@@ -109,7 +118,7 @@ public class MoSyncFile {
 		 */
 		private int openChannel()
 		{
-			try
+			synchronized(mMoSyncThread) { try
 			{
 				mRandomAccessFile = new RandomAccessFile(mFile,
 					mAccessMode == MA_ACCESS_READ_WRITE ? "rw" : "r");
@@ -122,7 +131,7 @@ public class MoSyncFile {
 			{
 				logerr("openChannel Exception : " + t);
 				return MA_FERR_GENERIC;
-			}
+			} }
 			return 0;
 		}
 
@@ -148,7 +157,7 @@ public class MoSyncFile {
 		 */
 		public int close()
 		{
-			try
+			synchronized(mMoSyncThread) { try
 			{
 				if(mFileChannel != null)
 					mFileChannel.close();
@@ -158,7 +167,7 @@ public class MoSyncFile {
 			catch(Throwable t)
 			{
 				t.printStackTrace();
-			}
+			} }
 
 			return 0;
 		}
@@ -317,7 +326,7 @@ public class MoSyncFile {
 			return MA_FERR_FORBIDDEN;
 		}
 
-		try
+		synchronized(mMoSyncThread) { try
 		{
 			if (fileHandle.mIsAFile)
 			{
@@ -337,7 +346,7 @@ public class MoSyncFile {
 		{
 			logerr("Got exception:" + t.toString());
 			return MA_FERR_GENERIC;
-		}
+		} }
 	}
 
 	/**
@@ -572,7 +581,7 @@ public class MoSyncFile {
 			return MA_FERR_NOTFOUND;
 		}
 
-		try
+		synchronized(mMoSyncThread) { try
 		{
 			fileHandle.mFileChannel.truncate(offset);
 			return 0;
@@ -581,7 +590,7 @@ public class MoSyncFile {
 		{
 			logerr("(Exception) maFileTruncate - " + error);
 			return MA_FERR_GENERIC;
-		}
+		} }
 	}
 
 	/**
@@ -591,7 +600,7 @@ public class MoSyncFile {
 		MoSyncFileHandle fileHandle,
 		ByteBuffer byteBuffer)
 	{
-		try
+		synchronized(mMoSyncThread) { try
 		{
 			int ret = fileHandle.mFileChannel.write(byteBuffer);
 
@@ -607,32 +616,33 @@ public class MoSyncFile {
 			logerr("writeByteBufferToFile Exception - " + t);
 			t.printStackTrace();
 			return MA_FERR_GENERIC;
-		}
+		} }
 	}
 
 	/**
 	 * Stores the data in the given file in a ByteBuffer
+	 * @return The number of bytes read, or MA_FERR_GENERIC on error.
 	 */
 	private int readFileToByteBuffer(
 		MoSyncFileHandle fileHandle,
 		ByteBuffer byteBuffer)
 	{
-		try
+		synchronized(mMoSyncThread) { try
 		{
-			int ret = fileHandle.mFileChannel.read(byteBuffer);
+			int bytesRead = fileHandle.mFileChannel.read(byteBuffer);
 
-			log("readFileToByteBuffer bytes read: "  + ret);
+			log("readFileToByteBuffer bytes read: "  + bytesRead);
 
 			fileHandle.mCurrentPosition =
 				(int)fileHandle.mFileChannel.position();
 
-			return ret;
+			return bytesRead;
 		}
-		catch(Throwable t)
+		catch (Throwable t)
 		{
 			logerr("readFileToByteBuffer Exception - " + t);
 			return MA_FERR_GENERIC;
-		}
+		} }
 	}
 
 	/**
@@ -758,9 +768,19 @@ public class MoSyncFile {
 		ByteBuffer slicedBuffer = mMoSyncThread.mMemDataSection.slice();
 		slicedBuffer.limit(len);
 
-		readFileToByteBuffer(fileHandle, slicedBuffer);
+		int bytesRead = readFileToByteBuffer(fileHandle, slicedBuffer);
 
-		return 0;
+		if (len != bytesRead)
+		{
+			logerr("maFileRead: MA_FERR_GENERIC error: len != bytesRead");
+			return MA_FERR_GENERIC;
+		}
+		else
+		{
+			// Success.
+			log("bytesRead: success");
+			return 0;
+		}
 	}
 
 	/**
@@ -838,7 +858,7 @@ public class MoSyncFile {
 			return MA_FERR_NOTFOUND;
 		}
 
-		try
+		synchronized(mMoSyncThread) { try
 		{
 			int position = (int)fileHandle.mFileChannel.position();
 			return position;
@@ -847,7 +867,7 @@ public class MoSyncFile {
 		{
 			logerr("maFileTell MA_FERR_GENERIC Exception: " + t);
 			return MA_FERR_GENERIC;
-		}
+		} }
 	}
 
 	/**
@@ -860,6 +880,7 @@ public class MoSyncFile {
 	*/
 	int maFileSeek(int file, int offset, int whence)
 	{
+		synchronized(mMoSyncThread) {
 		log("maFileSeek ("+file+")");
 
 		MoSyncFileHandle fileHandle = mFileHandles.get(file);
@@ -901,6 +922,7 @@ public class MoSyncFile {
 			logerr("maFileSeek MA_FERR_GENERIC Exception: " + t.toString());
 			return MA_FERR_GENERIC;
 		}
+		}
 
 		return offset;
 	}
@@ -925,7 +947,7 @@ public class MoSyncFile {
 
 		mNumFileListings++;
 
-		try
+		synchronized(mMoSyncThread) { try
 		{
 			MoSyncFileListing fileListing = new MoSyncFileListing();
 
@@ -965,7 +987,7 @@ public class MoSyncFile {
 		{
 			logerr("maFileListStart MA_FERR_GENERIC Exception: " + t);
 			return MA_FERR_GENERIC;
-		}
+		} }
 
 		return mNumFileListings;
 	}
