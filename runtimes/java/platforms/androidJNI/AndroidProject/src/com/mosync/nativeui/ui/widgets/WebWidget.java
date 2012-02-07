@@ -24,10 +24,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.util.Log;
 import android.view.MotionEvent;
+import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
+import android.webkit.WebStorage;
+
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -118,7 +120,7 @@ public class WebWidget extends Widget
 		webView.setWebViewClient(new WebWidget.MoSyncWebViewClient(webWidget));
 
 		// Create a WebChromeClient object.
-		webView.setWebChromeClient(new WebWidget.MoSyncWebChromeClient());
+		webView.setWebChromeClient(new WebWidget.MoSyncWebChromeClient(webWidget));
 
 		//Enable GeoLocation for webbased apps
 		webView.getSettings().setGeolocationEnabled(true);
@@ -159,7 +161,7 @@ public class WebWidget extends Widget
 			// url should be hooked.
 			if (url.matches(mHardHookPattern))
 			{
-				Log.i("@@@ MoSync", "Hard hook detected: " + mHardHookPattern);
+				//Log.i("@@@ MoSync", "Hard hook detected: " + mHardHookPattern);
 				return IX_WIDGET.MAW_CONSTANT_HARD;
 			}
 		}
@@ -171,7 +173,7 @@ public class WebWidget extends Widget
 			// url should be hooked.
 			if (url.matches(mSoftHookPattern))
 			{
-				Log.i("@@@ MoSync", "Soft hook detected: " + mSoftHookPattern);
+				//Log.i("@@@ MoSync", "Soft hook detected: " + mSoftHookPattern);
 				return IX_WIDGET.MAW_CONSTANT_SOFT;
 			}
 		}
@@ -210,7 +212,7 @@ public class WebWidget extends Widget
 			mNonHookedUrls.add(url);
 
 			// Here we check if the url has schema specifier.
-			// This is done so that is there is no schema
+			// This is done so that if there is no schema
 			// we use the file:// schema to load the file
 			// from the application's local file system.
 			if (url.contains("://") || url.contains("javascript:"))
@@ -270,14 +272,14 @@ public class WebWidget extends Widget
 		}
 		else if (property.equals(IX_WIDGET.MAW_WEB_VIEW_SOFT_HOOK))
 		{
-			Log.i("@@@ Mosync", "Setting softHookPattern to: " + value);
+			//Log.i("@@@ Mosync", "Setting softHookPattern to: " + value);
 
 			// Set the pattern used for url hooking.
 			mSoftHookPattern = value;
 		}
 		else if (property.equals(IX_WIDGET.MAW_WEB_VIEW_HARD_HOOK))
 		{
-			Log.i("@@@ Mosync", "Setting hardHookPattern to: " + value);
+			//Log.i("@@@ Mosync", "Setting hardHookPattern to: " + value);
 
 			// Set the pattern used for url hooking.
 			mHardHookPattern = value;
@@ -394,6 +396,16 @@ public class WebWidget extends Widget
 			// This might affect memory consumption / performance.
 			this.getSettings().setJavaScriptEnabled(true);
 
+
+			//use the default path for storage and database
+			String databasePath = context.getDir("database", Context.MODE_PRIVATE).getPath();
+			this.getSettings().setDatabasePath(databasePath);
+
+
+			//enable support for DOM Storage and Database
+			this.getSettings().setDatabaseEnabled(true);
+			this.getSettings().setDomStorageEnabled(true);
+
 			this.setVerticalScrollbarOverlay(true);
 		}
 
@@ -438,13 +450,13 @@ public class WebWidget extends Widget
 	static class MoSyncWebViewClient extends WebViewClient
 	{
 		/**
-		 * Access to the wrapped web view, so that we can set the
-		 * 'newurl' property.
+		 * The web view widget.
 		 */
 		private WebWidget mWebWidget;
 
 		/**
-		 * @param webWidget The web view that the url overrider is bound to.
+		 * Constructor.
+		 * @param webWidget The web view that this object is bound to.
 		 */
 		public MoSyncWebViewClient(WebWidget webWidget)
 		{
@@ -472,8 +484,8 @@ public class WebWidget extends Widget
 		@Override
 		public boolean shouldOverrideUrlLoading(WebView view, String url)
 		{
-			Log.i("@@@ MoSync",
-				"MoSyncWebViewClient.shouldOverrideUrlLoading url: " + url);
+//			Log.i("@@@ MoSync",
+//				"MoSyncWebViewClient.shouldOverrideUrlLoading url: " + url);
 
 			// Should we hook this url?
 			int hookType = mWebWidget.checkHookType(url);
@@ -517,7 +529,7 @@ public class WebWidget extends Widget
 			    mWebWidget.getView().getContext().startActivity(intent);
 			    return true;
 			}
-			else if(url.startsWith("tel:"))
+			else if (url.startsWith("tel:"))
 			{
 				//by default we should open the PhoneApp when this URL
 				//is loaded
@@ -555,8 +567,8 @@ public class WebWidget extends Widget
 		@Override
 		public void onPageStarted(WebView view, String url, Bitmap favIcon)
 		{
-			Log.i("@@@ MoSync",
-				"MoSyncWebViewClient.onPageStarted url: " + url);
+//			Log.i("@@@ MoSync",
+//				"MoSyncWebViewClient.onPageStarted url: " + url);
 
 			EventQueue.getDefault().postWidgetEvent(
 				IX_WIDGET.MAW_EVENT_WEB_VIEW_CONTENT_LOADING,
@@ -571,8 +583,8 @@ public class WebWidget extends Widget
 		@Override
 		public void onPageFinished(WebView view, String url)
 		{
-			Log.i("@@@ MoSync",
-				"MoSyncWebViewClient.onPageFinished url: " + url);
+//			Log.i("@@@ MoSync",
+//				"MoSyncWebViewClient.onPageFinished url: " + url);
 
 			EventQueue.getDefault().postWidgetEvent(
 				IX_WIDGET.MAW_EVENT_WEB_VIEW_CONTENT_LOADING,
@@ -591,9 +603,9 @@ public class WebWidget extends Widget
 			String description,
 			String failingUrl)
 		{
-			Log.i("@@@ MoSync",
-				"MoSyncWebViewClient.onReceivedError url: " + failingUrl
-				+ " error: " + description);
+//			Log.i("@@@ MoSync",
+//				"MoSyncWebViewClient.onReceivedError url: " + failingUrl
+//				+ " error: " + description);
 
 			EventQueue.getDefault().postWidgetEvent(
 				IX_WIDGET.MAW_EVENT_WEB_VIEW_CONTENT_LOADING,
@@ -607,17 +619,54 @@ public class WebWidget extends Widget
 	static class MoSyncWebChromeClient extends WebChromeClient
 	{
 		/**
-		 * Report a JavaScript error message to the host application.
-		 *
-		 * TODO: Move to a separate file and load conditionally, like the
-		 * Bluetooth class, since this method is available from API level 7.
+		 * The web view widget.
+		 */
+		private WebWidget mWebWidget;
+
+		// TODO: Use this charset as an alternative to the UTF8 length
+		// counting fix on mosync-bridge.js. If so, use in onJsPrompt
+		// as: message.getBytes(mCharset).
+		//private Charset mCharset = Charset.forName("ISO-8859-1");
+
+		/**
+		 * Constructor.
+		 * @param webWidget The web view that this object is bound to.
+		 */
+		public MoSyncWebChromeClient(WebWidget webWidget)
+		{
+			mWebWidget = webWidget;
+		}
+
+		/**
+		 * Try updating the Quota if it exceeds
 		 */
 		@Override
-		public void onConsoleMessage(String message, int lineNumber, String sourceID)
+		public void onExceededDatabaseQuota(
+				String url,
+				String databaseIdentifier,
+				long currentQuota,
+				long estimatedSize,
+				long totalUsedQuota,
+				WebStorage.QuotaUpdater quotaUpdater)
 		{
-			Log.i("@@@ MoSync",
-				"MoSyncWebChromeClient.onConsoleMessage: " + message);
+			quotaUpdater.updateQuota(estimatedSize * 2);
 		}
+
+// Commented out this method, because the console messages and JavaScript
+// errors are logged anyway, and we don't want double output.
+//
+//		/**
+//		 * Report a JavaScript error message to the host application.
+//		 *
+//		 * TODO: Move to a separate file and load conditionally, like the
+//		 * Bluetooth class, since this method is available from API level 7.
+//		 */
+//		@Override
+//		public void onConsoleMessage(String message, int lineNumber, String sourceID)
+//		{
+//			Log.i("@@@ MoSync",
+//				"MoSyncWebChromeClient.onConsoleMessage: " + message);
+//		}
 
 		/**
 		 * Tell the client to display a JavaScript alert dialog.
@@ -629,8 +678,8 @@ public class WebWidget extends Widget
 			String message,
 			JsResult result)
 		{
-			Log.i("@@@ MoSync",
-				"MoSyncWebChromeClient.onJsAlert: " + message);
+//			Log.i("@@@ MoSync",
+//				"MoSyncWebChromeClient.onJsAlert: " + message);
 
 			Toast.makeText(
 				view.getContext(),
@@ -639,6 +688,33 @@ public class WebWidget extends Widget
 
 			// This is needed to end the alert state.
 			result.confirm();
+
+			return true;
+		}
+
+		public boolean onJsPrompt(
+			WebView view,
+			String url,
+			String message,
+			String defaultValue,
+			JsPromptResult result)
+		{
+//			Log.i("@@@ MoSync", "onJsPrompt: " + message);
+
+			// Store the message in a data object.
+			int urlData = MoSyncThread.getInstance().createDataObject(
+				0, // Zero makes the system create a new placeholder.
+				message.getBytes() // Data content.
+				);
+
+			// Post message.
+			EventQueue.getDefault().postWidgetEvent(
+				IX_WIDGET.MAW_EVENT_WEB_VIEW_HOOK_INVOKED,
+				mWebWidget.getHandle(),
+				IX_WIDGET.MAW_CONSTANT_MESSAGE,
+				urlData);
+
+			result.confirm("ok");
 
 			return true;
 		}

@@ -26,6 +26,16 @@ namespace MoSync
         private Thread mThread = null;
         private readonly bool mRebuild;
 
+		public MoSync.Core GetCore()
+		{
+			return mCore;
+		}
+
+		public MoSync.Runtime GetRuntime()
+		{
+			return mRuntime;
+		}
+
         private Machine(bool rebuild)
         {
             mRebuild = rebuild;
@@ -120,8 +130,11 @@ namespace MoSync
             Core core = new MoSync.CoreInterpreted(programResInfo.Stream);
             Init(core, resources);
             programResInfo.Stream.Close();
-            if (resources != null)
-                resources.Close();
+
+			// do not close resources, they might contain ubins..
+			// maybe make BoundedStream reference counted?
+            //if (resources != null)
+            //    resources.Close();
         }
 
         public static Machine CreateInterpretedMachine(String programFile, String resourceFile)
@@ -140,8 +153,8 @@ namespace MoSync
 
             MoSync.Machine mosyncMachine = new MoSync.Machine(true);
             mosyncMachine.Init(core, resources);
-            if (resources != null)
-                resources.Close();
+            //if (resources != null)
+                //resources.Close();
             return mosyncMachine;
         }
 

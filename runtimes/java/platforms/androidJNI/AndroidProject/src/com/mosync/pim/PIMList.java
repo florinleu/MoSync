@@ -17,6 +17,63 @@ public abstract class PIMList {
 	}
 
 	/**
+	 * @param errorCode
+	 *            The error code returned by the syscall.
+	 * @param panicCode
+	 *            The panic code for this error.
+	 * @param panicText
+	 *            The panic text for this error.
+	 * @return
+	 */
+	public int throwError(int errorCode, int panicCode, String panicText) {
+		return MoSyncError.getSingletonObject().error(errorCode, panicCode,
+				panicText);
+	}
+
+	Cursor listCursor = null;
+
+	/**
+	 * Read the list
+	 */
+	int read(ContentResolver cr) {
+		DebugPrint("PIMList.read(" + cr + ")");
+		// try to query for contacts
+		try {
+			listCursor = cr.query(Contacts.CONTENT_URI,
+					new String[] { Contacts._ID },
+					null, null, null);
+		} catch (Exception e) {
+			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
+					PIMError.PANIC_LIST_UNAVAILABLE,
+					PIMError.sStrListUnavailable);
+		}
+
+		if (listCursor == null) {
+			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
+					PIMError.PANIC_LIST_UNAVAILABLE,
+					PIMError.sStrListUnavailable);
+		}
+
+		// read each item
+		for (int i = 0; i < listCursor.getCount(); i++) {
+			// String contactId = listCursor.getString(listCursor
+			// .getColumnIndex(Contacts._ID));
+
+			PIMItem pimItem = new PIMItem(false);
+			// pimItem.read(cr, contactId);
+
+			mList.add(pimItem);
+		}
+
+		// listCursor.close();
+		// listCursor = null;
+
+		mListIterator = 0;
+
+		return MA_PIM_ERR_NONE;
+	}
+
+	/**
 	 * Checks if we reached the end of the list.
 	 */
 	boolean hasNext() {
@@ -26,8 +83,19 @@ public abstract class PIMList {
 	/**
 	 * @return The next element in the list.
 	 */
-	PIMItem next() {
-		return mList.get(mListIterator++);
+	PIMItem next(ContentResolver cr) {
+		PIMItem pimItem = mList.get(mListIterator);
+		// read each item
+		if (listCursor.moveToNext()) {
+			String contactId = listCursor.getString(listCursor
+					.getColumnIndex(Contacts._ID));
+
+			pimItem.read(cr, contactId);
+
+			mList.set(mListIterator, pimItem);
+		}
+		mListIterator++;
+		return pimItem;
 	}
 
 	/**
@@ -63,9 +131,14 @@ public abstract class PIMList {
 	 */
 	void close(ContentResolver cr) {
 		DebugPrint("PIMList.close(" + cr + ")");
-		mListIterator = 0;
-		while (hasNext()) {
-			next().close(cr);
+		try {
+			mListIterator = 0;
+			while (hasNext()) {
+				next(cr).close(cr);
+			}
+			listCursor.close();
+			listCursor = null;
+		} catch (Exception e) {
 		}
 	}
 }
