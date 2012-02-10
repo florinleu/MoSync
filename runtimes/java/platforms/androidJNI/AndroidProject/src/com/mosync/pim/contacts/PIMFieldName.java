@@ -32,7 +32,7 @@ public class PIMFieldName extends PIMFieldContacts {
 				StructuredName.PREFIX, StructuredName.SUFFIX,
 				StructuredName.PHONETIC_FAMILY_NAME,
 				StructuredName.PHONETIC_GIVEN_NAME,
-				StructuredName.PHONETIC_MIDDLE_NAME, StructuredName.IS_PRIMARY };
+				StructuredName.PHONETIC_MIDDLE_NAME, StructuredName.DISPLAY_NAME, StructuredName.IS_PRIMARY };
 	}
 
 	protected void createMaps() {
