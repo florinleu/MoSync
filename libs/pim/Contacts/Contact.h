@@ -53,7 +53,8 @@ namespace PIM
 //	int find();
 //	int create();
 //	int remove();
-	private:
+	//private:
+	public:
 		Contact();
 
 		PIM::Name mName;

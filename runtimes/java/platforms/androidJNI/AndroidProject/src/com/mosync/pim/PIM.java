@@ -186,10 +186,14 @@ public class PIM {
 					PIMError.sStrListAlreadyOpened);
 		}
 
+		mPIMContactsList = new PIMListContacts(PIMUtil.getThread().nativeCreatePlaceholder());
+
 		// try to read the items in the list
 		// if failed, return error code
 		int error = 0;
 		if ((error = getContactList().read(getContentResolver())) < 0) {
+			// destroyPlaceHolder(mPIMContactsList.mHandle); //fleu TODO
+			mPIMContactsList = null;
 			return error;
 		}
 

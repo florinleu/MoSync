@@ -26,6 +26,8 @@ MA 02110-1301, USA.
 #include "Contacts/Contact.h"
 #include "IX_PIM.h"
 
+#include <conprint.h>
+
 MAHandle gContactsList;
 
 void initContacts()
@@ -38,6 +40,7 @@ PIM::Contact readContact()
 	//Get the contacts item handle.
 	int contactHandle = maPimListNext(gContactsList);
 
+	printf("@LIB: handle = %d", contactHandle);
 	// Check if the new contact handle is valid.
 	CHECK_RESULT(contactHandle);
 

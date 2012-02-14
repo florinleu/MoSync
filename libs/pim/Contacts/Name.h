@@ -50,7 +50,8 @@ namespace PIM
 			void readPhoneticMiddleName(MAAddress const buffer);
 			void readPhoneticLastName(MAAddress const buffer);
 
-		private:
+		//private:
+		public:
 			//The display name for the contact.
 			wchar* mDisplayName;
 			//The given name for the contact.

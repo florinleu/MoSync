@@ -24,14 +24,19 @@ MA 02110-1301, USA.
  *
  **/
 
+#include <mawstring.h>
+
 #include "Name.h"
 #include "util.h"
+
+#include <conprint.h>
 
 namespace PIM
 {
 
 	void Name::read(MA_PIM_ARGS& mArgs)
 	{
+		printf("@LIB: name read");
 		mArgs.field = MA_PIM_FIELD_CONTACT_NAME;
 		CHECK_RESULT(maPimItemGetValue(&mArgs, 0));
 

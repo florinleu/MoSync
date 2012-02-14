@@ -42,7 +42,7 @@ public class PIMItemContacts extends PIMItem {
 	/**
 	 * Constructor
 	 */
-	PIMItemContacts(boolean isNew) {
+	public PIMItemContacts(boolean isNew) {
 		super(isNew);
 		DebugPrint("PIMItemContacts()");
 		mAddress = new PIMFieldAddress();
@@ -98,7 +98,7 @@ public class PIMItemContacts extends PIMItem {
 	 * @param cr
 	 * @param contactId
 	 */
-	void read(ContentResolver cr, String contactId) {
+	public void read(ContentResolver cr, String contactId) {
 		DebugPrint("PIMItemContacts.read(" + cr + ", " + contactId + ")");
 
 		Iterator<PIMField> fieldsIt = mPIMFields.iterator();

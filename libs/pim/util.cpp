@@ -16,7 +16,7 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file util.h
+ * @file util.cpp
  * @author Florin Leu
  * @date 08 Feb 2011
  **/
@@ -24,14 +24,9 @@ MA 02110-1301, USA.
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#include <ma.h>
+#include <mawstring.h>
 #include <MAP/MemoryMgr.h>
-
-#define CHECK_RESULT(a)
-
-#define DELETE(a)					{deleteobject(a);}
-#define DELETE_ARRAY(a,size)		{if(a != NULL){for(int i=0; i<size; i++) deleteobject(a[i]);delete (a);a=NULL;}}
-
-#define BUF_SIZE					512 //we have a limit of 256 widechars
 
 /**
  * Get a wchar array from a specified buffer.
@@ -41,6 +36,41 @@ MA 02110-1301, USA.
  * @return A pointer to the wchar array if the arrayIndex is valid, or
  * NULL otherwise.
  */
-wchar* getWCharArrayFromBuf(MAAddress const buffer, const int arrayIndex);
+wchar* getWCharArrayFromBuf(MAAddress const buffer, const int arrayIndex)
+{
+	int totalBytes = *(int*) buffer;
+	char* charBuffer = (char*) buffer;
+	wchar* ptr = (wchar*) (charBuffer + sizeof(int));
+	int countBytes = sizeof(int);
+	int countArrays = 0;
+	while (countBytes < totalBytes)
+	{
+		if (arrayIndex == countArrays)
+		{
+			break;
+		}
+		int stringLength = wcslen(ptr) + 1;
+		countBytes += stringLength;
+		if (stringLength < totalBytes)
+		{
+			ptr += stringLength;
+			countArrays++;
+		}
+		else
+		{
+			ptr = NULL;
+			break;
+		}
+	}
+
+	if (arrayIndex == countArrays)
+	{
+		return ptr;
+	}
+	else
+	{
+		return NULL;
+	}
+}
 
 #endif //__UTIL_H__
