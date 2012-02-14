@@ -192,7 +192,7 @@ public class PIM {
 		// if failed, return error code
 		int error = 0;
 		if ((error = getContactList().read(getContentResolver())) < 0) {
-			// destroyPlaceHolder(mPIMContactsList.mHandle); //fleu TODO
+			// maDestroyPlaceHolder(mPIMContactsList.getHandle()); //fleu TODO
 			mPIMContactsList = null;
 			return error;
 		}

@@ -19,6 +19,7 @@ public abstract class PIMList {
 
 	protected ArrayList<PIMItem> mList;
 	protected int mListIterator;
+	protected int mHandle;
 
 	protected PIMList() {
 		mList = new ArrayList<PIMItem>();
@@ -137,6 +138,14 @@ public abstract class PIMList {
 			mList.remove(index);
 		}
 		return MA_PIM_ERR_NONE;
+	}
+
+	/*
+	 * Getter for handle.
+	 */
+	int getHandle()
+	{
+		return mHandle;
 	}
 
 	/**
