@@ -1459,8 +1459,8 @@ interface MAAPI {
 
 		/**
 		* \brief Send when the application receives an unregistration result.
-		* The application unregistered from Apple Push Service, or Google C2DM Service,
-		* and will not receive anymore push messages.
+		* The application unregistered from Google C2DM Service, and will not
+		* receive anymore push messages.
 		* Platform: Android only.
 		*/
 		PUSH_NOTIFICATION_UNREGISTRATION = 45;
@@ -4328,7 +4328,7 @@ group WidgetAPI "Widget API" {
 			int videoViewState;
 
 			/**
-			* Send by the OptionDialog view when a #MAW_EVENT_OPTION_DIALOG_BUTTON_CLICKED event is received.
+			* Send by the OptionDialog view when a #EVENT_TYPE_OPTIONS_BOX_BUTTON_CLICKED event is received.
 			*/
 			int optionDialogButtonIndex;
 		}
@@ -5926,7 +5926,7 @@ group WidgetAPI "Widget API" {
 		/**
 		* @brief Sets or gets the maximum input lenght of the edit box.
 		* Setting this value enables multiline input mode by default.
-		* Available on Android and iOS.
+		* Available on Android, iOS and Windows Phone.
 		*
 		* @validvalue A positive integer.
 		*
@@ -8013,8 +8013,10 @@ group SensorAPI "Sensor API" {
 			ORIENTATION = 3;
 			// A constant describing a gyroscope sensor type.
 			GYROSCOPE = 4;
-			// A constant describing an proximity sensor type.
+			// A constant describing a proximity sensor type.
 			PROXIMITY = 5;
+			// A constant describing a compass sensor type.
+			COMPASS = 6;
 		}
 
 		} // end of sensor types
@@ -9280,8 +9282,8 @@ group AdsAPI "Ads API" {
 		* For more info see Widget API.
 		*
 		* \returns
-		*  - MA_ADS_RES_UNSUPPORTED if ads are not supported on current system.
-		*  - MA_ADS_RES_ERROR if a error occurred while creating the banner widget.
+		*  - #MA_ADS_RES_UNSUPPORTED if ads are not supported on current system.
+		*  - #MA_ADS_RES_ERROR if a error occurred while creating the banner widget.
 		*  - a handle to a new banner widget(the handle value is >= 0).
 		*/
 		int maAdsBannerCreate(in int bannerSize, in MAString publisherID);
@@ -9292,8 +9294,8 @@ group AdsAPI "Ads API" {
 		* \param bannerHandle Handle to a banner.
 		*
 		* \returns One of the next constants:
-		* - MA_ADS_RES_OK if no error occurred.
-		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - #MA_ADS_RES_OK if no error occurred.
+		* - #MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
 		*/
 		int maAdsBannerDestroy(in MAHandle bannerHandle);
 
@@ -9304,9 +9306,9 @@ group AdsAPI "Ads API" {
 		* \param layoutHandle Handle to a layout.
 		*
 		* \returns One of the next constants:
-		* - MA_ADS_RES_OK if no error occurred.
-		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
-		* - MA_ADS_RES_INVALID_LAYOUT_HANDLE if the layout handle is invalid.
+		* - #MA_ADS_RES_OK if no error occurred.
+		* - #MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - #MA_ADS_RES_INVALID_LAYOUT_HANDLE if the layout handle is invalid.
 		*/
 		int maAdsAddBannerToLayout(in MAHandle bannerHandle, in MAHandle layoutHandle);
 
@@ -9317,9 +9319,9 @@ group AdsAPI "Ads API" {
 		* \param layoutHandle Handle to a layout.
 		*
 		* \returns One of the next constants:
-		* - MA_ADS_RES_OK if no error occurred.
-		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
-		* - MA_ADS_RES_INVALID_LAYOUT_HANDLE if the layout handle is invalid.
+		* - #MA_ADS_RES_OK if no error occurred.
+		* - #MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - #MA_ADS_RES_INVALID_LAYOUT_HANDLE if the layout handle is invalid.
 		*/
 		int maAdsRemoveBannerFromLayout(in MAHandle bannerHandle, in MAHandle layoutHandle);
 
@@ -9331,10 +9333,10 @@ group AdsAPI "Ads API" {
 		* \param value The value that will be assigned to the property.
 		*
 		* \returns One of the next result codes:
-		* - MA_ADS_RES_OK if no error occurred.
-		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
-		* - MA_ADS_RES_INVALID_PROPERTY_NAME if the property name is not valid.
-		* - MA_ADS_RES_INVALID_PROPERTY_VALUE if the property value is not valid.
+		* - #MA_ADS_RES_OK if no error occurred.
+		* - #MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - #MA_ADS_RES_INVALID_PROPERTY_NAME if the property name is not valid.
+		* - #MA_ADS_RES_INVALID_PROPERTY_VALUE if the property value is not valid.
 		*/
 		int maAdsBannerSetProperty(in MAHandle bannerHandle, in MAString property, in MAString value);
 
@@ -9347,10 +9349,10 @@ group AdsAPI "Ads API" {
 		* \param bufSize Size of the buffer.
 		*
 		* \returns One of the next result codes:
-		* - MA_ADS_RES_OK if no error occurred.
-		* - MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
-		* - MA_ADS_RES_INVALID_PROPERTY_NAME if the property name is not valid.
-		* - MA_ADS_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
+		* - #MA_ADS_RES_OK if no error occurred.
+		* - #MA_ADS_RES_INVALID_BANNER_HANDLE if the banner handle is invalid.
+		* - #MA_ADS_RES_INVALID_PROPERTY_NAME if the property name is not valid.
+		* - #MA_ADS_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
 		*/
 		int maAdsBannerGetProperty(in MAHandle bannerHandle, in MAString property, out MAString value range("bufSize"), in int bufSize);
 	}//End of Ads Functions
@@ -9610,7 +9612,7 @@ group NotificationAPI "Notification API" {
 			*
 			* @par Example
 			* \code
-			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_ALERT_BODY, "Did you forget something?");
+			*	maNotificationLocalSetProperty(notificationHandle, MA_NOTIFICATION_LOCAL_CONTENT_BODY, "Did you forget something?");
 			* \endcode
 			*/
 			CONTENT_BODY = "content_body";
@@ -9648,6 +9650,9 @@ group NotificationAPI "Notification API" {
 
 			/**
 			* @brief Set the sound to play when an alert is displayed.
+			* The sound file should be saved in a notifications folder under sdcard storage.
+			* Note that some devices can only play notification sounds stored in the internal storage,
+			* in the \system\media\audio\notifications folder.
 			* Platform: Android.
 			*
 			* @validvalue a valid path to an audio file.
@@ -9717,7 +9722,7 @@ group NotificationAPI "Notification API" {
 			*
 			* @validvalue One of the constants:
 			* - #MA_NOTIFICATION_DISPLAY_FLAG_DEFAULT Which is enabled by default.
-			* - #MA_NOTIFICATION_DISPLAY_FLAG_ ANYTIME.
+			* - #MA_NOTIFICATION_DISPLAY_FLAG_ANYTIME.
 			*
 			* @setonly
 			*
@@ -9792,7 +9797,7 @@ group NotificationAPI "Notification API" {
 			* - a value for the ledARGB field (for the color),
 			* - the ledOffMS field (length of time, in milliseconds, to keep the light off),
 			* - the ledOnMS (length of time, in milliseconds, to keep the light on).
-			*  returns #MA_NOTIFICATION_ERROR if the current device doesn't support flashing LED.
+			*  returns #MA_NOTIFICATION_RES_ERROR if the current device doesn't support flashing LED.
 			* @setonly
 			*
 			* @par Example
@@ -9846,8 +9851,8 @@ group NotificationAPI "Notification API" {
 		* \brief Creates a new local notification object.
 		*
 		* \returns
-		*  - MA_NOTIFICATION_RES_UNSUPPORTED if the notifications are not supported on current system.
-		*  - MA_NOTIFICATION_RES_ERROR if a error occurred while creating the notification object.
+		*  - #MA_NOTIFICATION_RES_UNSUPPORTED if the notifications are not supported on current system.
+		*  - #MA_NOTIFICATION_RES_ERROR if a error occurred while creating the notification object.
 		*  - a handle to a new local notification object(the handle value is >= 0).
 		*/
 		MAHandle maNotificationLocalCreate();
@@ -9916,7 +9921,7 @@ group NotificationAPI "Notification API" {
 		* Calling this method also programmatically dismisses the notification if
 		* it is currently displaying an alert.
 		*
-		* \param bannerHandle Handle to a local notification object.
+		* \param notificationHandle Handle to a local notification object.
 		*
 		* \returns One of the next constants:
 		* - #MA_NOTIFICATION_RES_OK if no error occurred.
@@ -9944,7 +9949,7 @@ group NotificationAPI "Notification API" {
 		*
 		* \returns One of the next constants:
 		* - #MA_NOTIFICATION_RES_OK if no error occurred.
-		* - #MA_NOTIFICATION_ALREADY_REGISTERED if the application is already registered for
+		* - #MA_NOTIFICATION_RES_ALREADY_REGISTERED if the application is already registered for
 		* receiving push notifications.
 		* - #MA_NOTIFICATION_RES_UNSUPPORTED if notifications are not supported on current platform.
 		*/
@@ -9955,20 +9960,20 @@ group NotificationAPI "Notification API" {
 		*
 		* \returns One of the next constants:
 		* - #MA_NOTIFICATION_RES_OK if no error occurred.
-		* - #MA_NOTIFICATION_NOT_REGISTERED if the application was not registered for receiving
+		* - #MA_NOTIFICATION_RES_NOT_REGISTERED if the application was not registered for receiving
 		* push notification.
 		*/
 		int maNotificationPushUnregister();
 
 		/**
 		* \brief Gets the latest push notification registration response.
-		* \param buffer The registrationID if the registration was successfull, or the error messsage otherwise.
-		* \param bufSize Size of the buffer.
-		* \response  One of the next constants:
+		* \param registrationMesssage The registrationID if the registration was successfull, or the error messsage otherwise.
+		* \param registrationMessageSize Size of the buffer.
+		* \returns  One of the next constants:
 		* - #MA_NOTIFICATION_RES_OK if the application registered successfully.
 		* - #MA_NOTIFICATION_RES_REGISTRATION_NOT_CALLED if maNotificationPushRegister was not called.
-		* - MA_NOTIFICATION_RES_REGISTRATION_MESSAGE_BUF_TOO_SMALL if the buffer is too small.
-		* - MA_NOTIFICATION_RES_ERROR if registration has failed.
+		* - #MA_NOTIFICATION_RES_REGISTRATION_MESSAGE_BUF_TOO_SMALL if the buffer is too small.
+		* - #MA_NOTIFICATION_RES_ERROR if registration has failed.
 		*/
 		int maNotificationPushGetRegistration(out MAString registrationMesssage range("registrationMessageSize"),
 											 in int registrationMessageSize);
@@ -10045,7 +10050,7 @@ group NotificationAPI "Notification API" {
 		* \brief Set the display flags applied to the incoming push notifications.
 		* Note that regardless of this setting, the #EVENT_TYPE_PUSH_NOTIFICATION event
 		* will be received for each incoming notification.
-		* #MA_NOTIFICATION_DISPLAY_DEFAULT is enabled by default.
+		* #MA_NOTIFICATION_DISPLAY_FLAG_DEFAULT is enabled by default.
 		* Platform: Android only.
 		* \param displayFlag One of the constants:
 		* - #MA_NOTIFICATION_DISPLAY_FLAG_DEFAULT Which is enabled by default.
@@ -10171,7 +10176,7 @@ group CaptureAPI "Capture API" {
 			* On Android devices with API level lower than 8
 			* it returns #MA_CAPTURE_RES_MAX_DURATION_NOT_SUPPORTED.
 			*
-			* @getandset
+			* @setandget
 			*
 			* @par Example
 			* \code
@@ -10192,7 +10197,7 @@ group CaptureAPI "Capture API" {
 			* iOS: Default value is MA_CAPTURE_VIDEO_QUALITY_MEDIUM.
 			* Android: Default value is MA_CAPTURE_VIDEO_QUALITY_HIGH.
 			*
-			* @getandset
+			* @setandget
 			*
 			* @par Example
 			* \code
@@ -10210,7 +10215,7 @@ group CaptureAPI "Capture API" {
 			* @validvalue "false" or "true".
 			* Default value: "true".
 			*
-			* @getandset
+			* @setandget
 			*
 			* @par Example
 			* \code
@@ -10228,7 +10233,7 @@ group CaptureAPI "Capture API" {
 			* @validvalue One of the \link #MA_CAPTURE_FLASH_AUTO MA_CAPTURE_FLASH \endlink constants.
 			* Default value: #MA_CAPTURE_FLASH_AUTO.
 			*
-			* @getandset
+			* @setandget
 			*
 			* @par Example
 			* \code
@@ -10241,12 +10246,13 @@ group CaptureAPI "Capture API" {
 
 			/**
 			* @brief Show/hide default camera controls.
+			* @brief Show/hide default camera controls.
 			* Platform: iOS.
 			*
 			* @validvalue "true" or "false".
 			* Default value: "true".
 			*
-			* @getandset
+			* @setandget
 			*
 			* @par Example
 			* \code
@@ -10320,7 +10326,7 @@ group CaptureAPI "Capture API" {
 		/**
 		* \brief Sets the properties to the Native Image Picker.
 		* \param property A string representing which property to set.
-		*  One of the \link #MA_CAPTURE_ MA_CAPTURE \endlink constants.
+		*  One of the \link #MA_CAPTURE_VIDEO_QUALITY MA_CAPTURE \endlink constants.
 		* \param value The value that will be assigned to the property.
 		*
 		* \returns One of the next constants:
@@ -10335,7 +10341,7 @@ group CaptureAPI "Capture API" {
 		* \brief Retrieves the properties from the Native Image Picker.
 		*
 		* \param property A string representing which property to get.
-		*  One of the \link #MA_CAPTURE_ MA_CAPTURE \endlink constants.
+		*  One of the \link #MA_CAPTURE_VIDEO_QUALITY MA_CAPTURE \endlink constants.
 		* \param value A buffer that will hold the value of the property, represented as a string.
 		* \param bufSize Size of the buffer.
 		*
@@ -10350,7 +10356,7 @@ group CaptureAPI "Capture API" {
 
 		/**
 		* \brief Perform an action on the image picker.
-		* \param action One of the \link #MA_CAPTURE_ACTION_ MA_CAPTURE_ACTION \endlink constants.
+		* \param action One of the \link #MA_CAPTURE_ACTION_TAKE_PICTURE MA_CAPTURE_ACTION \endlink constants.
 		*
 		* \returns One of the next constants:
 		*  - #MA_CAPTURE_RES_OK if no error occurred.
@@ -10383,9 +10389,9 @@ group CaptureAPI "Capture API" {
 		* \param bufferSize Maximum size of the buffer.
 		*
 		* \returns One of the next constants:
-		*  - MA_CAPTURE_RES_OK if no error occurred.
-		*  - MA_CAPTURE_RES_INVALID_HANDLE if the given handle was invalid.
-		*  - MA_CAPTURE_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
+		*  - #MA_CAPTURE_RES_OK if no error occurred.
+		*  - #MA_CAPTURE_RES_INVALID_HANDLE if the given handle was invalid.
+		*  - #MA_CAPTURE_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
 		*/
 		int maCaptureGetImagePath(in MAHandle handle, out MAString buffer range("bufferSize"), in int bufferSize);
 
@@ -10396,9 +10402,9 @@ group CaptureAPI "Capture API" {
 		* \param bufferSize Maximum size of the buffer.
 		*
 		* \returns One of the next constants:
-		*  - MA_CAPTURE_RES_OK if no error occurred.
-		*  - MA_CAPTURE_RES_INVALID_HANDLE if the given handle was invalid.
-		*  - MA_CAPTURE_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
+		*  - #MA_CAPTURE_RES_OK if no error occurred.
+		*  - #MA_CAPTURE_RES_INVALID_HANDLE if the given handle was invalid.
+		*  - #MA_CAPTURE_RES_INVALID_STRING_BUFFER_SIZE if the buffer size was to small.
 		*/
 		int maCaptureGetVideoPath(in MAHandle handle, out MAString buffer range("bufferSize"), in int bufferSize);
 
