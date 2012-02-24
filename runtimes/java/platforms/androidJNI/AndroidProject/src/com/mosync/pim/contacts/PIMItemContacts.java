@@ -42,7 +42,7 @@ public class PIMItemContacts extends PIMItem {
 	/**
 	 * Constructor
 	 */
-	public PIMItemContacts(boolean isNew) {
+	public PIMItemContacts(String id, boolean isNew) {
 		super(isNew);
 		DebugPrint("PIMItemContacts()");
 		mAddress = new PIMFieldAddress();
@@ -69,45 +69,51 @@ public class PIMItemContacts extends PIMItem {
 		mOrganizationInfo = new PIMFieldOrganizationInfo();
 		mEvent = new PIMFieldEvent();
 		mPIMFields.add(mAddress);
-		mPIMFields.add(mBirthday);
-		mPIMFields.add(mClass);
+		// mPIMFields.add(mBirthday);
+		// mPIMFields.add(mClass);
 		mPIMFields.add(mEmail);
-		mPIMFields.add(mFormattedAddress);
-		mPIMFields.add(mFormattedName);
+		// mPIMFields.add(mFormattedAddress);
+		// mPIMFields.add(mFormattedName);
 		mPIMFields.add(mName);
 		mPIMFields.add(mNickname);
-		mPIMFields.add(mNote);
-		mPIMFields.add(mOrganization);
-		mPIMFields.add(mPhoto);
-		mPIMFields.add(mPhotoURL);
-		mPIMFields.add(mPublicKey);
-		mPIMFields.add(mPublicKeyString);
-		mPIMFields.add(mRevision);
+		// mPIMFields.add(mNote);
+		// mPIMFields.add(mOrganization);
+		// mPIMFields.add(mPhoto);
+		// mPIMFields.add(mPhotoURL);
+		// mPIMFields.add(mPublicKey);
+		// mPIMFields.add(mPublicKeyString);
+		// mPIMFields.add(mRevision);
 		mPIMFields.add(mPhone);
-		mPIMFields.add(mTitle);
+		// mPIMFields.add(mTitle);
 		mPIMFields.add(mUID);
-		mPIMFields.add(mURL);
-		mPIMFields.add(mIM);
-		mPIMFields.add(mRelation);
-		mPIMFields.add(mOrganizationInfo);
+		// mPIMFields.add(mURL);
+		// mPIMFields.add(mIM);
+		// mPIMFields.add(mRelation);
+		// mPIMFields.add(mOrganizationInfo);
 		// mPIMFields.add(mEvent);
+
+		mUID.read(id);
 	}
 
-	/**
-	 * Read the item with contactId.
-	 * @param cr
-	 * @param contactId
-	 */
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMItemContacts.read(" + cr + ", " + contactId + ")");
+	// /**
+	// * Read the item with contactId.
+	// * @param cr
+	// * @param contactId
+	// */
+	// public void read() {
+	// DebugPrint("PIMItemContacts.read()");
+	//
+	// Iterator<PIMField> fieldsIt = mPIMFields.iterator();
+	//
+	// DebugPrint("Length = " + mPIMFields.size());
+	//
+	// while (fieldsIt.hasNext()) {
+	// fieldsIt.next().read(getID());
+	// }
+	// }
 
-		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
-
-		DebugPrint("Length = " + mPIMFields.size());
-
-		while (fieldsIt.hasNext()) {
-			fieldsIt.next().read(cr, contactId);
-		}
+	protected String getID() {
+		return mUID.getValue();
 	}
 
 	protected void delete(ContentResolver cr) {

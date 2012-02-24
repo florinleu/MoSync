@@ -31,6 +31,15 @@ public abstract class PIMItem {
 		mPIMFields = new ArrayList<PIMField>();
 	}
 
+	// public abstract void read();
+
+	/**
+	 * @return The Content Resolver.
+	 */
+	public ContentResolver getContentResolver() {
+		return PIMUtil.sContentResolver;
+	}
+
 	protected void setState(State state) {
 		if ((mState != State.ADDED) && (state != State.NONE))
 			mState = state;
@@ -61,8 +70,9 @@ public abstract class PIMItem {
 		Iterator<PIMField> i = mPIMFields.iterator();
 		while (i.hasNext()) {
 			PIMField p = i.next();
-			if (p.getType() == type)
+			if (p.getType() == type) {
 				return p;
+			}
 		}
 		return null;
 	}
@@ -87,7 +97,7 @@ public abstract class PIMItem {
 	 * @return The length of the given field.
 	 */
 	int getFieldLength(int field) {
-		DebugPrint("PIMItem.getFieldLength()");
+		DebugPrint("PIMItem.getFieldLength(" + field + ")");
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
@@ -98,6 +108,7 @@ public abstract class PIMItem {
 			return MA_PIM_ERR_FIELD_UNSUPPORTED;
 		}
 
+		pimField.read(getID());
 		return pimField.length();
 	}
 
@@ -179,8 +190,9 @@ public abstract class PIMItem {
 	 * @return
 	 */
 	int getFieldValue(int field, int index, int buffPointer, int buffSize) {
-		DebugPrint("getFieldValue(" + field + ", " + index + ", " + buffPointer
-				+ ", " + buffSize + ")");
+		DebugPrint("PIMItem.getFieldValue(" + field + ", " + index + ", "
+				+ buffPointer + ", " + buffSize + ")");
+
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
@@ -191,6 +203,7 @@ public abstract class PIMItem {
 			return MA_PIM_ERR_FIELD_UNSUPPORTED;
 		}
 
+		pimField.read(getID());
 		return pimField.getValue(index, buffPointer, buffSize);
 	}
 
@@ -204,8 +217,8 @@ public abstract class PIMItem {
 	 */
 	int setFieldValue(int field, int index, int buffPointer, int buffSize,
 			int attributes) {
-		DebugPrint("setFieldValue(" + field + ", " + index + ", " + buffPointer
-				+ ", " + buffSize + ", " + attributes + ")");
+		DebugPrint("PIMItem.setFieldValue(" + field + ", " + index + ", "
+				+ buffPointer + ", " + buffSize + ", " + attributes + ")");
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
@@ -286,12 +299,14 @@ public abstract class PIMItem {
 		return pimField.getDataType();
 	}
 
-	protected void delete(ContentResolver cr) {
+	protected abstract String getID();
+
+	protected void delete() {
 	}
 
 	/**
 	 * Closes the item
 	 */
-	protected void close(ContentResolver cr) {
+	protected void close() {
 	}
 }

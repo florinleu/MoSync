@@ -37,4 +37,8 @@ public class PIMItemEvents extends PIMItem {
 			fieldsIt.next().read(cur, calendarId);
 		}
 	}
+
+	protected String getID() {
+		return null;
+	}
 }

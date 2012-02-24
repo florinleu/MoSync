@@ -27,6 +27,9 @@ MA 02110-1301, USA.
  #ifndef __CONTACT_H__
  #define __CONTACT_H__
 
+#include <MAUtil/Vector.h>
+
+#include "ID.h"
 #include "Name.h"
 #include "Address.h"
 #include "Phone.h"
@@ -46,31 +49,59 @@ namespace PIM
 	class Contact
 	{
 	public:
-		Contact(MAHandle contactHandle);
+		enum ReadFlags {
+			RF_NAME = 0x1,
+			RF_ADDRESS = 0x2,
+			RF_PHONE = 0x4,
+			RF_PHOTO = 0x8,
+			RF_ALL = 0xF
+		};
+
+		Contact(const MAHandle listHandle);
 		~Contact();
 
-		int read();
+		void clean();
+		int readNext(int flag = RF_ALL);
+
+		const wchar* getID() const;
+
+		const Name* getName() const;
+		void setName(Name* name);
+
+		const int getAddressesCount() const;
+		const Address* getAddress(int index) const;
+		void setAddress(Address* address, int index);
+
+		const int getPhonesCount() const;
+		const Phone* getPhone(int index) const;
+		void setPhone(Phone* phone, int index);
+
+		const Photo* getPhoto() const;
+		void setPhoto(Photo* photo);
+
+//	int write();
 //	int find();
-//	int create();
 //	int remove();
-	//private:
-	public:
+
+	private:
 		Contact();
 
-		PIM::Name mName;
-		PIM::Address* mAddress;
-		PIM::Phone* mPhone;
-		PIM::Phone mPhoto;
-		PIM::Email* mEmail;
-		PIM::Website* mWebsite;
-		PIM::Organization* mOrganization;
-		PIM::Event* mEvent;
-		PIM::Note mNote;
-		PIM::InstantMessaging* mInstantMessaging;
-		PIM::Relation* mRelation;
-		PIM::SocialProfile* mSocialProfile;
+		ID* mID;
+		Name* mName;
+		MAUtil::Vector<Address*> mAddresses;
+		MAUtil::Vector<Phone*> mPhones;
+		Photo* mPhoto;
+		MAUtil::Vector<Email*> mEmail;
+		Website** mWebsite;
+		Organization** mOrganization;
+		Event** mEvent;
+		Note* mNote;
+		InstantMessaging** mInstantMessaging;
+		Relation** mRelation;
+		SocialProfile** mSocialProfile;
 
-		const MAHandle mHandle;
+		const MAHandle mListHandle;
+		MAHandle mHandle;
 		char* mBuffer;
 	};
 }

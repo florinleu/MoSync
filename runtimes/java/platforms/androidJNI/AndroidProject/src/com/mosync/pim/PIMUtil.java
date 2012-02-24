@@ -1,7 +1,10 @@
 package com.mosync.pim;
 
+import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 import java.nio.ByteBuffer;
 import java.util.Map;
+
+import android.content.ContentResolver;
 
 import com.mosync.internal.android.MoSyncError;
 import com.mosync.internal.android.MoSyncThread;
@@ -9,6 +12,7 @@ import com.mosync.internal.android.MoSyncThread;
 public class PIMUtil {
 
 	public static MoSyncThread sMoSyncThread;
+	public static ContentResolver sContentResolver;
 
 	/**
 	 * Gets the key from a map by it's value.

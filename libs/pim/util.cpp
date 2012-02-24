@@ -27,6 +27,9 @@ MA 02110-1301, USA.
 #include <ma.h>
 #include <mawstring.h>
 #include <MAP/MemoryMgr.h>
+#include <wchar.h>
+
+#include <conprint.h>
 
 /**
  * Get a wchar array from a specified buffer.
@@ -38,39 +41,40 @@ MA 02110-1301, USA.
  */
 wchar* getWCharArrayFromBuf(MAAddress const buffer, const int arrayIndex)
 {
-	int totalBytes = *(int*) buffer;
+	int totalArrays = *(int*) buffer;
 	char* charBuffer = (char*) buffer;
 	wchar* ptr = (wchar*) (charBuffer + sizeof(int));
-	int countBytes = sizeof(int);
-	int countArrays = 0;
-	while (countBytes < totalBytes)
+	int currentArrayIndex = 0;
+	while ( (currentArrayIndex < totalArrays) && (currentArrayIndex != arrayIndex) )
 	{
-		if (arrayIndex == countArrays)
-		{
-			break;
-		}
 		int stringLength = wcslen(ptr) + 1;
-		countBytes += stringLength;
-		if (stringLength < totalBytes)
-		{
-			ptr += stringLength;
-			countArrays++;
-		}
-		else
-		{
-			ptr = NULL;
-			break;
-		}
+		ptr += stringLength;
+		currentArrayIndex++;
 	}
 
-	if (arrayIndex == countArrays)
+	if (currentArrayIndex == arrayIndex)
 	{
-		return ptr;
+		wchar* str = new wchar[wcslen(ptr) + 1];
+		wcsncpy(str, ptr, wcslen(ptr));
+		return str;
 	}
 	else
 	{
 		return NULL;
 	}
+}
+
+char* wstrtostr(const wchar* wstr)
+{
+	if (wstr == NULL)
+	{
+		return NULL;
+	}
+	int len = wcslen(wstr);
+	char* str = new char[len + 1];
+	wcstombs(str, wstr, len + 1);
+	str[len] = 0;
+	return str;
 }
 
 #endif //__UTIL_H__

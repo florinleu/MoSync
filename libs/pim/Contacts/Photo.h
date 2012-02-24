@@ -20,7 +20,7 @@ MA 02110-1301, USA.
  * @author Florin Leu
  * @date 09 Feb 2011
  *
- * @brief PIM Field Address class.
+ * @brief PIM Field Photo class.
  *
  **/
 
@@ -28,15 +28,27 @@ MA 02110-1301, USA.
 #define __PHOTO_H__
 
 #include <maapi.h>
+#include <IX_PIM.h>
 
 namespace PIM
 {
 	class Photo
 	{
+		public:
+			void read(MA_PIM_ARGS& args);
+
+			const MAHandle& getHandle() const;
+			void setHandle(const MAHandle& handle);
+
+			void setURL(wchar* const url);
+
 		private:
-			//The street of the address.
+			void readHandle(MAAddress const buffer);
+
+		private:
+			//The photo handle.
 			MAHandle mHandle;
-			//The city of the address.
+			//The photo URL.
 			//Can only be set.
 			wchar* mURL;
 	};

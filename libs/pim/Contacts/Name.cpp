@@ -34,25 +34,30 @@ MA 02110-1301, USA.
 namespace PIM
 {
 
-	void Name::read(MA_PIM_ARGS& mArgs)
+	void Name::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: name read");
-		mArgs.field = MA_PIM_FIELD_CONTACT_NAME;
-		CHECK_RESULT(maPimItemGetValue(&mArgs, 0));
+		args.field = MA_PIM_FIELD_CONTACT_NAME;
+		//CHECK_RESULT(maPimItemGetValue(&args, 0));
+		if (maPimItemGetValue(&args, 0) > 0)
+		{
+			readDisplayName(args.buf);
+			readFirstName(args.buf);
+			readMiddleName(args.buf);
+			readLastName(args.buf);
+			readPrefix(args.buf);
+			readSuffix(args.buf);
+			readPhoneticFirstName(args.buf);
+			readPhoneticMiddleName(args.buf);
+			readPhoneticLastName(args.buf);
+		}
 
-		readDisplayName(mArgs.buf);
-		readFirstName(mArgs.buf);
-		readMiddleName(mArgs.buf);
-		readLastName(mArgs.buf);
-		readPrefix(mArgs.buf);
-		readSuffix(mArgs.buf);
-		readPhoneticFirstName(mArgs.buf);
-		readPhoneticMiddleName(mArgs.buf);
-		readPhoneticLastName(mArgs.buf);
-
-		mArgs.field = MA_PIM_FIELD_CONTACT_NICKNAME;
-		CHECK_RESULT(maPimItemGetValue(&mArgs, 0));
-		readNickname(mArgs.buf);
+		args.field = MA_PIM_FIELD_CONTACT_NICKNAME;
+		//CHECK_RESULT(maPimItemGetValue(&args, 0));
+		if (maPimItemGetValue(&args, 0) >=0 )
+		{
+			readNickname(args.buf);
+		}
 	}
 
 	void Name::readDisplayName(MAAddress const buffer)
@@ -77,7 +82,11 @@ namespace PIM
 
 	void Name::readNickname(MAAddress const buffer)
 	{
-		wcsncpy(mNickname, (wchar*)buffer, wcslen((wchar*)buffer));
+		DELETE(mNickname);
+		wchar* src = (wchar*)buffer;
+		int len = wcslen(src);
+		mNickname = new wchar[len + 1];
+		wcsncpy(mNickname, src, len);
 	}
 
 	void Name::readPrefix(MAAddress const buffer)
@@ -103,5 +112,165 @@ namespace PIM
 	void Name::readPhoneticLastName(MAAddress const buffer)
 	{
 		mPhoneticLastName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PHONETIC_FAMILY);
+	}
+
+	/*
+	 * Getter for display name.
+	 */
+	const wchar* Name::getDisplayName() const
+	{
+		return mDisplayName;
+	}
+
+	/*
+	 * Setter for display name.
+	 */
+	void Name::setDisplayName(wchar* const displayName)
+	{
+		mDisplayName = displayName;
+	}
+
+	/*
+	 * Getter for first name.
+	 */
+	const wchar* Name::getFirstName() const
+	{
+		return mFirstName;
+	}
+
+	/*
+	 * Setter for first name.
+	 */
+	void Name::setFirstName(wchar* const firstName)
+	{
+		mFirstName = firstName;
+	}
+
+	/*
+	 * Getter for middle name.
+	 */
+	const wchar* Name::getMiddleName() const
+	{
+		return mMiddleName;
+	}
+
+	/*
+	 * Setter for middle name.
+	 */
+	void Name::setMiddleName(wchar* const middleName)
+	{
+		mMiddleName = middleName;
+	}
+
+	/*
+	 * Getter for last name.
+	 */
+	const wchar* Name::getLastName() const
+	{
+		return mLastName;
+	}
+
+	/*
+	 * Setter for last name.
+	 */
+	void Name::setLastName(wchar* const lastName)
+	{
+		mLastName = lastName;
+	}
+
+	/*
+	 * Getter for nickname.
+	 */
+	const wchar* Name::getNickname() const
+	{
+		return mNickname;
+	}
+
+	/*
+	 * Setter for nickname.
+	 */
+	void Name::setNickname(wchar* const nickname)
+	{
+		mNickname = nickname;
+	}
+
+	/*
+	 * Getter for prefix.
+	 */
+	const wchar* Name::getPrefix() const
+	{
+		return mPrefix;
+	}
+
+	/*
+	 * Setter for prefix.
+	 */
+	void Name::setPrefix(wchar* const prefix)
+	{
+		mPrefix = prefix;
+	}
+
+	/*
+	 * Getter for suffix.
+	 */
+	const wchar* Name::getSuffix() const
+	{
+		return mSuffix;
+	}
+
+	/*
+	 * Setter for suffix.
+	 */
+	void Name::setSuffix(wchar* const suffix)
+	{
+		mSuffix = suffix;
+	}
+
+	/*
+	 * Getter for phonetic first name.
+	 */
+	const wchar* Name::getPhoneticFirstName() const
+	{
+		return mPhoneticFirstName;
+	}
+
+	/*
+	 * Setter for phonetic first name.
+	 */
+	void Name::setPhoneticFirstName(wchar* const phoneticFirstName)
+	{
+		mPhoneticFirstName = phoneticFirstName;
+	}
+
+	/*
+	 * Getter for phonetic middle name.
+	 */
+	const wchar* Name::getPhoneticMiddleName() const
+	{
+		return mPhoneticMiddleName;
+	}
+
+	/*
+	 * Setter for phonetic middle name.
+	 */
+	void Name::setPhoneticMiddleName(wchar* const phoneticMiddleName)
+	{
+		mPhoneticMiddleName = phoneticMiddleName;
+	}
+
+	/*
+	 * Getter for phonetic last name.
+	 */
+	const wchar* Name::getPhoneticLastName() const
+	{
+		return mPhoneticLastName;
+	}
+
+	/*
+	 * Setter for phonetic last name.
+	 */
+	void Name::setPhoneticLastName(wchar* const phoneticLastName)
+	{
+		mPhoneticLastName = phoneticLastName;
 	}
 }

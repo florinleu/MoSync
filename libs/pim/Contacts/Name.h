@@ -27,8 +27,8 @@ MA 02110-1301, USA.
 #ifndef __NAME_H__
 #define __NAME_H__
 
-#include "maapi.h"
-#include "IX_PIM.h"
+#include <maapi.h>
+#include <IX_PIM.h>
 
 namespace PIM
 {
@@ -37,6 +37,36 @@ namespace PIM
 	{
 		public:
 			void read(MA_PIM_ARGS& args);
+
+			const wchar* getDisplayName() const;
+			void setDisplayName(wchar* const displayName);
+
+			const wchar* getFirstName() const;
+			void setFirstName(wchar* const firstName);
+
+			const wchar* getMiddleName() const;
+			void setMiddleName(wchar* const firstName);
+
+			const wchar* getLastName() const;
+			void setLastName(wchar* const firstName);
+
+			const wchar* getNickname() const;
+			void setNickname(wchar* const firstName);
+
+			const wchar* getPrefix() const;
+			void setPrefix(wchar* const firstName);
+
+			const wchar* getSuffix() const;
+			void setSuffix(wchar* const firstName);
+
+			const wchar* getPhoneticFirstName() const;
+			void setPhoneticFirstName(wchar* const firstName);
+
+			const wchar* getPhoneticMiddleName() const;
+			void setPhoneticMiddleName(wchar* const firstName);
+
+			const wchar* getPhoneticLastName() const;
+			void setPhoneticLastName(wchar* const firstName);
 
 		private:
 			void readDisplayName(MAAddress const buffer);
@@ -50,8 +80,7 @@ namespace PIM
 			void readPhoneticMiddleName(MAAddress const buffer);
 			void readPhoneticLastName(MAAddress const buffer);
 
-		//private:
-		public:
+		private:
 			//The display name for the contact.
 			wchar* mDisplayName;
 			//The given name for the contact.

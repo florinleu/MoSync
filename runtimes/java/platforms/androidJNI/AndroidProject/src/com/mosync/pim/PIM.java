@@ -31,13 +31,10 @@ public class PIM {
 	 * PIM lists
 	 */
 	private Hashtable<Integer, PIMItem> mPIMItems;
-	private PIMListContacts mPIMContactsList;
+	private Hashtable<Integer, PIMList> mPIMLists;
 	private Hashtable<Integer, PIMListEvents> mPIMEventsList;
 
-	/**
-	 * Handle for PIM
-	 */
-	private int mResourceIndex = 100;
+	boolean mIsContactListOpened = false;
 
 	/**
 	 * @return The Activity object.
@@ -50,7 +47,7 @@ public class PIM {
 	 * @return The Content Resolver.
 	 */
 	public ContentResolver getContentResolver() {
-		return getActivity().getContentResolver();
+		return PIMUtil.sContentResolver;
 	}
 
 	/**
@@ -60,16 +57,14 @@ public class PIM {
 	 */
 	public PIM(MoSyncThread thread) {
 		mMoSyncThread = thread;
+		PIMUtil.sContentResolver = getActivity().getContentResolver();
 		mPIMItems = new Hashtable<Integer, PIMItem>();
+		mPIMLists = new Hashtable<Integer, PIMList>();
 		mPIMEventsList = new Hashtable<Integer, PIMListEvents>();
 	}
 
 	PIMList getList(int handle) {
-		if (handle == 0) {
-			return mPIMContactsList;
-		} else {
-			return mPIMEventsList.get(handle - 1);
-		}
+		return mPIMLists.get(handle);
 	}
 
 	/**
@@ -141,7 +136,7 @@ public class PIM {
 	 * Opens the PIM list depending on the listType
 	 */
 	public int maPimListOpen(int listType, int index) {
-		DebugPrint("maPimListOpen()");
+		DebugPrint("maPimListOpen(" + listType + ", " + index + ")");
 		switch (listType) {
 		case MA_PIM_CONTACTS:
 			return openContactsList(index);
@@ -154,27 +149,17 @@ public class PIM {
 	}
 
 	/**
-	 * @return the contact list
-	 */
-	PIMListContacts getContactList() {
-		if (mPIMContactsList == null) {
-			mPIMContactsList = new PIMListContacts();
-		}
-		return mPIMContactsList;
-	}
-
-	/**
 	 * @return false if the contact list is null
 	 */
 	boolean isContactListOpened() {
-		return ((mPIMContactsList != null) ? true : false);
+		return mIsContactListOpened;
 	}
 
 	/**
 	 * Opens the contacts list.
 	 */
 	int openContactsList(int index) {
-		DebugPrint("openContactsList()");
+		DebugPrint("openContactsList(" + index + ")");
 		if (index > 0) {
 			return PIMUtil.throwError(MA_PIM_ERR_INDEX_INVALID,
 					PIMError.PANIC_INDEX_INVALID, PIMError.sStrIndexInvalid);
@@ -186,18 +171,20 @@ public class PIM {
 					PIMError.sStrListAlreadyOpened);
 		}
 
-		mPIMContactsList = new PIMListContacts(PIMUtil.getThread().nativeCreatePlaceholder());
+		int placeholder = PIMUtil.getThread().nativeCreatePlaceholder();
+		mPIMLists.put(placeholder, new PIMListContacts());
+		mIsContactListOpened = true;
 
 		// try to read the items in the list
 		// if failed, return error code
 		int error = 0;
-		if ((error = getContactList().read(getContentResolver())) < 0) {
-			// maDestroyPlaceHolder(mPIMContactsList.getHandle()); //fleu TODO
-			mPIMContactsList = null;
+		if ((error = mPIMLists.get(placeholder).read()) < 0) {
+			mPIMLists.remove(placeholder);
+			// maDestroyPlaceHolder(placeholder); fleu TODO
 			return error;
 		}
 
-		return 0;
+		return placeholder;
 	}
 
 	/**
@@ -259,16 +246,14 @@ public class PIM {
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
-		DebugPrint("Size = " + pimList.mList.size());
-		DebugPrint("Pos = " + pimList.mListIterator);
-
+		int placeholder = PIMUtil.getThread().nativeCreatePlaceholder();
 		if (pimList.hasNext()) {
-			mPIMItems.put(mResourceIndex, pimList.next(getContentResolver()));
+			mPIMItems.put(placeholder, pimList.next());
 		} else {
 			return MA_PIM_ERR_NONE;
 		}
 
-		return mResourceIndex++;
+		return placeholder;
 	}
 
 	public int maPimListClose(int list) {
@@ -279,18 +264,22 @@ public class PIM {
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
-		pimList.close(getContentResolver());
-
-		if (list == 0) {
-			mPIMContactsList = null;
-		} else {
-			mPIMEventsList.remove(list - 1);
-			mPIMEventsList = null;
+		if (pimList instanceof PIMListContacts) {
+			mIsContactListOpened = false;
 		}
+
+		pimList.close();
+		mPIMLists.remove(list);
+		// maDestroyPlaceholder(list); fleu TODO
+		pimList = null;
+
+		// mPIMEventsList.remove(list - 1);
+		// mPIMEventsList = null;
 
 		return MA_PIM_ERR_NONE;
 	}
 
+	// fleu TODO
 	public int maPimItemCount(int item) {
 		DebugPrint("maPimItemCount(" + item + ")");
 		PIMItem pimItem = null;
@@ -302,6 +291,7 @@ public class PIM {
 		return pimItem.length();
 	}
 
+	// fleu TODO
 	public int maPimItemGetField(int item, int n) {
 		DebugPrint("maPimItemGetField(" + item + ", " + n + ")");
 		PIMItem pimItem = null;
@@ -313,6 +303,7 @@ public class PIM {
 		return pimItem.getFieldType(n);
 	}
 
+	// fleu TODO
 	public int maPimItemFieldCount(int item, int field) {
 		DebugPrint("maPimItemFieldCount(" + item + ", " + field + ")");
 		PIMItem pimItem = null;
@@ -324,6 +315,7 @@ public class PIM {
 		return pimItem.getFieldLength(field);
 	}
 
+	// fleu TODO
 	public int maPimItemGetAttributes(int item, int field, int index) {
 		DebugPrint("maPimItemGetAttributes(" + item + ", " + field + ", "
 				+ index + ")");
@@ -336,6 +328,7 @@ public class PIM {
 		return pimItem.getFieldAttributes(field, index);
 	}
 
+	// fleu TODO
 	public int maPimItemSetLabel(int item, int field, int buffPointer,
 			int buffSize, int index) {
 		DebugPrint("maPimItemSetLabel(" + item + ", " + field + ", "
@@ -349,6 +342,7 @@ public class PIM {
 		return pimItem.setFieldLabel(field, index, buffPointer, buffSize);
 	}
 
+	// fleu TODO
 	public int maPimItemGetLabel(int item, int field, int buffPointer,
 			int buffSize, int index) {
 		DebugPrint("maPimItemGetLabel(" + item + ", " + field + ", "
@@ -432,7 +426,7 @@ public class PIM {
 			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
-		pimItem.close(getContentResolver());
+		pimItem.close();
 
 		return MA_PIM_ERR_NONE;
 	}
@@ -445,9 +439,10 @@ public class PIM {
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 
-		mPIMItems.put(mResourceIndex, pimList.createItem());
+		int placeholder = PIMUtil.getThread().nativeCreatePlaceholder();
+		mPIMItems.put(placeholder, pimList.createItem());
 
-		return mResourceIndex++;
+		return placeholder++;
 	}
 
 	public int maPimItemRemove(int list, int item) {
@@ -462,7 +457,7 @@ public class PIM {
 			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
-		pimItem.delete(getContentResolver());
+		pimItem.delete();
 		return pimList.removeItem(pimItem);
 	}
 }

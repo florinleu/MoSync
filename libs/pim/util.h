@@ -43,4 +43,6 @@ MA 02110-1301, USA.
  */
 wchar* getWCharArrayFromBuf(MAAddress const buffer, const int arrayIndex);
 
+char* wstrtostr(const wchar* wstr);
+
 #endif //__UTIL_H__

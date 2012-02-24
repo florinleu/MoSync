@@ -16,33 +16,37 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file pim.cpp
+ * @file ID.h
  * @author Florin Leu
- * @date 08 Feb 2011
+ * @date 09 Feb 2011
+ *
+ * @brief PIM Field ID class.
+ *
  **/
 
-#include "pim.h"
-#include "util.h"
-#include "Contacts/Contact.h"
+#ifndef __ID_H__
+#define __ID_H__
+
+#include "maapi.h"
 #include "IX_PIM.h"
 
-#include <conprint.h>
-
-MAHandle gContactsList;
-
-void initContacts()
+namespace PIM
 {
-	printf("initContacts");
-	gContactsList = maPimListOpen(MA_PIM_CONTACTS, 0);
-}
 
-MAHandle getListHandle()
-{
-	return gContactsList;
-}
+	class ID
+	{
+		public:
+			void read(MA_PIM_ARGS& args);
 
-void closeContacts()
-{
-	printf("closeContacts");
-	maPimListClose(gContactsList);
-}
+			void readID(MAAddress const buffer);
+
+			const wchar* getID() const;
+
+		private:
+			//The ID for the contact.
+			wchar* mID;
+	};
+
+} //PIM
+
+#endif //__ID_H__

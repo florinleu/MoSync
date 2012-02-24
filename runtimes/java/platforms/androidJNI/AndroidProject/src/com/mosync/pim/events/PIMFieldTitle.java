@@ -62,4 +62,10 @@ public class PIMFieldTitle extends PIMFieldEvents {
 		return 0;
 	}
 
+	@Override
+	public void read(String contactId) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

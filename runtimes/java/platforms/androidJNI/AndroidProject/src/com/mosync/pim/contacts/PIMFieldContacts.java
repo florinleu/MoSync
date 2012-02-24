@@ -14,11 +14,14 @@ public abstract class PIMFieldContacts extends PIMField {
 	 * @param cr
 	 * @param contactId
 	 */
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMField.read(" + cr + ", " + contactId + ")");
-		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
-				+ "=?" + " AND " + Data.MIMETYPE + "=?",
-				new String[] { String.valueOf(contactId), mStrType }, null);
+	public void read(String contactId) {
+		if (mValues.size() > 0) {
+			return;
+		}
+		DebugPrint("PIMFieldContacts.read(" + contactId + ")");
+		Cursor cursor = getContentResolver().query(Data.CONTENT_URI, mNames,
+				Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?",
+				new String[] { contactId, mStrType }, null);
 
 		while (cursor.moveToNext()) {
 			String[] val = new String[mNames.length];
@@ -27,7 +30,10 @@ public abstract class PIMFieldContacts extends PIMField {
 				if (!mNames[i].equals(DUMMY)) {
 					int index = cursor.getColumnIndex(mNames[i]);
 					if (index >= 0) {
-						val[i] = cursor.getString(index);
+						String s = cursor.getString(index);
+						if (s != null) {
+							val[i] = s;
+						}
 					}
 				}
 			}
@@ -37,6 +43,5 @@ public abstract class PIMFieldContacts extends PIMField {
 		preProcessData();
 
 		print();
-		DebugPrint("MAX SIZE = " + MAX_SIZE);
 	}
 }

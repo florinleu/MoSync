@@ -22,6 +22,13 @@ public class PIMListEvents extends PIMList {
 	/**
 	 * Read the list
 	 */
+	public int read() {
+		return MA_PIM_ERR_NONE;
+	}
+
+	/**
+	 * Read the list
+	 */
 	public int read(Cursor cur, int index) {
 		DebugPrint("PIMListEvents.read(" + cur + ", " + index + ")");
 		// try to query for contacts

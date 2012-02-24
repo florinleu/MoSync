@@ -27,6 +27,8 @@ MA 02110-1301, USA.
 #ifndef __ADDRESS_H__
 #define __ADDRESS_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -45,6 +47,51 @@ namespace PIM
 
 	class Address
 	{
+		public:
+			Address();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getStreet() const;
+			void setStreet(wchar* const street); //fleu TODO is this correct?
+
+			const wchar* getCity() const;
+			void setCity(wchar* const city);
+
+			const wchar* getState() const;
+			void setState(wchar* const state);
+
+			const wchar* getPostalCode() const;
+			void setPostalCode(wchar* const postalCode);
+
+			const wchar* getCountry() const;
+			void setCountry(wchar* const country);
+
+			const wchar* getNeighborhood() const;
+			void setNeighborhood(wchar* const neighborhood);
+
+			const wchar* getPOBox() const;
+			void setPOBox(wchar* const pobox);
+
+			const eAddressTypes& getType() const;
+			void setType(const eAddressTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const pobox);
+
+			const bool isPrimary();
+
+		private:
+			void readStreet(MAAddress const buffer);
+			void readCity(MAAddress const buffer);
+			void readState(MAAddress const buffer);
+			void readPostalCode(MAAddress const buffer);
+			void readCountry(MAAddress const buffer);
+			void readNeighborhood(MAAddress const buffer);
+			void readPOBox(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
 		private:
 			//The street of the address.
 			//This element also includes the house number and room/apartment/flat/floor number.
@@ -67,6 +114,8 @@ namespace PIM
 			eAddressTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//True is this is a primary address.
+			bool mIsPrimary;
 	};
 
 } //PIM

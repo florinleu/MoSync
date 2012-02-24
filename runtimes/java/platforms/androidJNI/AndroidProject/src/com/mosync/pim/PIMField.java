@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.mosync.pim.contacts.PIMFieldContacts;
+
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -21,7 +23,7 @@ import android.provider.ContactsContract.Data;
 
 public abstract class PIMField {
 
-	protected static final String DUMMY = Data.DATA15;
+	protected static final String DUMMY = Data._ID;
 	protected int MAX_SIZE;
 
 	protected enum State {
@@ -54,10 +56,16 @@ public abstract class PIMField {
 		createMaps();
 	}
 
+	/**
+	 * @return The Content Resolver.
+	 */
+	public ContentResolver getContentResolver() {
+		return PIMUtil.sContentResolver;
+	}
+
 	protected abstract void createMaps();
 
-	public void read(ContentResolver cr, String contactId) {
-	}
+	public abstract void read(String contactId);
 
 	public void read(Cursor cur, String calendarId) {
 	}
@@ -202,6 +210,8 @@ public abstract class PIMField {
 	 * Gets the value of the specified field.
 	 */
 	int getValue(int index, int buffPointer, int buffSize) {
+		DebugPrint("PIMField.getValue(" + index + ", " + buffPointer + ", "
+				+ buffSize + ")");
 		if (isEmpty()) {
 			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
@@ -439,7 +449,7 @@ public abstract class PIMField {
 		DebugPrint("UPDATE");
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newUpdate(Data.CONTENT_URI).withSelection(
-						Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?"
+						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
 								+ " AND " + Data._ID + "=?",
 						new String[] { Integer.toString(rawContactId),
 								mStrType, values[0] });
@@ -459,7 +469,7 @@ public abstract class PIMField {
 		ops.add(ContentProviderOperation
 				.newDelete(Data.CONTENT_URI)
 				.withSelection(
-						Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?"
+						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
 								+ " AND " + Data._ID + "=?",
 						new String[] { Integer.toString(rawContactId),
 								mStrType, Long.toString(id) }).build());

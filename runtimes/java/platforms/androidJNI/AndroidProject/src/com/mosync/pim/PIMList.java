@@ -3,6 +3,7 @@ package com.mosync.pim;
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import com.mosync.internal.android.MoSyncError;
 
@@ -14,14 +15,13 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_UNAVAILABLE;
 
 import com.mosync.pim.contacts.PIMItemContacts;
 
-
 public abstract class PIMList {
 
 	protected ArrayList<PIMItem> mList;
 	protected int mListIterator;
-	protected int mHandle;
 
 	protected PIMList() {
+		DebugPrint("PIMList()");
 		mList = new ArrayList<PIMItem>();
 		mListIterator = -1;
 	}
@@ -40,48 +40,17 @@ public abstract class PIMList {
 				panicText);
 	}
 
-	Cursor listCursor = null;
+	/**
+	 * @return The Content Resolver.
+	 */
+	public ContentResolver getContentResolver() {
+		return PIMUtil.sContentResolver;
+	}
 
 	/**
 	 * Read the list
 	 */
-	public int read(ContentResolver cr) {
-		DebugPrint("PIMList.read(" + cr + ")");
-		// try to query for contacts
-		try {
-			listCursor = cr.query(Contacts.CONTENT_URI,
-					new String[] { Contacts._ID },
-					null, null, null);
-		} catch (Exception e) {
-			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
-					PIMError.PANIC_LIST_UNAVAILABLE,
-					PIMError.sStrListUnavailable);
-		}
-
-		if (listCursor == null) {
-			return throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
-					PIMError.PANIC_LIST_UNAVAILABLE,
-					PIMError.sStrListUnavailable);
-		}
-
-		// read each item
-		for (int i = 0; i < listCursor.getCount(); i++) {
-			// String contactId = listCursor.getString(listCursor
-			// .getColumnIndex(Contacts._ID));
-
-			PIMItem pimItem = new PIMItemContacts(false);
-			// pimItem.read(cr, contactId);
-
-			mList.add(pimItem);
-		}
-
-		// listCursor.close();
-		// listCursor = null;
-
-		mListIterator = 0;
-
-		return MA_PIM_ERR_NONE;
-	}
+	protected abstract int read();
 
 	/**
 	 * Checks if we reached the end of the list.
@@ -93,22 +62,14 @@ public abstract class PIMList {
 	/**
 	 * @return The next element in the list.
 	 */
-	PIMItem next(ContentResolver cr) {
-		DebugPrint("@RUNTIME PIMList.next(" + cr + ")");
+	PIMItem next() {
+		DebugPrint("PIMList.next()");
+
 		PIMItem pimItem = mList.get(mListIterator);
-		// read each item
-		if (listCursor.moveToNext()) {
-			String contactId = listCursor.getString(listCursor
-					.getColumnIndex(Contacts._ID));
+		// pimItem.read();
 
-			if (pimItem instanceof PIMItemContacts)
-			{
-				((PIMItemContacts)pimItem).read(cr, contactId);
-			}
+		mList.set(mListIterator++, pimItem);
 
-			mList.set(mListIterator, pimItem);
-		}
-		mListIterator++;
 		return pimItem;
 	}
 
@@ -140,26 +101,16 @@ public abstract class PIMList {
 		return MA_PIM_ERR_NONE;
 	}
 
-	/*
-	 * Getter for handle.
-	 */
-	int getHandle()
-	{
-		return mHandle;
-	}
-
 	/**
 	 * Closes the list.
 	 */
-	void close(ContentResolver cr) {
-		DebugPrint("PIMList.close(" + cr + ")");
+	void close() {
+		DebugPrint("PIMList.close()");
 		try {
 			mListIterator = 0;
 			while (hasNext()) {
-				next(cr).close(cr);
+				next().close();
 			}
-			listCursor.close();
-			listCursor = null;
 		} catch (Exception e) {
 		}
 	}

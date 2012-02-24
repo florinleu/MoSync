@@ -32,8 +32,8 @@ extern "C" {
 #endif
 
 	void initContacts();
-	PIM::Contact readContact();
-	void cleanContacts();
+	MAHandle getListHandle();
+	void closeContacts();
 
 #ifdef __cplusplus
 }	//extern "C"

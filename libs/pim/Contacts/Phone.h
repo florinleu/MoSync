@@ -27,6 +27,9 @@ MA 02110-1301, USA.
 #ifndef __PHONE_H__
 #define __PHONE_H__
 
+#include <maapi.h>
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -79,6 +82,24 @@ namespace PIM
 
 	class Phone
 	{
+		public:
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getNumber() const;
+			void setNumber(wchar* const street); //fleu TODO is this correct?
+
+			const ePhoneTypes& getType() const;
+			void setType(const ePhoneTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const pobox);
+
+		private:
+			void readNumber(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
 		private:
 			//The phone number.
 			wchar* mNumber;
