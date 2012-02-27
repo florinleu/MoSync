@@ -77,9 +77,9 @@ namespace PIM
 			void setType(const eAddressTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const pobox);
+			void setLabel(wchar* const label);
 
-			const bool isPrimary();
+			const bool isPrimary() const;
 
 		private:
 			void readStreet(MAAddress const buffer);
@@ -114,7 +114,7 @@ namespace PIM
 			eAddressTypes mType;
 			//The user defined label
 			wchar* mLabel;
-			//True is this is a primary address.
+			//Shows if this is a primary address or not.
 			bool mIsPrimary;
 	};
 

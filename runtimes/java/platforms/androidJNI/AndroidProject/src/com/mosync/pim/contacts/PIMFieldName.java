@@ -27,12 +27,13 @@ public class PIMFieldName extends PIMFieldContacts {
 		mStrType = StructuredName.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING_ARRAY;
 
-		mNames = new String[] { StructuredName._ID, StructuredName.FAMILY_NAME,
+		mNames = new String[] { StructuredName.FAMILY_NAME,
 				StructuredName.GIVEN_NAME, StructuredName.MIDDLE_NAME,
 				StructuredName.PREFIX, StructuredName.SUFFIX,
 				StructuredName.PHONETIC_FAMILY_NAME,
 				StructuredName.PHONETIC_GIVEN_NAME,
-				StructuredName.PHONETIC_MIDDLE_NAME, StructuredName.DISPLAY_NAME, StructuredName.IS_PRIMARY };
+				StructuredName.PHONETIC_MIDDLE_NAME,
+				StructuredName.DISPLAY_NAME };
 	}
 
 	protected void createMaps() {
@@ -98,9 +99,9 @@ public class PIMFieldName extends PIMFieldContacts {
 
 	String[] getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		String[] ret = new String[val.length - 4];
-		for (int i = 0; i < val.length - 4; i++) {
-			ret[i] = val[i + 1];
+		String[] ret = new String[val.length];
+		for (int i = 0; i < val.length; i++) {
+			ret[i] = val[i];
 		}
 		return ret;
 	}
@@ -124,7 +125,7 @@ public class PIMFieldName extends PIMFieldContacts {
 	void setSpecificData(String[] data, int index) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < data.length; i++) {
-			val[i + 1] = data[i];
+			val[i] = data[i];
 		}
 		mValues.set(index, val);
 	}

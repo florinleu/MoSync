@@ -30,8 +30,8 @@ public class PIMFieldUID extends PIMFieldContacts {
 	/**
 	 * Read address field.
 	 */
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMFieldUID.read(" + cr + ", " + contactId + ")");
+	public void read(String contactId) {
+		DebugPrint("PIMFieldUID.read(" + contactId + ")");
 		mValues.add(new String[] { contactId });
 		mStates.add(State.NONE);
 
@@ -89,6 +89,10 @@ public class PIMFieldUID extends PIMFieldContacts {
 	public String getSpecificData(int index) {
 		String[] val = mValues.get(index);
 		return val[0];
+	}
+
+	String getValue() {
+		return getSpecificData(0);
 	}
 
 	int getDataSize(String val) {

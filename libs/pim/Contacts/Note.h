@@ -27,11 +27,22 @@ MA 02110-1301, USA.
 #ifndef __NOTE_H__
 #define __NOTE_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
 	class Note
 	{
+		public:
+			void read(MA_PIM_ARGS& args);
+
+			const wchar* getText() const;
+			void setText(wchar* const text);
+
+		private:
+			void readText(MAAddress const buffer);
+
 		private:
 			//The note text.
 			wchar* mText;

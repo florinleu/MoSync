@@ -32,6 +32,7 @@ import com.mosync.pim.*;
 public class PIMFieldIM extends PIMFieldContacts {
 
 	Map<Integer, String> mProtocols;
+	final static int PROTOCOL_INDEX = 1;
 
 	/**
 	 * Constructor
@@ -41,8 +42,8 @@ public class PIMFieldIM extends PIMFieldContacts {
 		mStrType = Im.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING_ARRAY;
 
-		mNames = new String[] { Im._ID, Im.DATA, Im.PROTOCOL,
-				Im.CUSTOM_PROTOCOL, Im.TYPE, Im.LABEL, Im.IS_PRIMARY };
+		mNames = new String[] { Im.DATA, Im.PROTOCOL, Im.CUSTOM_PROTOCOL,
+				Im.TYPE, Im.LABEL, Im.IS_PRIMARY };
 	}
 
 	protected void createMaps() {
@@ -65,13 +66,13 @@ public class PIMFieldIM extends PIMFieldContacts {
 		mProtocols.put(Im.PROTOCOL_JABBER, MA_PIM_CONTACT_IM_PROTOCOL_JABBER);
 		mProtocols.put(Im.PROTOCOL_NETMEETING,
 				MA_PIM_CONTACT_IM_PROTOCOL_NETMEETING);
-		mProtocols.put(Im.PROTOCOL_CUSTOM, "OTHER");
+		mProtocols.put(Im.PROTOCOL_CUSTOM, "Custom");
 	}
 
 	protected void preProcessData() {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
-			val[2] = getProtocolName(val[2]);
+			val[PROTOCOL_INDEX] = getProtocolName(val[PROTOCOL_INDEX]);
 			mValues.set(i, val);
 		}
 	}
@@ -79,7 +80,7 @@ public class PIMFieldIM extends PIMFieldContacts {
 	String getProtocolName(String value) {
 		int val = Integer.parseInt(value);
 		if (!mProtocols.containsKey(val))
-			return "OTHER";
+			return "Custom";
 		return mProtocols.get(val);
 	}
 
@@ -137,9 +138,9 @@ public class PIMFieldIM extends PIMFieldContacts {
 
 	String[] getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		String[] ret = new String[val.length - 4];
-		for (int i = 0; i < val.length - 4; i++) {
-			ret[i] = val[i + 1];
+		String[] ret = new String[val.length - 3];
+		for (int i = 0; i < val.length - 3; i++) {
+			ret[i] = val[i];
 		}
 		return ret;
 	}
@@ -163,7 +164,7 @@ public class PIMFieldIM extends PIMFieldContacts {
 	void setSpecificData(String[] data, int index) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < data.length; i++) {
-			val[i + 1] = data[i];
+			val[i] = data[i];
 		}
 		mValues.set(index, val);
 	}
@@ -189,7 +190,6 @@ public class PIMFieldIM extends PIMFieldContacts {
 	protected void postProcessData() {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
-			val[2] = getProtocolId(val[2]);
 			mValues.set(i, val);
 		}
 	}

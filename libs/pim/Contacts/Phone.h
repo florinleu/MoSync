@@ -27,7 +27,6 @@ MA 02110-1301, USA.
 #ifndef __PHONE_H__
 #define __PHONE_H__
 
-#include <maapi.h>
 #include <IX_PIM.h>
 
 namespace PIM
@@ -83,6 +82,8 @@ namespace PIM
 	class Phone
 	{
 		public:
+			Phone();
+
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getNumber() const;
@@ -92,7 +93,9 @@ namespace PIM
 			void setType(const ePhoneTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const pobox);
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
 
 		private:
 			void readNumber(MAAddress const buffer);
@@ -108,6 +111,8 @@ namespace PIM
 			ePhoneTypes mType;
 			//The user defined label.
 			wchar* mLabel;
+			//Shows if this is a primary phone number or not.
+			bool mIsPrimary;
 	};
 
 } //PIM

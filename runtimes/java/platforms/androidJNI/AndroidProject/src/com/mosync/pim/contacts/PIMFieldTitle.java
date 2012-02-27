@@ -29,8 +29,8 @@ public class PIMFieldTitle extends PIMFieldContacts {
 		mStrType = Organization.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING;
 
-		mNames = new String[] { Organization._ID, Organization.TITLE,
-				Organization.TYPE, Organization.LABEL, Organization.IS_PRIMARY };
+		mNames = new String[] { Organization.TITLE, Organization.TYPE,
+				Organization.LABEL, Organization.IS_PRIMARY };
 	}
 
 	protected void createMaps() {
@@ -38,42 +38,6 @@ public class PIMFieldTitle extends PIMFieldContacts {
 		mAttributes.put(MA_PIM_ATTR_TITLE_WORK, Organization.TYPE_WORK);
 		mAttributes.put(MA_PIM_ATTR_TITLE_OTHER, Organization.TYPE_OTHER);
 		mAttributes.put(MA_PIM_ATTR_TITLE_CUSTOM, Organization.TYPE_CUSTOM);
-	}
-
-	/**
-	 * Read field
-	 * @param cr
-	 * @param contactId
-	 */
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMFieldTitle.read(" + cr + ", " + contactId + ")");
-		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
-				+ "=?" + " AND " + Data.MIMETYPE + "=?",
-				new String[] { String.valueOf(contactId), mStrType }, null);
-
-		while (cursor.moveToNext()) {
-			String[] val = new String[mNames.length];
-			for (int i = 0; i < mNames.length; i++) {
-				val[i] = new String("");
-				if (!mNames[i].equals(DUMMY)) {
-					int index = cursor.getColumnIndex(mNames[i]);
-					if (index >= 0) {
-						val[i] = cursor.getString(index);
-					}
-				}
-			}
-			if (val[1] != null) {
-				mValues.add(val);
-				mStates.add(State.NONE);
-			}
-		}
-
-		cursor.close();
-		cursor = null;
-
-		preProcessData();
-
-		print();
 	}
 
 	protected int checkForPreferredAttribute(int index) {
@@ -132,7 +96,7 @@ public class PIMFieldTitle extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[1];
+		return val[0];
 	}
 
 	int getDataSize(String val) {
@@ -146,7 +110,7 @@ public class PIMFieldTitle extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[1] = data;
+		val[0] = data;
 		mValues.set(index, val);
 	}
 
@@ -177,7 +141,7 @@ public class PIMFieldTitle extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Title " + i);
-			DebugPrint(mNames[1] + ": " + val[1]);
+			DebugPrint(mNames[0] + ": " + val[0]);
 		}
 		DebugPrint("***************************");
 	}

@@ -22,8 +22,8 @@ public class PIMFieldPublicKey extends PIMFieldContacts {
 
 	}
 
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMFieldPublicKey.read(" + cr + ", " + contactId + ")");
+	public void read(String contactId) {
+		DebugPrint("PIMFieldPublicKey.read(" + contactId + ")");
 		print();
 	}
 

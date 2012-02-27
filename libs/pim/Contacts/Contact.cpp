@@ -126,11 +126,67 @@ namespace PIM
 			}
 		}
 
-		if ((flag & RF_PHOTO) != 0)
+		if ((flag & RF_EMAIL) != 0)
 		{
-			mPhoto = new Photo();
-			mPhoto->read(args);
+			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EMAIL);
+			for (int i=0; i<countValues; i++)
+			{
+				Email* email = new Email();
+				email->read(args, i);
+				mEmails.add(email);
+			}
 		}
+
+		if ((flag & RF_WEBSITE) != 0)
+		{
+			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_URL);
+			for (int i=0; i<countValues; i++)
+			{
+				Website* website = new Website();
+				website->read(args, i);
+				mWebsites.add(website);
+			}
+		}
+
+		if ((flag & RF_INSTANTMESSAGING) != 0)
+		{
+			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_IM);
+			for (int i=0; i<countValues; i++)
+			{
+				InstantMessaging* instantMessaging = new InstantMessaging();
+				instantMessaging->read(args, i);
+				mInstantMessagings.add(instantMessaging);
+			}
+		}
+
+		if ((flag & RF_NOTE) != 0)
+		{
+			mNote = new Note();
+			mNote->read(args);
+		}
+
+		if ((flag & RF_ORGANIZATION) != 0)
+		{
+			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_ORG);
+			for (int i=0; i<countValues; i++)
+			{
+				Organization* organization = new Organization();
+				organization->read(args, i);
+				mOrganizations.add(organization);
+			}
+		}
+
+		if ((flag & RF_SOCIALPROFILE) != 0)
+		{
+			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE);
+			for (int i=0; i<countValues; i++)
+			{
+				SocialProfile* socialProfile = new SocialProfile();
+				socialProfile->read(args, i);
+				mSocialProfiles.add(socialProfile);
+			}
+		}
+
 		return 0;
 	}
 
@@ -211,18 +267,138 @@ namespace PIM
 	}
 
 	/*
-	 * Getter for photo field.
+	 * Getter for the number of emails.
 	 */
-	const Photo* Contact::getPhoto() const
+	const int Contact::getEmailsCount() const
 	{
-		return mPhoto;
+		return mEmails.size();
 	}
 
 	/*
-	 * Setter for photo field.
+	 * Getter for email field.
 	 */
-	void Contact::setPhoto(Photo* photo)
+	const Email* Contact::getEmail(int index) const
 	{
-		mPhoto = photo;
+		return mEmails[index];
+	}
+
+	/*
+	 * Setter for email field.
+	 */
+	void Contact::setEmail(Email* email, int index)
+	{
+		mEmails[index] = email;
+	}
+
+	/*
+	 * Getter for the number of websites.
+	 */
+	const int Contact::getWebsitesCount() const
+	{
+		return mWebsites.size();
+	}
+
+	/*
+	 * Getter for website field.
+	 */
+	const Website* Contact::getWebsite(int index) const
+	{
+		return mWebsites[index];
+	}
+
+	/*
+	 * Setter for website field.
+	 */
+	void Contact::setWebsite(Website* website, int index)
+	{
+		mWebsites[index] = website;
+	}
+
+	/*
+	 * Getter for the number of instant messagings.
+	 */
+	const int Contact::getInstantMessagingsCount() const
+	{
+		return mInstantMessagings.size();
+	}
+
+	/*
+	 * Getter for instant messaging field.
+	 */
+	const InstantMessaging* Contact::getInstantMessaging(int index) const
+	{
+		return mInstantMessagings[index];
+	}
+
+	/*
+	 * Setter for instant messaging field.
+	 */
+	void Contact::setInstantMessaging(InstantMessaging* instantMessaging, int index)
+	{
+		mInstantMessagings[index] = instantMessaging;
+	}
+
+	/*
+	 * Getter for note field.
+	 */
+	const Note* Contact::getNote() const
+	{
+		return mNote;
+	}
+
+	/*
+	 * Setter for note field.
+	 */
+	void Contact::setNote(Note* note)
+	{
+		mNote = note;
+	}
+
+	/*
+	 * Getter for the number of organizations.
+	 */
+	const int Contact::getOrganizationsCount() const
+	{
+		return mOrganizations.size();
+	}
+
+	/*
+	 * Getter for organizations field.
+	 */
+	const Organization* Contact::getOrganization(int index) const
+	{
+		return mOrganizations[index];
+	}
+
+	/*
+	 * Setter for organization field.
+	 */
+	void Contact::setOrganization(Organization* organization, int index)
+	{
+		mOrganizations[index] = organization;
+	}
+
+	/*
+	 * Getter for the number of social profiles.
+	 */
+	const int Contact::getSocialProfilesCount() const
+	{
+		return mSocialProfiles.size();
+	}
+
+	/*
+	 * Getter for social profile field.
+	 */
+	const SocialProfile* Contact::getSocialProfile(int index) const
+	{
+		return mSocialProfiles[index];
+	}
+
+	/*
+	 * Setter for social profile field.
+	 */
+	void Contact::setSocialProfile(SocialProfile* socialProfile, int index)
+	{
+		mSocialProfiles[index] = socialProfile;
 	}
 }

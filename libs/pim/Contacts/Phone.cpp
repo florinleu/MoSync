@@ -33,6 +33,15 @@ MA 02110-1301, USA.
 namespace PIM
 {
 	/*
+	 * Constructor
+	 */
+	Phone::Phone():
+		mIsPrimary(false)
+	{
+
+	}
+
+	/*
 	 * Read a complete phone number.
 	 */
 	void Phone::read(MA_PIM_ARGS& args, int index)
@@ -61,6 +70,15 @@ namespace PIM
 	void Phone::readType(const MAHandle handle, const int index)
 	{
 		int attribute = maPimItemGetAttributes(handle, MA_PIM_FIELD_CONTACT_TEL, index);
+
+		if (attribute >> 16)
+		{
+			mIsPrimary = true;
+
+			// Remove primary value from attribute.
+			attribute = (attribute & 0xFFFF);
+		}
+
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_PHONE_HOME:
@@ -192,6 +210,14 @@ namespace PIM
 	void Phone::setLabel(wchar* const label)
 	{
 		mLabel = label;
+	}
+
+	/*
+	 * Returns true if this is set as the primary phone.
+	 */
+	const bool Phone::isPrimary() const
+	{
+		return mIsPrimary;
 	}
 
 } //PIM

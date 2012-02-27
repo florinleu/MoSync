@@ -53,8 +53,13 @@ namespace PIM
 			RF_NAME = 0x1,
 			RF_ADDRESS = 0x2,
 			RF_PHONE = 0x4,
-			RF_PHOTO = 0x8,
-			RF_ALL = 0xF
+			RF_EMAIL = 0x8,
+			RF_WEBSITE = 0x10,
+			RF_INSTANTMESSAGING = 0x20,
+			RF_NOTE = 0x40,
+			RF_ORGANIZATION = 0x80,
+			RF_SOCIALPROFILE = 0x100,
+			RF_ALL = 0x1FF
 		};
 
 		Contact(const MAHandle listHandle);
@@ -76,11 +81,31 @@ namespace PIM
 		const Phone* getPhone(int index) const;
 		void setPhone(Phone* phone, int index);
 
-		const Photo* getPhoto() const;
-		void setPhoto(Photo* photo);
+		const int getEmailsCount() const;
+		const Email* getEmail(int index) const;
+		void setEmail(Email* email, int index);
 
-//	int write();
+		const int getWebsitesCount() const;
+		const Website* getWebsite(int index) const;
+		void setWebsite(Website* website, int index);
+
+		const int getInstantMessagingsCount() const;
+		const InstantMessaging* getInstantMessaging(int index) const;
+		void setInstantMessaging(InstantMessaging* instantMessaging, int index);
+
+		const Note* getNote() const;
+		void setNote(Note* note);
+
+		const int getOrganizationsCount() const;
+		const Organization* getOrganization(int index) const;
+		void setOrganization(Organization* organization, int index);
+
+		const int getSocialProfilesCount() const;
+		const SocialProfile* getSocialProfile(int index) const;
+		void setSocialProfile(SocialProfile* socialProfile, int index);
+
 //	int find();
+//	int write();
 //	int remove();
 
 	private:
@@ -90,15 +115,15 @@ namespace PIM
 		Name* mName;
 		MAUtil::Vector<Address*> mAddresses;
 		MAUtil::Vector<Phone*> mPhones;
-		Photo* mPhoto;
-		MAUtil::Vector<Email*> mEmail;
-		Website** mWebsite;
-		Organization** mOrganization;
-		Event** mEvent;
+		MAUtil::Vector<Email*> mEmails;
+		MAUtil::Vector<Website*> mWebsites;
+		MAUtil::Vector<InstantMessaging*> mInstantMessagings;
 		Note* mNote;
-		InstantMessaging** mInstantMessaging;
+		MAUtil::Vector<Organization*> mOrganizations;
+		MAUtil::Vector<SocialProfile*> mSocialProfiles;
+		MAUtil::Vector<Event*> mEvent;
+		Photo* mPhoto;
 		Relation** mRelation;
-		SocialProfile** mSocialProfile;
 
 		const MAHandle mListHandle;
 		MAHandle mHandle;

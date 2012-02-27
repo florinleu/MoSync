@@ -27,6 +27,8 @@ MA 02110-1301, USA.
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -45,14 +47,38 @@ namespace PIM
 
 	class Event
 	{
+		public:
+			Event();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const int getDate() const;
+			void setDate(wchar* const street); //fleu TODO is this correct?
+
+			const eEventTypes& getType() const;
+			void setType(const eEventTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
+
+		private:
+			void readDate(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
 		private:
 			//The event start date.
-			wchar* mDate;
+			int mDate;
 
 			//The type of data.
 			eAddressTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//Shows if this is a primary phone number or not.
+			bool mIsPrimary;
 	};
 
 } //PIM

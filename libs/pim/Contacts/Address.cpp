@@ -105,7 +105,7 @@ namespace PIM
 
 		if (attribute >> 16)
 		{
-			mIsPrimary == true;
+			mIsPrimary = true;
 
 			// Remove primary value from attribute.
 			attribute = (attribute & 0xFFFF);
@@ -293,7 +293,7 @@ namespace PIM
 	/*
 	 * Returns true if this is set as the primary address.
 	 */
-	const bool Address::isPrimary()
+	const bool Address::isPrimary() const
 	{
 		return mIsPrimary;
 	}

@@ -22,8 +22,8 @@ public class PIMFieldClass extends PIMFieldContacts {
 
 	}
 
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMFieldClass.read(" + cr + ", " + contactId + ")");
+	public void read(String contactId) {
+		DebugPrint("PIMFieldClass.read(" + contactId + ")");
 		print();
 	}
 

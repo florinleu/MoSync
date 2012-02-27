@@ -29,7 +29,7 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 		mStrType = Organization.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING_ARRAY;
 
-		mNames = new String[] { Organization._ID, Organization.DEPARTMENT,
+		mNames = new String[] { Organization.DEPARTMENT,
 				Organization.JOB_DESCRIPTION, Organization.SYMBOL,
 				Organization.PHONETIC_NAME, Organization.OFFICE_LOCATION,
 				Organization.TYPE, Organization.LABEL, Organization.IS_PRIMARY };
@@ -40,51 +40,6 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 		mAttributes.put(MA_PIM_ATTR_ORG_INFO_WORK, Organization.TYPE_WORK);
 		mAttributes.put(MA_PIM_ATTR_ORG_INFO_OTHER, Organization.TYPE_OTHER);
 		mAttributes.put(MA_PIM_ATTR_ORG_INFO_CUSTOM, Organization.TYPE_CUSTOM);
-	}
-
-	/**
-	 * Read field
-	 * @param cr
-	 * @param contactId
-	 */
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMFieldOrganizationInfo.read(" + cr + ", " + contactId
-				+ ")");
-		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
-				+ "=?" + " AND " + Data.MIMETYPE + "=?",
-				new String[] { String.valueOf(contactId), mStrType }, null);
-
-		while (cursor.moveToNext()) {
-			String[] val = new String[mNames.length];
-			for (int i = 0; i < mNames.length; i++) {
-				val[i] = new String("");
-				if (!mNames[i].equals(DUMMY)) {
-					int index = cursor.getColumnIndex(mNames[i]);
-					if (index >= 0) {
-						val[i] = cursor.getString(index);
-					}
-				}
-			}
-
-			boolean canAdd = false;
-			for (int i = 1; i < 6; i++) {
-				if (val[i] != null) {
-					canAdd = true;
-					break;
-				}
-			}
-			if (canAdd) {
-				mValues.add(val);
-				mStates.add(State.NONE);
-			}
-		}
-
-		cursor.close();
-		cursor = null;
-
-		preProcessData();
-
-		print();
 	}
 
 	protected int checkForPreferredAttribute(int index) {
@@ -141,9 +96,9 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 
 	String[] getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		String[] ret = new String[val.length - 4];
-		for (int i = 0; i < val.length - 4; i++) {
-			ret[i] = val[i + 1];
+		String[] ret = new String[val.length - 3];
+		for (int i = 0; i < val.length - 3; i++) {
+			ret[i] = val[i];
 		}
 		return ret;
 	}
@@ -167,7 +122,7 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 	void setSpecificData(String[] data, int index) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < data.length; i++) {
-			val[i + 1] = data[i];
+			val[i] = data[i];
 		}
 		mValues.set(index, val);
 	}

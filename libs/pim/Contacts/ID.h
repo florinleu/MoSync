@@ -27,8 +27,8 @@ MA 02110-1301, USA.
 #ifndef __ID_H__
 #define __ID_H__
 
-#include "maapi.h"
-#include "IX_PIM.h"
+#include <maapi.h>
+#include <IX_PIM.h>
 
 namespace PIM
 {

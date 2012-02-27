@@ -27,6 +27,8 @@ MA 02110-1301, USA.
 #ifndef __EMAIL_H__
 #define __EMAIL_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -47,6 +49,28 @@ namespace PIM
 
 	class Email
 	{
+		public:
+			Email();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getAddress() const;
+			void setAddress(wchar* const street); //fleu TODO is this correct?
+
+			const eEmailTypes& getType() const;
+			void setType(const eEmailTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
+
+		private:
+			void readAddress(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
 		private:
 			//The email address.
 			wchar* mAddress;
@@ -55,6 +79,8 @@ namespace PIM
 			eEmailTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//Shows if this is a primary email or not.
+			bool mIsPrimary;
 	};
 
 } //PIM

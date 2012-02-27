@@ -27,6 +27,8 @@ MA 02110-1301, USA.
 #ifndef __INSTANTMESSAGING_H__
 #define __INSTANTMESSAGING_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -56,7 +58,7 @@ namespace PIM
 		//This constant describes a QQ protocol.
 		PROTOCOL_QQ,
 		//This constant describes a Google Talk protocol.
-		PROTOCOL_GOOGLE_TALK,
+		PROTOCOL_GOOGLETALK,
 		//This constant describes an ICQ protocol.
 		PROTOCOL_ICQ,
 		//This constant describes a Jabber protocol.
@@ -69,18 +71,50 @@ namespace PIM
 
 	class InstantMessaging
 	{
+		public:
+			InstantMessaging();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getUsername() const;
+			void setUsername(wchar* const username); //fleu TODO is this correct?
+
+			const eInstantMessagingProtocols& getProtocol() const;
+			void setProtocol(const eInstantMessagingProtocols& protocol);
+
+			const wchar* getProtocolLabel() const;
+			void setProtocolLabel(wchar* const protocolLabel);
+
+			const eInstantMessagingTypes& getType() const;
+			void setType(const eInstantMessagingTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
+
+		private:
+			void readUsername(MAAddress const buffer);
+			void readProtocol(MAAddress const buffer);
+			void readProtocolLabel(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
 		private:
 			//The user name for the instant messaging.
 			wchar* mUsername;
 			//The protocol of the instant messaging.
 			eInstantMessagingProtocols mProtocol;
 			//The user defined protocol.
-			wchar* mProtocoLabel;
+			wchar* mProtocolLabel;
 
 			//The type of data.
 			eInstantMessagingTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//Shows if this is a primary instant messaging or not.
+			bool mIsPrimary;
 	};
 
 } //PIM

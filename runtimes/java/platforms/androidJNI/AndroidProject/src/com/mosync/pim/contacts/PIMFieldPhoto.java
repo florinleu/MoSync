@@ -44,10 +44,10 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 	 * @param cr
 	 * @param contactId
 	 */
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMFieldPhoto.read(" + cr + ", " + contactId + ")");
-		Cursor cursor = cr.query(Data.CONTENT_URI, mNames, Data.CONTACT_ID
-				+ "=?" + " AND " + Data.MIMETYPE + "=?",
+	public void read(String contactId) {
+		DebugPrint("PIMFieldPhoto.read(" + contactId + ")");
+		Cursor cursor = getContentResolver().query(Data.CONTENT_URI, mNames,
+				Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?",
 				new String[] { String.valueOf(contactId), mStrType }, null);
 
 		while (cursor.moveToNext()) {

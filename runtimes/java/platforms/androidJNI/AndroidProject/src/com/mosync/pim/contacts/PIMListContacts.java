@@ -46,12 +46,14 @@ public class PIMListContacts extends PIMList {
 
 		// create the items
 		while (listCursor.moveToNext()) {
-			String contactId = listCursor.getString(listCursor
-					.getColumnIndex(Contacts.LOOKUP_KEY));
+			try {
+				String contactId = listCursor.getString(listCursor
+						.getColumnIndex(Contacts.LOOKUP_KEY));
+				PIMItem pimItem = new PIMItemContacts(contactId, false);
 
-			PIMItem pimItem = new PIMItemContacts(contactId, false);
-
-			mList.add(pimItem);
+				mList.add(pimItem);
+			} catch (Exception e) {
+			}
 		}
 		listCursor.close();
 		listCursor = null;

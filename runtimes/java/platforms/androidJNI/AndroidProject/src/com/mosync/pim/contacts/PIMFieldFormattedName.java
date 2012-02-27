@@ -22,8 +22,8 @@ public class PIMFieldFormattedName extends PIMFieldContacts {
 
 	}
 
-	public void read(ContentResolver cr, String contactId) {
-		DebugPrint("PIMFieldFormattedName.read(" + cr + ", " + contactId + ")");
+	public void read(String contactId) {
+		DebugPrint("PIMFieldFormattedName.read(" + contactId + ")");
 		print();
 	}
 

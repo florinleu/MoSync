@@ -3519,6 +3519,34 @@ group PIMAPI "PIM API" {
 			*
 			*/
 			ORG_INFO = 121;
+
+			/**
+			* @brief An event for the contact. Has \link #MA_PIM_CONTACT_EVENT_URL MA_PIM_CONTACT_SOCIAL_PROFILE \endlink indices.
+			*
+			* @validvalue #MA_PIM_TYPE_STRING_ARRAY.
+			*
+			* @addsetget
+			*
+			* @attributes MA_PIM_ATTR_SOCIAL_PROFILE_HOME, MA_PIM_ATTR_SOCIAL_PROFILE_WORK, MA_PIM_ATTR_SOCIAL_PROFILE_OTHER, MA_PIM_ATTR_SOCIAL_PROFILE_CUSTOM.
+			*
+			* @platforms Android, iOS.
+			*
+			*/
+			EVENT = 122;
+
+			/**
+			* @brief Information about the social profile. Has \link #MA_PIM_CONTACT_SOCIAL_PROFILE_URL MA_PIM_CONTACT_SOCIAL_PROFILE \endlink indices.
+			*
+			* @validvalue #MA_PIM_TYPE_STRING_ARRAY.
+			*
+			* @addsetget
+			*
+			* @attributes MA_PIM_ATTR_SOCIAL_PROFILE_HOME, MA_PIM_ATTR_SOCIAL_PROFILE_WORK, MA_PIM_ATTR_SOCIAL_PROFILE_OTHER, MA_PIM_ATTR_SOCIAL_PROFILE_CUSTOM.
+			*
+			* @platforms Android, iOS.
+			*
+			*/
+			SOCIAL_PROFILE = 123;
 		}
 
 		constset int MA_PIM_FIELD_EVENT_ {
@@ -3610,6 +3638,8 @@ group PIMAPI "PIM API" {
 			USERNAME = 0;
 			/// #MA_PIM_TYPE_STRING.
 			PROTOCOL = 1;
+			/// #MA_PIM_TYPE_STRING.
+			PROTOCOL_LABEL = 2;
 		}
 
 		constset int MA_PIM_CONTACT_CLASS_ {
@@ -3619,6 +3649,19 @@ group PIMAPI "PIM API" {
 			PRIVATE = 201;
 			/// Value for #MA_PIM_FIELD_CONTACT_CLASS.
 			PUBLIC = 202;
+		}
+
+		constset int MA_PIM_CONTACT_SOCIAL_PROFILE_ {
+			/// #MA_PIM_TYPE_STRING.
+			URL = 0;
+			/// #MA_PIM_TYPE_STRING.
+			USERNAME = 1;
+			/// #MA_PIM_TYPE_STRING.
+			USER_IDENTIFIER = 2;
+			/// #MA_PIM_TYPE_STRING.
+			SERVICE = 3;
+			/// #MA_PIM_TYPE_STRING.
+			SERVICE_LABEL = 4;
 		}
 
 		constset MAString MA_PIM_CONTACT_IM_PROTOCOL_ {
@@ -3640,6 +3683,25 @@ group PIMAPI "PIM API" {
 			JABBER = "Jabber";
 			/// This constant describes a NetMeeting protocol.
 			NETMEETING = "Netmeeting";
+			/// This constant describes a custom protocol.
+			CUSTOM = "Custom";
+		}
+
+		constset MAString MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_ {
+			/// This constant describes an Twitter service.
+			TWITTER = "Twitter";
+			/// This constant describes a GameCenter service.
+			GAMECENTER = "GameCenter";
+			/// This constant describes a Facebook service.
+			FACEBOOK = "Facebook";
+			/// This constant describes a MySpace service.
+			MYSPACE = "MySpace";
+			/// This constant describes a LinkedIn service.
+			LINKEDIN = "LinkedIn";
+			/// This constant describes a Flickr service.
+			FLICKR= "Flickr";
+			/// This constant describes an custom service.
+			CUSTOM = "Custom";
 		}
 
 		// deprecated
@@ -3853,6 +3915,30 @@ group PIMAPI "PIM API" {
 			/// The field's label can be set.
 			/// Not available on iOS.
 			CUSTOM = 1003;
+		}
+
+		constset int MA_PIM_ATTR_EVENT_ {
+			/// The constant describes a birthday event.
+			BIRTHDAY = 1101;
+			/// The constant describes an anniversary event.
+			ANNIVERSARY = 1102;
+			/// The constant describes a different event type.
+			OTHER = 1103;
+			/// The constant describes a custom event type.
+			/// The field's label can be set.
+			CUSTOM = 1104;
+		}
+
+		constset int MA_PIM_ATTR_SOCIAL_PROFILE_ {
+			/// The constant describes a home social profile.
+			HOME = 1201;
+			/// The constant describes a work social profile.
+			WORK = 1202;
+			//The constant describes a different social profile type.
+			OTHER = 1203;
+			/// The constant describes a custom social profile type.
+			/// The field's label can be set.
+			CUSTOM = 1203;
 		}
 
 		constset int MA_PIM_ATTR {

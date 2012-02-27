@@ -27,6 +27,8 @@ MA 02110-1301, USA.
 #ifndef __SOCIALPROFILE_H__
 #define __SOCIALPROFILE_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -63,8 +65,46 @@ namespace PIM
 
 	class SocialProfile
 	{
+		public:
+			SocialProfile();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getURL() const;
+			void setURL(wchar* const url);
+
+			const wchar* getUsername() const;
+			void setUsername(wchar* const username);
+
+			const wchar* getUserIdentifier() const;
+			void setUserIdentifier(wchar* const userIdentifier);
+
+			const eSocialProfileServices& getService() const;
+			void setService(const eSocialProfileServices& service);
+
+			const wchar* getServiceLabel() const;
+			void setServiceLabel(wchar* const serviceLabel);
+
+			const eSocialProfileTypes& getType() const;
+			void setType(const eSocialProfileTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
+
 		private:
-			//The URL of the social service.
+			void readURL(MAAddress const buffer);
+			void readUsername(MAAddress const buffer);
+			void readUserIdentifier(MAAddress const buffer);
+			void readService(MAAddress const buffer);
+			void readServiceLabel(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
+		private:
+			//The URL of the social profile.
 			wchar* mURL;
 			//The user name of the social profile.
 			wchar* mUsername;
@@ -79,6 +119,8 @@ namespace PIM
 			eSocialProfileTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//Shows if this is a primary social profile or not.
+			bool mIsPrimary;
 	};
 
 } //PIM

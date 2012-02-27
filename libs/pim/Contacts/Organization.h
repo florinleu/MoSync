@@ -27,6 +27,8 @@ MA 02110-1301, USA.
 #ifndef __ORGANIZATION_H__
 #define __ORGANIZATION_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -43,6 +45,52 @@ namespace PIM
 
 	class Organization
 	{
+		public:
+			Organization();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getName() const;
+			void setName(wchar* const street); //fleu TODO is this correct?
+
+			const wchar* getTitle() const;
+			void setTitle(wchar* const title);
+
+			const wchar* getDepartment() const;
+			void setDepartment(wchar* const department);
+
+			const wchar* getLocation() const;
+			void setLocation(wchar* const location);
+
+			const wchar* getJobDescription() const;
+			void setJobDescription(wchar* const jobDescription);
+
+			const wchar* getPhoneticName() const;
+			void setPhoneticName(wchar* const phoneticName);
+
+			const wchar* getSymbol() const;
+			void setSymbol(wchar* const symbol);
+
+			const eOrganizationTypes& getType() const;
+			void setType(const eOrganizationTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
+
+		private:
+			void readName(MAAddress const buffer);
+			void readTitle(MAAddress const buffer);
+			void readDepartment(MAAddress const buffer);
+			void readLocation(MAAddress const buffer);
+			void readJobDescription(MAAddress const buffer);
+			void readPhoneticName(MAAddress const buffer);
+			void readSymbol(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
 		private:
 			//The company name.
 			wchar* mName;
@@ -53,16 +101,18 @@ namespace PIM
 			//The office location of this company.
 			wchar* mLocation;
 			//The job description at this company
-			wchar* mPhoneticName;
+			wchar* mJobDescription;
 			//The phonetic name of this company
-			wchar* mNeighborhood;
-			////The symbol of this company
+			wchar* mPhoneticName;
+			//The symbol of this company
 			wchar* mSymbol;
 
 			//The type of data.
 			eOrganizationTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//Shows if this is a primary address or not.
+			bool mIsPrimary;
 	};
 
 } //PIM

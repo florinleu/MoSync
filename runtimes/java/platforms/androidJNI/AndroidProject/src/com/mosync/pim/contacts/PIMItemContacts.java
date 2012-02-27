@@ -38,6 +38,7 @@ public class PIMItemContacts extends PIMItem {
 	PIMFieldRelation mRelation;
 	PIMFieldOrganizationInfo mOrganizationInfo;
 	PIMFieldEvent mEvent;
+	PIMFieldSocialProfile mSocialProfile;
 
 	/**
 	 * Constructor
@@ -69,29 +70,29 @@ public class PIMItemContacts extends PIMItem {
 		mOrganizationInfo = new PIMFieldOrganizationInfo();
 		mEvent = new PIMFieldEvent();
 		mPIMFields.add(mAddress);
-		// mPIMFields.add(mBirthday);
-		// mPIMFields.add(mClass);
+		mPIMFields.add(mBirthday);
+		mPIMFields.add(mClass);
 		mPIMFields.add(mEmail);
 		// mPIMFields.add(mFormattedAddress);
 		// mPIMFields.add(mFormattedName);
 		mPIMFields.add(mName);
 		mPIMFields.add(mNickname);
-		// mPIMFields.add(mNote);
-		// mPIMFields.add(mOrganization);
+		mPIMFields.add(mNote);
+		mPIMFields.add(mOrganization);
 		// mPIMFields.add(mPhoto);
 		// mPIMFields.add(mPhotoURL);
-		// mPIMFields.add(mPublicKey);
-		// mPIMFields.add(mPublicKeyString);
+		mPIMFields.add(mPublicKey);
+		mPIMFields.add(mPublicKeyString);
 		// mPIMFields.add(mRevision);
 		mPIMFields.add(mPhone);
-		// mPIMFields.add(mTitle);
+		mPIMFields.add(mTitle);
 		mPIMFields.add(mUID);
-		// mPIMFields.add(mURL);
-		// mPIMFields.add(mIM);
+		mPIMFields.add(mURL);
+		mPIMFields.add(mIM);
 		// mPIMFields.add(mRelation);
-		// mPIMFields.add(mOrganizationInfo);
-		// mPIMFields.add(mEvent);
-
+		mPIMFields.add(mOrganizationInfo);
+		mPIMFields.add(mEvent);
+		mPIMFields.add(mSocialProfile);
 		mUID.read(id);
 	}
 

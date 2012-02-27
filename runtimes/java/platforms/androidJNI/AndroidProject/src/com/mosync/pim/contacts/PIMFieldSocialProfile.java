@@ -5,17 +5,17 @@ import android.content.ContentResolver;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_REVISION;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_DATE;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
-public class PIMFieldRevision extends PIMFieldContacts {
+public class PIMFieldSocialProfile extends PIMFieldContacts {
 
 	/**
 	 * Constructor
 	 */
-	public PIMFieldRevision() {
-		mType = MA_PIM_FIELD_CONTACT_REVISION;
-		mDataType = MA_PIM_TYPE_DATE;
+	public PIMFieldSocialProfile() {
+		mType = MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE;
+		mDataType = MA_PIM_TYPE_STRING;
 	}
 
 	protected void createMaps() {
@@ -23,7 +23,7 @@ public class PIMFieldRevision extends PIMFieldContacts {
 	}
 
 	public void read(String contactId) {
-		DebugPrint("PIMFieldRevision.read(" + contactId + ")");
+		DebugPrint("PIMFieldSocialProfile.read(" + contactId + ")");
 		print();
 	}
 
@@ -65,7 +65,7 @@ public class PIMFieldRevision extends PIMFieldContacts {
 	 * Print field values.
 	 */
 	protected void print() {
-		DebugPrint("**********REVISION*********");
+		DebugPrint("******SOCIAL PROFILE*******");
 		DebugPrint("Not supported");
 		DebugPrint("***************************");
 	}

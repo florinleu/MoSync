@@ -27,7 +27,6 @@ MA 02110-1301, USA.
 #ifndef __PHOTO_H__
 #define __PHOTO_H__
 
-#include <maapi.h>
 #include <IX_PIM.h>
 
 namespace PIM

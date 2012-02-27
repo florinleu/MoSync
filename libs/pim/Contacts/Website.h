@@ -27,6 +27,8 @@ MA 02110-1301, USA.
 #ifndef __WEBSITE_H__
 #define __WEBSITE_H__
 
+#include <IX_PIM.h>
+
 namespace PIM
 {
 
@@ -53,6 +55,28 @@ namespace PIM
 
 	class Website
 	{
+		public:
+			Website();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getURL() const;
+			void setURL(wchar* const street); //fleu TODO is this correct?
+
+			const eWebsiteTypes& getType() const;
+			void setType(const eWebsiteTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
+
+		private:
+			void readURL(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
 		private:
 			//The website URL.
 			wchar* mURL;
@@ -61,6 +85,8 @@ namespace PIM
 			eWebsiteTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//Shows if this is a primary website or not.
+			bool mIsPrimary;
 	};
 
 } //PIM
