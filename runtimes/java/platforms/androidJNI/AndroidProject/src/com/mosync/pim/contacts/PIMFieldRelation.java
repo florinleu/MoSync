@@ -26,7 +26,6 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_RELATION
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.Relation;
-
 import com.mosync.pim.*;
 
 public class PIMFieldRelation extends PIMFieldContacts {
@@ -39,8 +38,8 @@ public class PIMFieldRelation extends PIMFieldContacts {
 		mStrType = Relation.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING;
 
-		mNames = new String[] { Relation._ID, Relation.NAME, Relation.TYPE,
-				Relation.LABEL, Relation.IS_PRIMARY };
+		mNames = new String[] { Relation.NAME, Relation.TYPE, Relation.LABEL,
+				Relation.IS_PRIMARY };
 	}
 
 	protected void createMaps() {
@@ -66,8 +65,11 @@ public class PIMFieldRelation extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Relation.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index, Relation.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
 		return 0;
 	}
 
@@ -79,7 +81,11 @@ public class PIMFieldRelation extends PIMFieldContacts {
 		if ((attribute = getColumnValue(index, Relation.TYPE)) == null) {
 			return -1;
 		}
-		return Integer.parseInt(attribute);
+		try {
+			return Integer.parseInt(attribute);
+		} catch (NumberFormatException e) {
+			return Relation.TYPE_CUSTOM;
+		}
 	}
 
 	/**
@@ -105,8 +111,12 @@ public class PIMFieldRelation extends PIMFieldContacts {
 	 * @param index
 	 */
 	protected boolean hasCustomLabel(int index) {
-		return ((Integer.parseInt(getColumnValue(index, Relation.TYPE)) == Relation.TYPE_CUSTOM) ? true
-				: false);
+		try {
+			return ((Integer.parseInt(getColumnValue(index, Relation.TYPE)) == Relation.TYPE_CUSTOM) ? true
+					: false);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	protected char[] getData(int index) {
@@ -121,7 +131,7 @@ public class PIMFieldRelation extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[1];
+		return val[0];
 	}
 
 	int getDataSize(String val) {
@@ -135,7 +145,7 @@ public class PIMFieldRelation extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[1] = data;
+		val[0] = data;
 		mValues.set(index, val);
 	}
 
@@ -166,7 +176,7 @@ public class PIMFieldRelation extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Relation " + i);
-			DebugPrint(mNames[1] + ": " + val[1]);
+			DebugPrint(mNames[0] + ": " + val[0]);
 		}
 		DebugPrint("***************************");
 	}

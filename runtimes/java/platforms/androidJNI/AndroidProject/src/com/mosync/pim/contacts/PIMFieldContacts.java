@@ -1,7 +1,6 @@
 package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
-import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract.Data;
 

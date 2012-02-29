@@ -1,7 +1,6 @@
 package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
-import android.content.ContentResolver;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 

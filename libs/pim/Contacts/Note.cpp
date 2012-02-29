@@ -38,7 +38,6 @@ namespace PIM
 		printf("@LIB: note read");
 		args.field = MA_PIM_FIELD_CONTACT_NOTE;
 		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		printf("RET VALUE = %d", maPimItemGetValue(&args, 0));
 		if (maPimItemGetValue(&args, 0) >= 0)
 		{
 			readText(args.buf);

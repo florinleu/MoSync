@@ -12,6 +12,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_NOTE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.Note;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 
 import com.mosync.pim.*;
 
@@ -48,8 +49,11 @@ public class PIMFieldNote extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Note.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index, Note.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
 		return 0;
 	}
 

@@ -47,8 +47,7 @@ namespace PIM
 
 	void Photo::readHandle(MAAddress const buffer)
 	{
-		wchar* src = (wchar*)buffer;
-		mHandle = atoi(wstrtostr(src));
+		mHandle = *(int*)buffer;
 	}
 
 	/*

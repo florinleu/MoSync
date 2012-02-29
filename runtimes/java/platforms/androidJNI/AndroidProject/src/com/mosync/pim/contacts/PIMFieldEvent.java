@@ -35,8 +35,8 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		mStrType = Event.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_DATE;
 
-		mNames = new String[] { Event._ID, Event.START_DATE, Event.TYPE,
-				Event.LABEL, Event.IS_PRIMARY };
+		mNames = new String[] { Event.START_DATE, Event.TYPE, Event.LABEL,
+				Event.IS_PRIMARY };
 	}
 
 	protected void createMaps() {
@@ -54,9 +54,9 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		} else {
 			for (int i = 0; i < mValues.size(); i++) {
 				val = mValues.get(i);
-				if (val[1] != null) {
-					val[1] = Integer
-							.toString((int) (getUtcTimeInMillis(val[1]) / 1000));
+				if (val[0] != null) {
+					val[0] = Integer
+							.toString((int) (getUtcTimeInMillis(val[0]) / 1000));
 					mValues.set(i, val);
 				}
 			}
@@ -82,8 +82,12 @@ public class PIMFieldEvent extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Event.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index, Event.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
+
 		return 0;
 	}
 
@@ -95,7 +99,11 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		if ((attribute = getColumnValue(index, Event.TYPE)) == null) {
 			return -1;
 		}
-		return Integer.parseInt(attribute);
+		try {
+			return Integer.parseInt(attribute);
+		} catch (NumberFormatException e) {
+			return Event.TYPE_OTHER;
+		}
 	}
 
 	protected int setAttribute(int index, int attribute) {
@@ -139,8 +147,12 @@ public class PIMFieldEvent extends PIMFieldContacts {
 	 * @param index
 	 */
 	protected boolean hasCustomLabel(int index) {
-		return ((Integer.parseInt(getColumnValue(index, Event.TYPE)) == Event.TYPE_CUSTOM) ? true
-				: false);
+		try {
+			return ((Integer.parseInt(getColumnValue(index, Event.TYPE)) == Event.TYPE_CUSTOM) ? true
+					: false);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	protected char[] getData(int index) {
@@ -149,13 +161,19 @@ public class PIMFieldEvent extends PIMFieldContacts {
 			return null;
 		}
 		char[] buffer = new char[getDataSize(val)];
-		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
+		int toWrite = 0;
+		try {
+			toWrite = Integer.parseInt(val);
+		} catch (NumberFormatException e) {
+		}
+
+		PIMUtil.writeInt(toWrite, buffer, 0);
 		return buffer;
 	}
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[1];
+		return val[0];
 	}
 
 	int getDataSize(String val) {
@@ -169,7 +187,7 @@ public class PIMFieldEvent extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[1] = data;
+		val[0] = data;
 		mValues.set(index, val);
 	}
 
@@ -180,8 +198,8 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		} else {
 			for (int i = 0; i < mValues.size(); i++) {
 				val = mValues.get(i);
-				if (val[1] != null) {
-					val[1] = getUtcTime(Long.parseLong(val[1]) * 1000);
+				if (val[0] != null) {
+					val[0] = getUtcTime(Long.parseLong(val[0]) * 1000);
 					mValues.set(i, val);
 				}
 			}
@@ -208,7 +226,7 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Event " + i);
-			DebugPrint(mNames[1] + ": " + val[1]);
+			DebugPrint(mNames[0] + ": " + val[0]);
 		}
 		DebugPrint("***************************");
 	}

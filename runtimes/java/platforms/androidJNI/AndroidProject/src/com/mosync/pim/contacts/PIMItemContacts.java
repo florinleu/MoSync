@@ -69,6 +69,7 @@ public class PIMItemContacts extends PIMItem {
 		mRelation = new PIMFieldRelation();
 		mOrganizationInfo = new PIMFieldOrganizationInfo();
 		mEvent = new PIMFieldEvent();
+		mSocialProfile = new PIMFieldSocialProfile();
 		mPIMFields.add(mAddress);
 		mPIMFields.add(mBirthday);
 		mPIMFields.add(mClass);

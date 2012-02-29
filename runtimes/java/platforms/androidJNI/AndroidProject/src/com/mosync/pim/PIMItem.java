@@ -70,7 +70,7 @@ public abstract class PIMItem {
 		Iterator<PIMField> i = mPIMFields.iterator();
 		while (i.hasNext()) {
 			PIMField p = i.next();
-			if (p.getType() == type) {
+			if ((p != null) && (p.getType() == type)) {
 				return p;
 			}
 		}

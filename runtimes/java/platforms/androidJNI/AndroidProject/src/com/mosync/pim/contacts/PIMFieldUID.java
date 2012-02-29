@@ -6,8 +6,6 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_UID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
-import android.content.ContentResolver;
-
 import com.mosync.pim.*;
 
 public class PIMFieldUID extends PIMFieldContacts {

@@ -58,7 +58,11 @@ public class PIMFieldAddress extends PIMFieldContacts {
 		if ((attribute = getColumnValue(index, StructuredPostal.TYPE)) == null) {
 			return -1;
 		}
-		return Integer.parseInt(attribute);
+		try {
+			return Integer.parseInt(attribute);
+		} catch (NumberFormatException e) {
+			return StructuredPostal.TYPE_OTHER;
+		}
 	}
 
 	/**
@@ -84,8 +88,13 @@ public class PIMFieldAddress extends PIMFieldContacts {
 	 * @param index
 	 */
 	protected boolean hasCustomLabel(int index) {
-		return ((Integer.parseInt(getColumnValue(index, StructuredPostal.TYPE)) == StructuredPostal.TYPE_CUSTOM) ? true
-				: false);
+		try {
+			return ((Integer.parseInt(getColumnValue(index,
+					StructuredPostal.TYPE)) == StructuredPostal.TYPE_CUSTOM) ? true
+					: false);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	protected char[] getData(int index) {

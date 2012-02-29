@@ -27,6 +27,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_CONTACT_IM_PROTOCOL_JA
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_CONTACT_IM_PROTOCOL_NETMEETING;
 
 import android.provider.ContactsContract.CommonDataKinds.Im;
+
 import com.mosync.pim.*;
 
 public class PIMFieldIM extends PIMFieldContacts {
@@ -78,15 +79,23 @@ public class PIMFieldIM extends PIMFieldContacts {
 	}
 
 	String getProtocolName(String value) {
-		int val = Integer.parseInt(value);
-		if (!mProtocols.containsKey(val))
+		int val = 0;
+		try {
+			val = Integer.parseInt(value);
+			if (!mProtocols.containsKey(val))
+				return "Custom";
+		} catch (NumberFormatException e) {
 			return "Custom";
+		}
 		return mProtocols.get(val);
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Im.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index, Im.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
 		return 0;
 	}
 
@@ -98,7 +107,12 @@ public class PIMFieldIM extends PIMFieldContacts {
 		if ((attribute = getColumnValue(index, Im.TYPE)) == null) {
 			return -1;
 		}
-		return Integer.parseInt(attribute);
+
+		try {
+			return Integer.parseInt(attribute);
+		} catch (NumberFormatException e) {
+			return Im.TYPE_OTHER;
+		}
 	}
 
 	/**
@@ -124,8 +138,12 @@ public class PIMFieldIM extends PIMFieldContacts {
 	 * @param index
 	 */
 	protected boolean hasCustomLabel(int index) {
-		return ((Integer.parseInt(getColumnValue(index, Im.TYPE)) == Im.TYPE_CUSTOM) ? true
-				: false);
+		try {
+			return ((Integer.parseInt(getColumnValue(index, Im.TYPE)) == Im.TYPE_CUSTOM) ? true
+					: false);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	protected char[] getData(int index) {

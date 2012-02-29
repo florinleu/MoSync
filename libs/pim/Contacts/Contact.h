@@ -46,21 +46,25 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
+	enum ReadFlags {
+		RF_NONE = 0,
+		RF_NAME = 0x1,
+		RF_ADDRESS = 0x2,
+		RF_PHONE = 0x4,
+		RF_EMAIL = 0x8,
+		RF_WEBSITE = 0x10,
+		RF_INSTANTMESSAGING = 0x20,
+		RF_NOTE = 0x40,
+		RF_ORGANIZATION = 0x80,
+		RF_SOCIALPROFILE = 0x100,
+		RF_EVENT = 0x200,
+		RF_RELATION = 0x400,
+		RF_ALL = 0x7FF
+	};
+
 	class Contact
 	{
 	public:
-		enum ReadFlags {
-			RF_NAME = 0x1,
-			RF_ADDRESS = 0x2,
-			RF_PHONE = 0x4,
-			RF_EMAIL = 0x8,
-			RF_WEBSITE = 0x10,
-			RF_INSTANTMESSAGING = 0x20,
-			RF_NOTE = 0x40,
-			RF_ORGANIZATION = 0x80,
-			RF_SOCIALPROFILE = 0x100,
-			RF_ALL = 0x1FF
-		};
 
 		Contact(const MAHandle listHandle);
 		~Contact();
@@ -104,6 +108,17 @@ namespace PIM
 		const SocialProfile* getSocialProfile(int index) const;
 		void setSocialProfile(SocialProfile* socialProfile, int index);
 
+		const int getEventsCount() const;
+		const Event* getEvent(int index) const;
+		void setEvent(Event* event, int index);
+
+		const int getRelationsCount() const;
+		const Relation* getRelation(int index) const;
+		void setRelation(Relation* relation, int index);
+
+		const Photo* getPhoto() const;
+		void setPhoto(Photo* photo); //fleu TODO does this need const?
+
 //	int find();
 //	int write();
 //	int remove();
@@ -121,9 +136,9 @@ namespace PIM
 		Note* mNote;
 		MAUtil::Vector<Organization*> mOrganizations;
 		MAUtil::Vector<SocialProfile*> mSocialProfiles;
-		MAUtil::Vector<Event*> mEvent;
+		MAUtil::Vector<Event*> mEvents;
+		MAUtil::Vector<Relation*> mRelations;
 		Photo* mPhoto;
-		Relation** mRelation;
 
 		const MAHandle mListHandle;
 		MAHandle mHandle;

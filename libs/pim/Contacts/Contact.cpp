@@ -187,6 +187,27 @@ namespace PIM
 			}
 		}
 
+		if ((flag & RF_EVENT) != 0)
+		{
+			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EVENT);
+			for (int i=0; i<countValues; i++)
+			{
+				Event* event = new Event();
+				event->read(args, i);
+				mEvents.add(event);
+			}
+		}
+
+		if ((flag & RF_RELATION) != 0)
+		{
+			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_RELATION);
+			for (int i=0; i<countValues; i++)
+			{
+				Relation* relation = new Relation();
+				relation->read(args, i);
+				mRelations.add(relation);
+			}
+		}
 		return 0;
 	}
 
@@ -400,5 +421,69 @@ namespace PIM
 	void Contact::setSocialProfile(SocialProfile* socialProfile, int index)
 	{
 		mSocialProfiles[index] = socialProfile;
+	}
+
+	/*
+	 * Getter for the number of events.
+	 */
+	const int Contact::getEventsCount() const
+	{
+		return mEvents.size();
+	}
+
+	/*
+	 * Getter for event field.
+	 */
+	const Event* Contact::getEvent(int index) const
+	{
+		return mEvents[index];
+	}
+
+	/*
+	 * Setter for event field.
+	 */
+	void Contact::setEvent(Event* event, int index)
+	{
+		mEvents[index] = event;
+	}
+
+	/*
+	 * Getter for the number of relations.
+	 */
+	const int Contact::getRelationsCount() const
+	{
+		return mRelations.size();
+	}
+
+	/*
+	 * Getter for relation field.
+	 */
+	const Relation* Contact::getRelation(int index) const
+	{
+		return mRelations[index];
+	}
+
+	/*
+	 * Setter for relation field.
+	 */
+	void Contact::setRelation(Relation* relation, int index)
+	{
+		mRelations[index] = relation;
+	}
+
+	/*
+	 * Getter for photo field.
+	 */
+	const Photo* Contact::getPhoto() const
+	{
+		return mPhoto;
+	}
+
+	/*
+	 * Setter for photo field.
+	 */
+	void Contact::setPhoto(Photo* photo)
+	{
+		mPhoto = photo;
 	}
 }

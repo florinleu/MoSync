@@ -14,7 +14,6 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_PHOTO;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_INT;
 
 import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
@@ -33,7 +32,7 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 		mStrType = Photo.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_INT;
 
-		mNames = new String[] { Photo._ID, Photo.PHOTO, Photo.IS_PRIMARY };
+		mNames = new String[] { Photo.PHOTO };
 	}
 
 	protected void createMaps() {
@@ -47,25 +46,25 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 	public void read(String contactId) {
 		DebugPrint("PIMFieldPhoto.read(" + contactId + ")");
 		Cursor cursor = getContentResolver().query(Data.CONTENT_URI, mNames,
-				Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?",
+				Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?",
 				new String[] { String.valueOf(contactId), mStrType }, null);
 
 		while (cursor.moveToNext()) {
 			String[] val = new String[mNames.length];
-			for (int i = 0; i < mNames.length; i++) {
-				int index = cursor.getColumnIndex(mNames[i]);
-				if (index >= 0) {
-					if (mNames[i].equals(Photo.PHOTO)) {
-						byte[] b = cursor.getBlob(index);
-						if (b != null) {
-							val[i] = Integer.toString(loadPhoto(b));
-						}
-					} else {
-						val[i] = cursor.getString(index);
-					}
+			int index = cursor.getColumnIndex(mNames[0]);
+			DebugPrint("index = " + index);
+			if (index >= 0) {
+				byte[] b = cursor.getBlob(index);
+				DebugPrint("b = " + b);
+				if (b != null) {
+					val[0] = Integer.toString(loadPhoto(b));
 				}
+				DebugPrint("Val[0] = " + val[0]);
+				// else {
+				// val[0] = cursor.getString(index);
+				// }
 			}
-			if ((val[1] != null) && val[1].equals("")) {
+			if ((val[0] != null) && !val[0].equals("")) {
 				mValues.add(val);
 				mStates.add(State.NONE);
 			}
@@ -100,8 +99,11 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Photo.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index, Photo.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
 		return 0;
 	}
 
@@ -153,13 +155,18 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 			return null;
 		}
 		char[] buffer = new char[getDataSize(val)];
-		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
+		int toWrite = -1;
+		try {
+			toWrite = Integer.parseInt(val);
+		} catch (NumberFormatException e) {
+		}
+		PIMUtil.writeInt(toWrite, buffer, 0);
 		return buffer;
 	}
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[1];
+		return val[0];
 	}
 
 	int getDataSize(String val) {
@@ -173,7 +180,7 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[1] = data;
+		val[0] = data;
 		mValues.set(index, val);
 	}
 
@@ -212,7 +219,7 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 				+ values[0]);
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newUpdate(Data.CONTENT_URI).withSelection(
-						Data.CONTACT_ID + "=?" + " AND " + Data.MIMETYPE + "=?"
+						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
 								+ " AND " + Data._ID + "=?",
 						new String[] { Integer.toString(rawContactId),
 								mStrType, values[0] });
@@ -256,7 +263,7 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 				|| ((val = mValues.get(0)) == null)) {
 			DebugPrint("Not available");
 		} else {
-			DebugPrint("Photo: " + val[1]);
+			DebugPrint("Photo: " + val[0]);
 		}
 		DebugPrint("***************************");
 	}

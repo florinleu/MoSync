@@ -4,7 +4,6 @@ import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_UNAVAILABLE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 
-import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract.Contacts;
 

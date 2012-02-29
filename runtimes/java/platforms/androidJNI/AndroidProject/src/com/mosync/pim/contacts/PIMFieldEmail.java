@@ -15,7 +15,6 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_EMAIL;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.Email;
-
 import com.mosync.pim.*;
 
 public class PIMFieldEmail extends PIMFieldContacts {
@@ -42,8 +41,12 @@ public class PIMFieldEmail extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Email.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index, Email.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
+
 		return 0;
 	}
 
@@ -55,7 +58,11 @@ public class PIMFieldEmail extends PIMFieldContacts {
 		if ((attribute = getColumnValue(index, Email.TYPE)) == null) {
 			return -1;
 		}
-		return Integer.parseInt(attribute);
+		try {
+			return Integer.parseInt(attribute);
+		} catch (NumberFormatException e) {
+			return Email.TYPE_OTHER;
+		}
 	}
 
 	/**
@@ -81,8 +88,12 @@ public class PIMFieldEmail extends PIMFieldContacts {
 	 * @param index
 	 */
 	protected boolean hasCustomLabel(int index) {
-		return ((Integer.parseInt(getColumnValue(index, Email.TYPE)) == Email.TYPE_CUSTOM) ? true
-				: false);
+		try {
+			return ((Integer.parseInt(getColumnValue(index, Email.TYPE)) == Email.TYPE_CUSTOM) ? true
+					: false);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	protected char[] getData(int index) {

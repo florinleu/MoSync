@@ -17,6 +17,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_ATTRIBUTE_COMBO_UN
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_URL;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 
 import com.mosync.pim.*;
@@ -48,8 +49,11 @@ public class PIMFieldURL extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Website.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index, Website.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
 		return 0;
 	}
 
@@ -61,7 +65,11 @@ public class PIMFieldURL extends PIMFieldContacts {
 		if ((attribute = getColumnValue(index, Website.TYPE)) == null) {
 			return -1;
 		}
-		return Integer.parseInt(attribute);
+		try {
+			return Integer.parseInt(attribute);
+		} catch (NumberFormatException e) {
+			return Website.TYPE_OTHER;
+		}
 	}
 
 	/**
@@ -87,8 +95,12 @@ public class PIMFieldURL extends PIMFieldContacts {
 	 * @param index
 	 */
 	protected boolean hasCustomLabel(int index) {
-		return ((Integer.parseInt(getColumnValue(index, Website.TYPE)) == Website.TYPE_CUSTOM) ? true
-				: false);
+		try {
+			return ((Integer.parseInt(getColumnValue(index, Website.TYPE)) == Website.TYPE_CUSTOM) ? true
+					: false);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	protected char[] getData(int index) {

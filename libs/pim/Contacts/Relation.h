@@ -20,12 +20,14 @@ MA 02110-1301, USA.
  * @author Florin Leu
  * @date 09 Feb 2011
  *
- * @brief PIM Field Address class.
+ * @brief PIM Field Relation class.
  *
  **/
 
 #ifndef __RELATION_H__
 #define __RELATION_H__
+
+#include <IX_PIM.h>
 
 namespace PIM
 {
@@ -66,6 +68,28 @@ namespace PIM
 
 	class Relation
 	{
+		public:
+			Relation();
+
+			void read(MA_PIM_ARGS& args, int index);
+
+			const wchar* getName() const;
+			void setName(wchar* const name);
+
+			const eRelationTypes& getType() const;
+			void setType(const eRelationTypes& type);
+
+			const wchar* getLabel() const;
+			void setLabel(wchar* const label);
+
+			const bool isPrimary() const;
+
+		private:
+			void readName(MAAddress const buffer);
+
+			void readType(const MAHandle handle, const int index);
+			void readLabel(const MAHandle handle, const int index);
+
 		private:
 			//The name of the relative.
 			wchar* mName;
@@ -74,6 +98,8 @@ namespace PIM
 			eRelationTypes mType;
 			//The user defined label
 			wchar* mLabel;
+			//Shows if this is a primary phone number or not.
+			bool mIsPrimary;
 	};
 
 } //PIM

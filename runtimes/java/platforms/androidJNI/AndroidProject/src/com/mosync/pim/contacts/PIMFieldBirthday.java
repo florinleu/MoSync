@@ -18,7 +18,6 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_DATE;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-
 import com.mosync.pim.*;
 
 public class PIMFieldBirthday extends PIMFieldContacts {
@@ -83,9 +82,15 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, StructuredName.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer.parseInt(getColumnValue(index,
+					StructuredName.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
+
 		return 0;
+
 	}
 
 	protected int getAndroidAttribute(int index) {
@@ -138,7 +143,14 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 			return null;
 		}
 		char[] buffer = new char[getDataSize(val)];
-		PIMUtil.writeInt(Integer.parseInt(val), buffer, 0);
+
+		int toWrite = 0;
+		try {
+			toWrite = Integer.parseInt(val);
+		} catch (NumberFormatException e) {
+		}
+
+		PIMUtil.writeInt(toWrite, buffer, 0);
 		return buffer;
 	}
 

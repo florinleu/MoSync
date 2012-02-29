@@ -12,11 +12,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_ATTRIBUTE_COMBO_UN
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_ORG;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
-import android.content.ContentResolver;
-import android.database.Cursor;
-import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.CommonDataKinds.Organization;
-
 import com.mosync.pim.*;
 
 public class PIMFieldOrganization extends PIMFieldContacts {
@@ -41,8 +37,12 @@ public class PIMFieldOrganization extends PIMFieldContacts {
 	}
 
 	protected int checkForPreferredAttribute(int index) {
-		if (Integer.parseInt(getColumnValue(index, Organization.IS_PRIMARY)) != 0)
-			return MA_PIM_ATTRPREFERRED;
+		try {
+			if (Integer
+					.parseInt(getColumnValue(index, Organization.IS_PRIMARY)) != 0)
+				return MA_PIM_ATTRPREFERRED;
+		} catch (NumberFormatException e) {
+		}
 		return 0;
 	}
 
@@ -54,7 +54,11 @@ public class PIMFieldOrganization extends PIMFieldContacts {
 		if ((attribute = getColumnValue(index, Organization.TYPE)) == null) {
 			return -1;
 		}
-		return Integer.parseInt(attribute);
+		try {
+			return Integer.parseInt(attribute);
+		} catch (NumberFormatException e) {
+			return Organization.TYPE_OTHER;
+		}
 	}
 
 	/**
@@ -80,8 +84,12 @@ public class PIMFieldOrganization extends PIMFieldContacts {
 	 * @param index
 	 */
 	protected boolean hasCustomLabel(int index) {
-		return ((Integer.parseInt(getColumnValue(index, Organization.TYPE)) == Organization.TYPE_CUSTOM) ? true
-				: false);
+		try {
+			return ((Integer.parseInt(getColumnValue(index, Organization.TYPE)) == Organization.TYPE_CUSTOM) ? true
+					: false);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 
 	protected char[] getData(int index) {
