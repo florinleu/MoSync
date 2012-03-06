@@ -833,7 +833,7 @@ public class MoSyncThread extends Thread
 	 *
 	 * @return	The created Bitmap, null if it failed
 	 */
-	synchronized Bitmap decodeImageFromData(final byte[] data, final BitmapFactory.Options options)
+	public synchronized Bitmap decodeImageFromData(final byte[] data, final BitmapFactory.Options options)
 	{
 		try
 		{
@@ -2761,6 +2761,15 @@ public class MoSyncThread extends Thread
 			logError("loadImage exception : " + e.toString(), e);
 			return false;
 		}
+	}
+
+	/**
+	 * Ads a bitmap to the images hashtable.
+	 * @param key
+	 * @param bitmap
+	 */
+	public void addBitmap(int key, Bitmap bitmap) {
+		mImageResources.put(key, new ImageCache(null, bitmap));
 	}
 
 	/**

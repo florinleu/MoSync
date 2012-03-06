@@ -160,12 +160,8 @@ public class PIMItemContacts extends PIMItem {
 
 		setState(State.NONE);
 		try {
-			DebugPrint("REQUEST UPDATE");
 			ContentProviderResult[] res = cr.applyBatch(
 					ContactsContract.AUTHORITY, ops);
-			for (int i = 0; i < res.length; i++) {
-				DebugPrint("RESULT " + i + ": " + res[i].toString());
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			DebugPrint("Exception: " + e.getMessage());

@@ -62,9 +62,7 @@ namespace PIM
 	{
 		DELETE(mURL);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mURL = new wchar[len + 1];
-		wcsncpy(mURL, src, len);
+		mURL = wcsdup(src);
 	}
 
 	void Website::readType(const MAHandle handle, const int index)
@@ -121,9 +119,7 @@ namespace PIM
 		maPimItemGetLabel(&args, index);
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
-		int len = wcslen(src);
-		mLabel = new wchar[len + 1];
-		wcsncpy(mLabel, src, len);
+		mLabel = wcsdup(src);
 	}
 
 	/*

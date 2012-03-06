@@ -62,9 +62,7 @@ namespace PIM
 	{
 		DELETE(mNumber);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mNumber = new wchar[len + 1];
-		wcsncpy(mNumber, src, len);
+		mNumber = wcsdup(src);
 	}
 
 	void Phone::readType(const MAHandle handle, const int index)
@@ -160,9 +158,7 @@ namespace PIM
 		maPimItemGetLabel(&args, index);
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
-		int len = wcslen(src);
-		mLabel = new wchar[len + 1];
-		wcsncpy(mLabel, src, len);
+		mLabel = wcsdup(src);
 	}
 
 	/*

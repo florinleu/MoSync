@@ -53,17 +53,13 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 		while (cursor.moveToNext()) {
 			String[] val = new String[mNames.length];
 			int index = cursor.getColumnIndex(mNames[0]);
-			DebugPrint("index = " + index);
+
 			if (index >= 0) {
 				byte[] b = cursor.getBlob(index);
-				DebugPrint("b = " + b);
+
 				if (b != null) {
 					val[0] = Integer.toString(loadPhoto(b));
 				}
-				DebugPrint("Val[0] = " + val[0]);
-				// else {
-				// val[0] = cursor.getString(index);
-				// }
 			}
 			if ((val[0] != null) && !val[0].equals("")) {
 				mValues.add(val);
@@ -78,19 +74,14 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 	}
 
 	public int loadPhoto(byte[] buffer) {
-		DebugPrint("loadPhoto " + buffer);
-		// ByteBuffer bBuffer = ByteBuffer.wrap(buffer);
-
 		int photoHandle = PIMUtil.getThread().nativeCreatePlaceholder();
 
 		Bitmap bitmap = PIMUtil.getThread().decodeImageFromData(buffer, null);
 
 		if (bitmap != null) {
-			SYSLOG("Bitmap was created!");
 			PIMUtil.getThread().addBitmap(photoHandle, bitmap);
 		}
 
-		// PIMUtil.getThread().loadBinary(photoHandle, bBuffer);
 		return photoHandle;
 	}
 
@@ -202,13 +193,11 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 				.withValue(Data.MIMETYPE, mStrType);
 
 		for (int i = 0; i < names.length; i++) {
-			DebugPrint(names[i] + ": " + values[i]);
 			if (values[i] != null) {
 				if (names[i].equals(Photo.PHOTO)) {
 					byte[] buffer = PIMUtil.getThread()
 							.getUnloadedBinaryResourceAsByteArray(
 									Integer.parseInt(values[i]));
-					DebugPrint("Buffer: " + buffer);
 					if (buffer != null) {
 						builder = builder.withValue(names[i], buffer);
 					}
@@ -223,9 +212,6 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 
 	protected void updateToDisk(ArrayList<ContentProviderOperation> ops,
 			int rawContactId, String[] names, String[] values) {
-		DebugPrint("UPDATE");
-		DebugPrint("Data: " + rawContactId + "   " + mStrType + "   "
-				+ values[0]);
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newUpdate(Data.CONTENT_URI).withSelection(
 						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
@@ -234,13 +220,11 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 								mStrType, values[0] });
 
 		for (int i = 1; i < names.length; i++) {
-			DebugPrint(names[i] + ": " + values[i]);
 			if (values[i] != null) {
 				if (names[i].equals(Photo.PHOTO)) {
 					byte[] buffer = PIMUtil.getThread()
 							.getUnloadedBinaryResourceAsByteArray(
 									Integer.parseInt(values[i]));
-					DebugPrint("Buffer: " + buffer);
 					if (buffer != null) {
 						builder = builder.withValue(names[i], buffer);
 					}

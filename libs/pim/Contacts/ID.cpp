@@ -47,7 +47,6 @@ namespace PIM
 	{
 		wchar* src = (wchar*)buffer;
 		mID = wcsdup(src);
-		printf("read ID = %S, %d", mID, (int)wcslen(mID));
 	}
 
 	const wchar* ID::getID() const

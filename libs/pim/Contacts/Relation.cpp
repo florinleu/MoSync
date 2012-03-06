@@ -63,9 +63,7 @@ namespace PIM
 	{
 		DELETE(mName);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mName = new wchar[len + 1];
-		wcsncpy(mName, src, len);
+		mName = wcsdup(src);
 	}
 
 	void Relation::readType(const MAHandle handle, const int index)
@@ -143,9 +141,7 @@ namespace PIM
 		maPimItemGetLabel(&args, index);
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
-		int len = wcslen(src);
-		mLabel = new wchar[len + 1];
-		wcsncpy(mLabel, src, len);
+		mLabel = wcsdup(src);
 	}
 
 	/*

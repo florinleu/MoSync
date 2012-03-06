@@ -179,9 +179,6 @@ namespace PIM
 		memset(args.buf, 0, BUF_SIZE);
 		memcpy(args.buf, getID(), args.bufSize);
 
-		printf("ID = -%S-; size = %d", getID(), (int)wcslen(getID()));
-		printf("buf = %S; size = %d", (wchar*)args.buf, args.bufSize);
-
 		mHandle = maPimListFind(mListHandle, &args);
 		args.item = mHandle;
 

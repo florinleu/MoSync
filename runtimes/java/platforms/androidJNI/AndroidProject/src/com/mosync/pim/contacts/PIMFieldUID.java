@@ -86,7 +86,6 @@ public class PIMFieldUID extends PIMFieldContacts {
 
 	public String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		DebugPrint("RUNTIME ID = " + val[0] + "; size = " + val[0].length());
 		return val[0];
 	}
 

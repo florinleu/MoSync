@@ -49,9 +49,7 @@ namespace PIM
 	{
 		DELETE(mText);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mText = new wchar[len + 1];
-		wcsncpy(mText, src, len);
+		mText = wcsdup(src);
 	}
 
 	/*

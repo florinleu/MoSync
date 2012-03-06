@@ -96,7 +96,6 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 
 	protected char[] getData(int index) {
 		String[] val = getSpecificData(index);
-		DebugPrint("DATA SIZE = " + getDataSize(val));
 		char[] buffer = new char[getDataSize(val)];
 		PIMUtil.writeStringArray(val, buffer);
 		return buffer;

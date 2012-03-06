@@ -77,13 +77,11 @@ namespace PIM
 	void Name::readDisplayName(const MAAddress buffer)
 	{
 		mDisplayName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_DISPLAY);
-		printf("Read display name: %S", mDisplayName);
 	}
 
 	void Name::readFirstName(const MAAddress buffer)
 	{
 		mFirstName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_GIVEN);
-		printf("Read first name: %S", mFirstName);
 	}
 
 	void Name::readMiddleName(const MAAddress buffer)
@@ -100,9 +98,7 @@ namespace PIM
 	{
 		DELETE(mNickname);
 		wchar* src = (wchar*)buffer;
-		//int len = wcslen(src);
 		mNickname = wcsdup(src);
-		//wcsncpy(mNickname, src, len);
 	}
 
 	void Name::readPrefix(const MAAddress buffer)
@@ -134,9 +130,7 @@ namespace PIM
 	{
 		DELETE(mFormattedName);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mFormattedName = new wchar[len + 1];
-		wcsncpy(mFormattedName, src, len);
+		mFormattedName = wcsdup(src);
 	}
 
 	/*

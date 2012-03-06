@@ -83,7 +83,7 @@ public abstract class PIMList {
 		}
 
 		String id = new String(buffer);
-		DebugPrint("String id = " + id);
+
 		Iterator<PIMItem> iterator = mList.iterator();
 		while (iterator.hasNext()) {
 			pimItem = iterator.next();

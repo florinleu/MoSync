@@ -54,9 +54,10 @@ wchar* getWCharArrayFromBuf(MAAddress const buffer, const int arrayIndex)
 
 	if (currentArrayIndex == arrayIndex)
 	{
-		wchar* str = new wchar[wcslen(ptr) + 1];
-		wcsncpy(str, ptr, wcslen(ptr));
-		return str;
+//		wchar* str = new wchar[wcslen(ptr) + 1];
+//		wcsncpy(str, ptr, wcslen(ptr));
+//		return str;
+		return wcsdup(ptr);
 	}
 	else
 	{

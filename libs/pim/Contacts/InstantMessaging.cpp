@@ -163,9 +163,7 @@ namespace PIM
 
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
-		int len = wcslen(src);
-		mLabel = new wchar[len + 1];
-		wcsncpy(mLabel, src, len);
+		mLabel = wcsdup(src);
 	}
 
 	/*

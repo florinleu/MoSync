@@ -81,18 +81,14 @@ namespace PIM
 	{
 		DELETE(mName);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mName = new wchar[len + 1];
-		wcsncpy(mName, src, len);
+		mName = wcsdup(src);
 	}
 
 	void Organization::readTitle(const MAAddress buffer)
 	{
 		DELETE(mTitle);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mTitle = new wchar[len + 1];
-		wcsncpy(mTitle, src, len);
+		mTitle = wcsdup(src);
 	}
 
 	void Organization::readDepartment(const MAAddress buffer)
@@ -160,9 +156,7 @@ namespace PIM
 
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
-		int len = wcslen(src);
-		mLabel = new wchar[len + 1];
-		wcsncpy(mLabel, src, len);
+		mLabel = wcsdup(src);
 	}
 
 	/*

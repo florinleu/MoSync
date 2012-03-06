@@ -64,9 +64,7 @@ namespace PIM
 	{
 		DELETE(mAddress);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mAddress = new wchar[len + 1];
-		wcsncpy(mAddress, src, len);
+		mAddress = wcsdup(src);
 	}
 
 	void Email::readType(const MAHandle handle, const int index)
@@ -114,9 +112,7 @@ namespace PIM
 		maPimItemGetLabel(&args, index);
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
-		int len = wcslen(src);
-		mLabel = new wchar[len + 1];
-		wcsncpy(mLabel, src, len);
+		mLabel = wcsdup(src);
 	}
 
 	/*
