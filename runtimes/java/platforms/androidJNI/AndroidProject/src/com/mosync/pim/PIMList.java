@@ -3,17 +3,12 @@ package com.mosync.pim;
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.Iterator;
 
 import com.mosync.internal.android.MoSyncError;
 
 import android.content.ContentResolver;
-import android.database.Cursor;
-import android.provider.ContactsContract.Contacts;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
-import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_UNAVAILABLE;
-
-import com.mosync.pim.contacts.PIMItemContacts;
 
 public abstract class PIMList {
 
@@ -65,12 +60,38 @@ public abstract class PIMList {
 	PIMItem next() {
 		DebugPrint("PIMList.next()");
 
-		PIMItem pimItem = mList.get(mListIterator);
-		// pimItem.read();
+		PIMItem pimItem = mList.get(mListIterator++);
 
-		mList.set(mListIterator++, pimItem);
+		// pimItem.read();
+		// mList.set(mListIterator++, pimItem);
 
 		return pimItem;
+	}
+
+	/*
+	 * Finds the item with the specified id.
+	 */
+	PIMItem find(int buffPointer, int buffSize) {
+		DebugPrint("PIMList.find(" + buffPointer + ", " + buffSize + ")");
+		PIMItem pimItem = null;
+
+		char[] buffer = PIMUtil
+				.readBufferFromMemory(buffPointer, buffSize >> 1);
+
+		if (buffer == null) {
+			return null;
+		}
+
+		String id = new String(buffer);
+		DebugPrint("String id = " + id);
+		Iterator<PIMItem> iterator = mList.iterator();
+		while (iterator.hasNext()) {
+			pimItem = iterator.next();
+			if (pimItem.getID().compareTo(id) == 0) {
+				return pimItem;
+			}
+		}
+		return null;
 	}
 
 	/**

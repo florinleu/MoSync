@@ -4537,6 +4537,11 @@ public class MoSyncThread extends Thread
 		return mMoSyncPIM.maPimListNext(list);
 	}
 
+	int maPimListFind(int list, int buffPointer, int buffSize)
+	{
+		return mMoSyncPIM.maPimListFind(list, buffPointer, buffSize);
+	}
+
 	int maPimListClose(int list)
 	{
 		return mMoSyncPIM.maPimListClose(list);

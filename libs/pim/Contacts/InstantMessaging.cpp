@@ -48,8 +48,8 @@ namespace PIM
 	{
 		printf("@LIB: instant messaging read");
 		args.field = MA_PIM_FIELD_CONTACT_IM;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) > 0)
 		{
 			readUsername(args.buf);
 			readProtocol(args.buf);
@@ -60,12 +60,12 @@ namespace PIM
 		}
 	}
 
-	void InstantMessaging::readUsername(MAAddress const buffer)
+	void InstantMessaging::readUsername(const MAAddress buffer)
 	{
 		mUsername = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_IM_USERNAME);
 	}
 
-	void InstantMessaging::readProtocol(MAAddress const buffer)
+	void InstantMessaging::readProtocol(const MAAddress buffer)
 	{
 		wchar* wstrProtocol = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_IM_PROTOCOL);
 		char* strProtocol = wstrtostr(wstrProtocol);
@@ -115,7 +115,7 @@ namespace PIM
 		DELETE(strProtocol);
 	}
 
-	void InstantMessaging::readProtocolLabel(MAAddress const buffer)
+	void InstantMessaging::readProtocolLabel(const MAAddress buffer)
 	{
 		mProtocolLabel = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_IM_PROTOCOL_LABEL);
 	}
@@ -154,6 +154,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_IM;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -178,7 +179,7 @@ namespace PIM
 	/*
 	 * Setter for username.
 	 */
-	void InstantMessaging::setUsername(wchar* const username)
+	void InstantMessaging::setUsername(wchar* username)
 	{
 		mUsername = username;
 	}
@@ -210,7 +211,7 @@ namespace PIM
 	/*
 	 * Setter for protocol label.
 	 */
-	void InstantMessaging::setProtocolLabel(wchar* const protocolLabel)
+	void InstantMessaging::setProtocolLabel(wchar* protocolLabel)
 	{
 		mProtocolLabel = protocolLabel;
 	}
@@ -242,7 +243,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void InstantMessaging::setLabel(wchar* const label)
+	void InstantMessaging::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}

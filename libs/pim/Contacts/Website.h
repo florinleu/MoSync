@@ -61,18 +61,18 @@ namespace PIM
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getURL() const;
-			void setURL(wchar* const street); //fleu TODO is this correct?
+			void setURL(wchar* url);
 
 			const eWebsiteTypes& getType() const;
 			void setType(const eWebsiteTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
 
 			const bool isPrimary() const;
 
 		private:
-			void readURL(MAAddress const buffer);
+			void readURL(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);

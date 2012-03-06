@@ -53,42 +53,45 @@ namespace PIM
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getStreet() const;
-			void setStreet(wchar* const street); //fleu TODO is this correct?
+			void setStreet(wchar* street);
 
 			const wchar* getCity() const;
-			void setCity(wchar* const city);
+			void setCity(wchar* city);
 
 			const wchar* getState() const;
-			void setState(wchar* const state);
+			void setState(wchar* state);
 
 			const wchar* getPostalCode() const;
-			void setPostalCode(wchar* const postalCode);
+			void setPostalCode(wchar* postalCode);
 
 			const wchar* getCountry() const;
-			void setCountry(wchar* const country);
+			void setCountry(wchar* country);
 
 			const wchar* getNeighborhood() const;
-			void setNeighborhood(wchar* const neighborhood);
+			void setNeighborhood(wchar* neighborhood);
 
 			const wchar* getPOBox() const;
-			void setPOBox(wchar* const pobox);
+			void setPOBox(wchar* pobox);
 
 			const eAddressTypes& getType() const;
 			void setType(const eAddressTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
+
+			const wchar* getFormattedAddress() const;
 
 			const bool isPrimary() const;
 
 		private:
-			void readStreet(MAAddress const buffer);
-			void readCity(MAAddress const buffer);
-			void readState(MAAddress const buffer);
-			void readPostalCode(MAAddress const buffer);
-			void readCountry(MAAddress const buffer);
-			void readNeighborhood(MAAddress const buffer);
-			void readPOBox(MAAddress const buffer);
+			void readStreet(const MAAddress buffer);
+			void readCity(const MAAddress buffer);
+			void readState(const MAAddress buffer);
+			void readPostalCode(const MAAddress buffer);
+			void readCountry(const MAAddress buffer);
+			void readNeighborhood(const MAAddress buffer);
+			void readPOBox(const MAAddress buffer);
+			void readFormattedAddress(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);
@@ -105,10 +108,12 @@ namespace PIM
 			wchar* mPostalCode;
 			//The country of the address.
 			wchar* mCountry;
-			//Available only on Android.
+			//The neighborhood of the address.
 			wchar* mNeighborhood;
-			//Available only on Android.
+			//The PO Box of the address.
 			wchar* mPOBox;
+			//The formatted address.
+			wchar* mFormattedAddress;
 
 			//The type of data.
 			eAddressTypes mType;

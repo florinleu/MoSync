@@ -48,8 +48,8 @@ namespace PIM
 	{
 		printf("@LIB: website read");
 		args.field = MA_PIM_FIELD_CONTACT_URL;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) >= 0)
 		{
 			readURL(args.buf);
 
@@ -58,7 +58,7 @@ namespace PIM
 		}
 	}
 
-	void Website::readURL(MAAddress const buffer)
+	void Website::readURL(const MAAddress buffer)
 	{
 		DELETE(mURL);
 		wchar* src = (wchar*)buffer;
@@ -113,6 +113,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_URL;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -136,7 +137,7 @@ namespace PIM
 	/*
 	 * Setter for website URL.
 	 */
-	void Website::setURL(wchar* const url)
+	void Website::setURL(wchar* url)
 	{
 		mURL = url;
 	}
@@ -168,7 +169,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void Website::setLabel(wchar* const label)
+	void Website::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}

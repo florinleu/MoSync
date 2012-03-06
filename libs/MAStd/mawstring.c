@@ -18,6 +18,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "ma.h"
 #include "mawstring.h"
 #include "madmath.h"
+#include "maheap.h"
 
 #ifdef MAPIP
 
@@ -260,6 +261,23 @@ wchar *wcslwr(wchar *s)
 	}
 
 	return s;
+}
+
+wchar *wcsdup(const wchar *s)
+{
+	int len;
+	wchar* copy;
+
+	if (NULL == s)
+		return NULL;
+
+	len = wcslen(s) + 1;
+	copy = (wchar*)malloc(len * sizeof (wchar_t));
+
+	if (NULL == copy)
+		return NULL;
+
+	return memcpy(copy, s, len * sizeof (wchar_t));
 }
 
 wchar *wcsupr(wchar *s)

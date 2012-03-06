@@ -48,8 +48,8 @@ namespace PIM
 	{
 		printf("@LIB: phone read");
 		args.field = MA_PIM_FIELD_CONTACT_TEL;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) >= 0)
 		{
 			readNumber(args.buf);
 
@@ -58,7 +58,7 @@ namespace PIM
 		}
 	}
 
-	void Phone::readNumber(MAAddress const buffer)
+	void Phone::readNumber(const MAAddress buffer)
 	{
 		DELETE(mNumber);
 		wchar* src = (wchar*)buffer;
@@ -152,6 +152,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_TEL;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -175,7 +176,7 @@ namespace PIM
 	/*
 	 * Setter for phone number.
 	 */
-	void Phone::setNumber(wchar* const number)
+	void Phone::setNumber(wchar* number)
 	{
 		mNumber = number;
 	}
@@ -207,7 +208,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void Phone::setLabel(wchar* const label)
+	void Phone::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}

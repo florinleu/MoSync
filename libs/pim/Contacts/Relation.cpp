@@ -49,8 +49,8 @@ namespace PIM
 	{
 		printf("@LIB: relation read");
 		args.field = MA_PIM_FIELD_CONTACT_RELATION;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) >= 0)
 		{
 			readName(args.buf);
 
@@ -59,7 +59,7 @@ namespace PIM
 		}
 	}
 
-	void Relation::readName(MAAddress const buffer)
+	void Relation::readName(const MAAddress buffer)
 	{
 		DELETE(mName);
 		wchar* src = (wchar*)buffer;
@@ -135,6 +135,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_RELATION;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -158,7 +159,7 @@ namespace PIM
 	/*
 	 * Setter for name.
 	 */
-	void Relation::setName(wchar* const name)
+	void Relation::setName(wchar* name)
 	{
 		mName = name;
 	}
@@ -190,7 +191,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void Relation::setLabel(wchar* const label)
+	void Relation::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}

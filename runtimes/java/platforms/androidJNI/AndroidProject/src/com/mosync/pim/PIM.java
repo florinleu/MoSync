@@ -9,6 +9,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_TYPE_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_INDEX_INVALID;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_NONE;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_LIST_UNAVAILABLE;
+import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_ID_INVALID;
 
 import java.util.Hashtable;
 
@@ -124,9 +125,12 @@ public class PIM {
 
 		Cursor managedCursor = getCalendarManagedCursor(projection, selection,
 				path);
-		if (managedCursor != null)
-			return managedCursor.getCount();
-		else
+		if (managedCursor != null) {
+			int count = managedCursor.getCount();
+			managedCursor.close();
+			managedCursor = null;
+			return count;
+		} else
 			return PIMUtil.throwError(MA_PIM_ERR_LIST_UNAVAILABLE,
 					PIMError.PANIC_LIST_UNAVAILABLE,
 					PIMError.sStrListUnavailable);
@@ -235,6 +239,9 @@ public class PIM {
 			return error;
 		}
 
+		managedCursor.close();
+		managedCursor = null;
+
 		return (mPIMEventsList.size());
 	}
 
@@ -251,6 +258,26 @@ public class PIM {
 			mPIMItems.put(placeholder, pimList.next());
 		} else {
 			return MA_PIM_ERR_NONE;
+		}
+
+		return placeholder;
+	}
+
+	public int maPimListFind(int list, int buffPointer, int buffSize) {
+		DebugPrint("maPimListFind(" + list + ")");
+		PIMList pimList = null;
+		if ((list < 0) || ((pimList = getList(list)) == null)) {
+			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
+					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
+		}
+
+		int placeholder = PIMUtil.getThread().nativeCreatePlaceholder();
+		PIMItem item = null;
+		if ((item = pimList.find(buffPointer, buffSize)) != null) {
+			mPIMItems.put(placeholder, item);
+		} else {
+			return PIMUtil.throwError(MA_PIM_ERR_ID_INVALID,
+					PIMError.PANIC_ID_INVALID, PIMError.sStrHandleInvalid);
 		}
 
 		return placeholder;
@@ -427,12 +454,15 @@ public class PIM {
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
 		pimItem.close();
+		pimItem = null;
+
+		mPIMItems.remove(item);
 
 		return MA_PIM_ERR_NONE;
 	}
 
 	public int maPimItemCreate(int list) {
-		DebugPrint("maPimListNext(" + list + ")");
+		DebugPrint("maPimItemCreate(" + list + ")");
 		PIMList pimList = null;
 		if ((list < 0) || ((pimList = getList(list)) == null)) {
 			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,

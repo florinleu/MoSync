@@ -33,19 +33,27 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
+	/*
+	 * Constructor.
+	 */
+	Photo::Photo():
+			mHandle(-1)
+	{
 
-	void Photo::read(MA_PIM_ARGS& args)
+	}
+
+	bool Photo::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: photo read");
 		args.field = MA_PIM_FIELD_CONTACT_PHOTO;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, 0) > 0)
-		{
-			readHandle(args.buf);
-		}
+		args.bufSize = BUF_SIZE;
+		CHECK_RESULT(maPimItemGetValue(&args, 0));
+		readHandle(args.buf);
+
+		return true;
 	}
 
-	void Photo::readHandle(MAAddress const buffer)
+	void Photo::readHandle(const MAAddress buffer)
 	{
 		mHandle = *(int*)buffer;
 	}
@@ -69,7 +77,7 @@ namespace PIM
 	/*
 	 * Setter for photo URL.
 	 */
-	void Photo::setURL(wchar* const url)
+	void Photo::setURL(wchar* url)
 	{
 		mURL = url;
 	}

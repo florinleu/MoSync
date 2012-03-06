@@ -41,6 +41,9 @@ public abstract class PIMFieldContacts extends PIMField {
 		}
 		preProcessData();
 
+		cursor.close();
+		cursor = null;
+
 		print();
 	}
 }

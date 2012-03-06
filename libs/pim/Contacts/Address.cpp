@@ -47,9 +47,10 @@ namespace PIM
 	void Address::read(MA_PIM_ARGS& args, int index)
 	{
 		printf("@LIB: address read");
+
 		args.field = MA_PIM_FIELD_CONTACT_ADDR;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) > 0)
 		{
 			readStreet(args.buf);
 			readCity(args.buf);
@@ -62,41 +63,55 @@ namespace PIM
 			readType(args.item, index);
 			readLabel(args.item, index);
 		}
+
+		args.field = MA_PIM_FIELD_CONTACT_FORMATTED_ADDR;
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) >=0 )
+		{
+			readFormattedAddress(args.buf);
+		}
 	}
 
-	void Address::readStreet(MAAddress const buffer)
+	void Address::readStreet(const MAAddress buffer)
 	{
 		mStreet = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_STREET);
 	}
 
-	void Address::readCity(MAAddress const buffer)
+	void Address::readCity(const MAAddress buffer)
 	{
 		mCity = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_LOCALITY);
 	}
 
-	void Address::readState(MAAddress const buffer)
+	void Address::readState(const MAAddress buffer)
 	{
 		mState = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_REGION);
 	}
 
-	void Address::readPostalCode(MAAddress const buffer)
+	void Address::readPostalCode(const MAAddress buffer)
 	{
 		mPostalCode = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_POSTALCODE);
 	}
 
-	void Address::readCountry(MAAddress const buffer)
+	void Address::readCountry(const MAAddress buffer)
 	{
 		mCountry = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_COUNTRY);
 	}
 
-	void Address::readNeighborhood(MAAddress const buffer)
+	void Address::readNeighborhood(const MAAddress buffer)
 	{
 		mNeighborhood = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_NEIGHBORHOOD);
 	}
 
-	void Address::readPOBox(MAAddress const buffer)
+	void Address::readPOBox(const MAAddress buffer)
 	{
 		mPOBox = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_POBOX);
+	}
+
+	void Address::readFormattedAddress(const MAAddress buffer)
+	{
+		DELETE(mFormattedAddress);
+		wchar* src = (wchar*)buffer;
+		mFormattedAddress = wcsdup(src);
 	}
 
 	void Address::readType(const MAHandle handle, const int index)
@@ -133,6 +148,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_ADDR;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -141,9 +157,7 @@ namespace PIM
 
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
-		int len = wcslen(src);
-		mLabel = new wchar[len + 1];
-		wcsncpy(mLabel, src, len);
+		mLabel = wcsdup(src);
 	}
 
 	/*
@@ -157,7 +171,7 @@ namespace PIM
 	/*
 	 * Setter for street.
 	 */
-	void Address::setStreet(wchar* const street)
+	void Address::setStreet(wchar* street)
 	{
 		mStreet = street;
 	}
@@ -173,7 +187,7 @@ namespace PIM
 	/*
 	 * Setter for city.
 	 */
-	void Address::setCity(wchar* const city)
+	void Address::setCity(wchar* city)
 	{
 		mCity = city;
 	}
@@ -189,7 +203,7 @@ namespace PIM
 	/*
 	 * Setter for state.
 	 */
-	void Address::setState(wchar* const state)
+	void Address::setState(wchar* state)
 	{
 		mState = state;
 	}
@@ -205,7 +219,7 @@ namespace PIM
 	/*
 	 * Setter for postalCode.
 	 */
-	void Address::setPostalCode(wchar* const postalCode)
+	void Address::setPostalCode(wchar* postalCode)
 	{
 		mPostalCode = postalCode;
 	}
@@ -221,7 +235,7 @@ namespace PIM
 	/*
 	 * Setter for country.
 	 */
-	void Address::setCountry(wchar* const country)
+	void Address::setCountry(wchar* country)
 	{
 		mCountry = country;
 	}
@@ -237,7 +251,7 @@ namespace PIM
 	/*
 	 * Setter for neighborhood.
 	 */
-	void Address::setNeighborhood(wchar* const neighborhood)
+	void Address::setNeighborhood(wchar* neighborhood)
 	{
 		mNeighborhood = neighborhood;
 	}
@@ -253,9 +267,17 @@ namespace PIM
 	/*
 	 * Setter for pobox.
 	 */
-	void Address::setPOBox(wchar* const pobox)
+	void Address::setPOBox(wchar* pobox)
 	{
 		mPOBox = pobox;
+	}
+
+	/*
+	 * Getter for formatted address.
+	 */
+	const wchar* Address::getFormattedAddress() const
+	{
+		return mFormattedAddress;
 	}
 
 	/*
@@ -285,7 +307,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void Address::setLabel(wchar* const label)
+	void Address::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}

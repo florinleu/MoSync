@@ -33,18 +33,19 @@ MA 02110-1301, USA.
 namespace PIM
 {
 
-	void Note::read(MA_PIM_ARGS& args)
+	bool Note::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: note read");
 		args.field = MA_PIM_FIELD_CONTACT_NOTE;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, 0) >= 0)
-		{
-			readText(args.buf);
-		}
+		args.bufSize = BUF_SIZE;
+		CHECK_RESULT(maPimItemGetValue(&args, 0));
+
+		readText(args.buf);
+
+		return true;
 	}
 
-	void Note::readText(MAAddress const buffer)
+	void Note::readText(const MAAddress buffer)
 	{
 		DELETE(mText);
 		wchar* src = (wchar*)buffer;
@@ -64,7 +65,7 @@ namespace PIM
 	/*
 	 * Setter for text.
 	 */
-	void Note::setText(wchar* const text)
+	void Note::setText(wchar* text)
 	{
 		mText = text;
 	}

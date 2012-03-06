@@ -34,13 +34,16 @@ MA 02110-1301, USA.
 namespace PIM
 {
 
-	void Name::read(MA_PIM_ARGS& args)
+	bool Name::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: name read");
+		bool isSupported = false;
+
 		args.field = MA_PIM_FIELD_CONTACT_NAME;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
+		args.bufSize = BUF_SIZE;
 		if (maPimItemGetValue(&args, 0) > 0)
 		{
+			isSupported = true;
 			readDisplayName(args.buf);
 			readFirstName(args.buf);
 			readMiddleName(args.buf);
@@ -53,65 +56,87 @@ namespace PIM
 		}
 
 		args.field = MA_PIM_FIELD_CONTACT_NICKNAME;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
+		args.bufSize = BUF_SIZE;
 		if (maPimItemGetValue(&args, 0) >=0 )
 		{
+			isSupported = true;
 			readNickname(args.buf);
 		}
+
+		args.field = MA_PIM_FIELD_CONTACT_FORMATTED_NAME;
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, 0) >=0)
+		{
+			isSupported = true;
+			readFormattedName(args.buf);
+		}
+
+		return isSupported;
 	}
 
-	void Name::readDisplayName(MAAddress const buffer)
+	void Name::readDisplayName(const MAAddress buffer)
 	{
 		mDisplayName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_DISPLAY);
+		printf("Read display name: %S", mDisplayName);
 	}
 
-	void Name::readFirstName(MAAddress const buffer)
+	void Name::readFirstName(const MAAddress buffer)
 	{
 		mFirstName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_GIVEN);
+		printf("Read first name: %S", mFirstName);
 	}
 
-	void Name::readMiddleName(MAAddress const buffer)
+	void Name::readMiddleName(const MAAddress buffer)
 	{
 		mMiddleName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_OTHER);
 	}
 
-	void Name::readLastName(MAAddress const buffer)
+	void Name::readLastName(const MAAddress buffer)
 	{
 		mLastName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_FAMILY);
 	}
 
-	void Name::readNickname(MAAddress const buffer)
+	void Name::readNickname(const MAAddress buffer)
 	{
 		DELETE(mNickname);
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mNickname = new wchar[len + 1];
-		wcsncpy(mNickname, src, len);
+		//int len = wcslen(src);
+		mNickname = wcsdup(src);
+		//wcsncpy(mNickname, src, len);
 	}
 
-	void Name::readPrefix(MAAddress const buffer)
+	void Name::readPrefix(const MAAddress buffer)
 	{
 		mPrefix = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PREFIX);
 	}
 
-	void Name::readSuffix(MAAddress const buffer)
+	void Name::readSuffix(const MAAddress buffer)
 	{
 		mSuffix = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_SUFFIX);
 	}
 
-	void Name::readPhoneticFirstName(MAAddress const buffer)
+	void Name::readPhoneticFirstName(const MAAddress buffer)
 	{
 		mPhoneticFirstName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PHONETIC_GIVEN);
 	}
 
-	void Name::readPhoneticMiddleName(MAAddress const buffer)
+	void Name::readPhoneticMiddleName(const MAAddress buffer)
 	{
 		mPhoneticMiddleName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PHONETIC_OTHER);
 	}
 
-	void Name::readPhoneticLastName(MAAddress const buffer)
+	void Name::readPhoneticLastName(const MAAddress buffer)
 	{
 		mPhoneticLastName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PHONETIC_FAMILY);
+	}
+
+	void Name::readFormattedName(const MAAddress buffer)
+	{
+		DELETE(mFormattedName);
+		wchar* src = (wchar*)buffer;
+		int len = wcslen(src);
+		mFormattedName = new wchar[len + 1];
+		wcsncpy(mFormattedName, src, len);
 	}
 
 	/*
@@ -125,7 +150,7 @@ namespace PIM
 	/*
 	 * Setter for display name.
 	 */
-	void Name::setDisplayName(wchar* const displayName)
+	void Name::setDisplayName(wchar* displayName)
 	{
 		mDisplayName = displayName;
 	}
@@ -141,7 +166,7 @@ namespace PIM
 	/*
 	 * Setter for first name.
 	 */
-	void Name::setFirstName(wchar* const firstName)
+	void Name::setFirstName(wchar* firstName)
 	{
 		mFirstName = firstName;
 	}
@@ -157,7 +182,7 @@ namespace PIM
 	/*
 	 * Setter for middle name.
 	 */
-	void Name::setMiddleName(wchar* const middleName)
+	void Name::setMiddleName(wchar* middleName)
 	{
 		mMiddleName = middleName;
 	}
@@ -173,7 +198,7 @@ namespace PIM
 	/*
 	 * Setter for last name.
 	 */
-	void Name::setLastName(wchar* const lastName)
+	void Name::setLastName(wchar* lastName)
 	{
 		mLastName = lastName;
 	}
@@ -189,7 +214,7 @@ namespace PIM
 	/*
 	 * Setter for nickname.
 	 */
-	void Name::setNickname(wchar* const nickname)
+	void Name::setNickname(wchar* nickname)
 	{
 		mNickname = nickname;
 	}
@@ -205,7 +230,7 @@ namespace PIM
 	/*
 	 * Setter for prefix.
 	 */
-	void Name::setPrefix(wchar* const prefix)
+	void Name::setPrefix(wchar* prefix)
 	{
 		mPrefix = prefix;
 	}
@@ -221,7 +246,7 @@ namespace PIM
 	/*
 	 * Setter for suffix.
 	 */
-	void Name::setSuffix(wchar* const suffix)
+	void Name::setSuffix(wchar* suffix)
 	{
 		mSuffix = suffix;
 	}
@@ -237,7 +262,7 @@ namespace PIM
 	/*
 	 * Setter for phonetic first name.
 	 */
-	void Name::setPhoneticFirstName(wchar* const phoneticFirstName)
+	void Name::setPhoneticFirstName(wchar* phoneticFirstName)
 	{
 		mPhoneticFirstName = phoneticFirstName;
 	}
@@ -253,7 +278,7 @@ namespace PIM
 	/*
 	 * Setter for phonetic middle name.
 	 */
-	void Name::setPhoneticMiddleName(wchar* const phoneticMiddleName)
+	void Name::setPhoneticMiddleName(wchar* phoneticMiddleName)
 	{
 		mPhoneticMiddleName = phoneticMiddleName;
 	}
@@ -269,8 +294,16 @@ namespace PIM
 	/*
 	 * Setter for phonetic last name.
 	 */
-	void Name::setPhoneticLastName(wchar* const phoneticLastName)
+	void Name::setPhoneticLastName(wchar* phoneticLastName)
 	{
 		mPhoneticLastName = phoneticLastName;
+	}
+
+	/*
+	 * Getter for formatted name.
+	 */
+	const wchar* Name::getFormattedName() const
+	{
+		return mFormattedName;
 	}
 }

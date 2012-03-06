@@ -35,13 +35,13 @@ namespace PIM
 	class Note
 	{
 		public:
-			void read(MA_PIM_ARGS& args);
+			bool read(MA_PIM_ARGS& args);
 
 			const wchar* getText() const;
-			void setText(wchar* const text);
+			void setText(wchar* text);
 
 		private:
-			void readText(MAAddress const buffer);
+			void readText(const MAAddress buffer);
 
 		private:
 			//The note text.

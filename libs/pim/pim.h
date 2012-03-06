@@ -31,7 +31,7 @@ MA 02110-1301, USA.
 extern "C" {
 #endif
 
-	void initContacts();
+	bool initContacts();
 	MAHandle getListHandle();
 	void closeContacts();
 

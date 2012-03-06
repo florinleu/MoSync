@@ -1697,109 +1697,6 @@ namespace Base
 		return result;
 	}
 
-	//////////////
-	//  SENSOR  //
-	//////////////
-	int _maSensorStart(int sensor, int interval,
-		JNIEnv* jNIEnv, jobject jThis)
-	{
-		jclass cls = jNIEnv->GetObjectClass(jThis);
-
-		jmethodID methodID = jNIEnv->GetMethodID(cls, "maSensorStart", "(II)I");
-		if (methodID == 0)
-		{
-			return 0;
-		}
-
-		jint result = jNIEnv->CallIntMethod(
-			jThis, methodID,
-			sensor, interval);
-
-		jNIEnv->DeleteLocalRef(cls);
-
-		return (int)result;
-	}
-
-	int _maSensorStop(int sensor,
-		JNIEnv* jNIEnv, jobject jThis)
-	{
-		jclass cls = jNIEnv->GetObjectClass(jThis);
-
-		jmethodID methodID = jNIEnv->GetMethodID(cls, "maSensorStop", "(I)I");
-		if (methodID == 0)
-		{
-			return 0;
-		}
-
-		jint result = jNIEnv->CallIntMethod(
-			jThis, methodID,
-			sensor);
-
-		jNIEnv->DeleteLocalRef(cls);
-
-		return (int)result;
-	}
-
-	//////////////////////
-	//		PIM			//
-	//////////////////////
-	MAHandle _maPimListCount(int listType,
-		JNIEnv* jNIEnv, jobject jThis)
-	{
-		jclass cls = jNIEnv->GetObjectClass(jThis);
-		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListCount", "(I)I");
-		if (methodID == 0)
-		{
-			return 0;
-		}
-
-		jint result = jNIEnv->CallIntMethod(
-			jThis, methodID,
-			listType);
-
-		jNIEnv->DeleteLocalRef(cls);
-
-		return (int)result;
-	}
-
-	MAHandle _maPimListOpen(int listType, int index,
-		JNIEnv* jNIEnv, jobject jThis)
-	{
-		jclass cls = jNIEnv->GetObjectClass(jThis);
-		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListOpen", "(II)I");
-		if (methodID == 0)
-		{
-			return 0;
-		}
-
-		jint result = jNIEnv->CallIntMethod(
-			jThis, methodID,
-			listType, index);
-
-		jNIEnv->DeleteLocalRef(cls);
-
-		return (int)result;
-	}
-
-	MAHandle _maPimListNext(MAHandle list,
-		JNIEnv* jNIEnv, jobject jThis)
-	{
-		jclass cls = jNIEnv->GetObjectClass(jThis);
-		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListNext", "(I)I");
-		if (methodID == 0)
-		{
-			return 0;
-		}
-
-		jint result = jNIEnv->CallIntMethod(
-			jThis, methodID,
-			list);
-
-		jNIEnv->DeleteLocalRef(cls);
-
-		return (int)result;
-	}
-
 	/**
 	* Returns a handle to one of the default fonts of the device, in the style and size you specify.
 	* \param 'type' The type of the font, can be FONT_TYPE_[SANS_SERIF,SERIF,MONOSPACE].
@@ -1944,6 +1841,128 @@ namespace Base
 			return 0;
 
 		jint result = jNIEnv->CallIntMethod(jThis, methodID, font);
+
+		jNIEnv->DeleteLocalRef(cls);
+
+		return (int)result;
+	}
+
+	//////////////
+	//  SENSOR  //
+	//////////////
+	int _maSensorStart(int sensor, int interval,
+		JNIEnv* jNIEnv, jobject jThis)
+	{
+		jclass cls = jNIEnv->GetObjectClass(jThis);
+
+		jmethodID methodID = jNIEnv->GetMethodID(cls, "maSensorStart", "(II)I");
+		if (methodID == 0)
+		{
+			return 0;
+		}
+
+		jint result = jNIEnv->CallIntMethod(
+			jThis, methodID,
+			sensor, interval);
+
+		jNIEnv->DeleteLocalRef(cls);
+
+		return (int)result;
+	}
+
+	int _maSensorStop(int sensor,
+		JNIEnv* jNIEnv, jobject jThis)
+	{
+		jclass cls = jNIEnv->GetObjectClass(jThis);
+
+		jmethodID methodID = jNIEnv->GetMethodID(cls, "maSensorStop", "(I)I");
+		if (methodID == 0)
+		{
+			return 0;
+		}
+
+		jint result = jNIEnv->CallIntMethod(
+			jThis, methodID,
+			sensor);
+
+		jNIEnv->DeleteLocalRef(cls);
+
+		return (int)result;
+	}
+
+	//////////////////////
+	//		PIM			//
+	//////////////////////
+	MAHandle _maPimListCount(int listType,
+		JNIEnv* jNIEnv, jobject jThis)
+	{
+		jclass cls = jNIEnv->GetObjectClass(jThis);
+		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListCount", "(I)I");
+		if (methodID == 0)
+		{
+			return 0;
+		}
+
+		jint result = jNIEnv->CallIntMethod(
+			jThis, methodID,
+			listType);
+
+		jNIEnv->DeleteLocalRef(cls);
+
+		return (int)result;
+	}
+
+	MAHandle _maPimListOpen(int listType, int index,
+		JNIEnv* jNIEnv, jobject jThis)
+	{
+		jclass cls = jNIEnv->GetObjectClass(jThis);
+		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListOpen", "(II)I");
+		if (methodID == 0)
+		{
+			return 0;
+		}
+
+		jint result = jNIEnv->CallIntMethod(
+			jThis, methodID,
+			listType, index);
+
+		jNIEnv->DeleteLocalRef(cls);
+
+		return (int)result;
+	}
+
+	MAHandle _maPimListNext(MAHandle list,
+		JNIEnv* jNIEnv, jobject jThis)
+	{
+		jclass cls = jNIEnv->GetObjectClass(jThis);
+		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListNext", "(I)I");
+		if (methodID == 0)
+		{
+			return 0;
+		}
+
+		jint result = jNIEnv->CallIntMethod(
+			jThis, methodID,
+			list);
+
+		jNIEnv->DeleteLocalRef(cls);
+
+		return (int)result;
+	}
+
+	MAHandle _maPimListFind(MAHandle list, int bufPointer, int bufSize,
+		JNIEnv* jNIEnv, jobject jThis)
+	{
+		jclass cls = jNIEnv->GetObjectClass(jThis);
+		jmethodID methodID = jNIEnv->GetMethodID(cls, "maPimListFind", "(III)I");
+		if (methodID == 0)
+		{
+			return 0;
+		}
+
+		jint result = jNIEnv->CallIntMethod(
+			jThis, methodID,
+			list, bufPointer, bufSize);
 
 		jNIEnv->DeleteLocalRef(cls);
 

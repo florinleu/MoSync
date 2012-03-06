@@ -24,19 +24,25 @@ MA 02110-1301, USA.
  *
  **/
 
+#include <mawstring.h>
+#include <mawvsprintf.h>
+
 #include "Contact.h"
 #include "IX_PIM.h"
 #include "util.h"
+#include "pim.h"
 
 #include <conprint.h>
+
+using namespace MAUtil;
 
 namespace PIM
 {
 	/*
 	 * Constructor.
 	 */
-	Contact::Contact(const MAHandle listHandle):
-			mListHandle(listHandle)
+	Contact::Contact():
+			mListHandle(getListHandle())
 	{
 	}
 
@@ -45,33 +51,28 @@ namespace PIM
 	 */
 	Contact::~Contact()
 	{
-		clean();
+		cleanFields();
 	}
 
-	void Contact::clean()
+	void Contact::cleanFields(bool cleanID)
 	{
-		DELETE(mID);
+		if (cleanID)
+		{
+			DELETE(mID);
+		}
 		DELETE(mName);
-		for (int i=0; i<mAddresses.size(); i++)
-		{
-			DELETE(mAddresses[i]);
-		}
-		mAddresses.empty();
-
-		for (int i=0; i<mPhones.size(); i++)
-		{
-			DELETE(mPhones[i]);
-		}
-		mPhones.empty();
+		DELETE_VECTOR(mAddresses);
+		DELETE_VECTOR(mPhones);
+		DELETE_VECTOR(mEmails);
+		DELETE_VECTOR(mWebsites);
+		DELETE_VECTOR(mInstantMessagings);
+		DELETE(mNote);
+		DELETE_VECTOR(mOrganizations);
+		DELETE_VECTOR(mSocialProfiles);
+		DELETE_VECTOR(mEvents);
+		DELETE_VECTOR(mRelations);
 		DELETE(mPhoto);
-//		Email** mEmail;
-//		Website** mWebsite;
-//		Organization** mOrganization;
-//		Event** mEvent;
-//		Note* mNote;
-//		InstantMessaging** mInstantMessaging;
-//		Relation** mRelation;
-//		SocialProfile** mSocialProfile;
+
 		DELETE(mBuffer);
 	}
 
@@ -80,135 +81,372 @@ namespace PIM
 	 */
 	int Contact::readNext(int flag)
 	{
-		clean();
+		cleanFields();
 		//Get the contacts item handle.
 		mHandle = maPimListNext(mListHandle);
 
 		if (mHandle <= 0)
 		{
-			return 0; //fleu TODO
+			return -1;
 		}
 
 		MA_PIM_ARGS args;
+		initArgs(args);
 		args.item = mHandle;
+
+		readID(args);
+
+		if (MATCH_FLAGS(flag, RF_NAME))
+		{
+			readName(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_ADDRESS))
+		{
+			readAddresses(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_PHONE))
+		{
+			readPhones(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_EMAIL))
+		{
+			readEmails(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_WEBSITE))
+		{
+			readWebsites(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_INSTANTMESSAGING))
+		{
+			readInstantMessagings(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_NOTE))
+		{
+			readNote(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_ORGANIZATION))
+		{
+			readOrganizations(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_SOCIALPROFILE))
+		{
+			readSocialProfiles(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_EVENT))
+		{
+			readEvents(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_RELATION))
+		{
+			readRelations(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_PHOTO))
+		{
+			readPhoto(args);
+		}
+
+		maPimItemClose(mHandle);
+
+		return 0;
+	}
+
+	/*
+	 * Find the Contact.
+	 */
+	int Contact::find(int flag)
+	{
+		cleanFields(false);
+		//Get the contacts item handle.
+		if ((getID() == NULL) || (wcslen(getID()) == 0))
+		{
+			return -1;
+		}
+
+		MA_PIM_ARGS args;
+		initArgs(args);
+		args.bufSize = wcslen(getID())*sizeof(wchar);
+		memset(args.buf, 0, BUF_SIZE);
+		memcpy(args.buf, getID(), args.bufSize);
+
+		printf("ID = -%S-; size = %d", getID(), (int)wcslen(getID()));
+		printf("buf = %S; size = %d", (wchar*)args.buf, args.bufSize);
+
+		mHandle = maPimListFind(mListHandle, &args);
+		args.item = mHandle;
+
+		if (mHandle <= 0)
+		{
+			return -1;
+		}
+
+		if (MATCH_FLAGS(flag, RF_NAME))
+		{
+			readName(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_ADDRESS))
+		{
+			readAddresses(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_PHONE))
+		{
+			readPhones(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_EMAIL))
+		{
+			readEmails(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_WEBSITE))
+		{
+			readWebsites(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_INSTANTMESSAGING))
+		{
+			readInstantMessagings(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_NOTE))
+		{
+			readNote(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_ORGANIZATION))
+		{
+			readOrganizations(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_SOCIALPROFILE))
+		{
+			readSocialProfiles(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_EVENT))
+		{
+			readEvents(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_RELATION))
+		{
+			readRelations(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_PHOTO))
+		{
+			readPhoto(args);
+		}
+
+		maPimItemClose(mHandle); //fleu TODO check this on the runtime
+
+		return 0;
+	}
+
+	/*
+	 * Write the Contact.
+	 */
+	int Contact::write(int flag)
+	{
+		return 0;
+	}
+
+	/*
+	 * Remove the Contact.
+	 */
+	int Contact::remove()
+	{
+		return 0;
+	}
+
+	void Contact::initArgs(MA_PIM_ARGS& args)
+	{
 		mBuffer = new char[BUF_SIZE];
 		args.buf = mBuffer;
 		args.bufSize = BUF_SIZE;
+	}
 
+	void Contact::readID(MA_PIM_ARGS args)
+	{
 		mID = new ID();
-		mID->read(args);
-
-		if ((flag & RF_NAME) != 0)
+		if (!mID->read(args))
 		{
-			mName = new Name();
-			mName->read(args);
+			DELETE(mID);
 		}
+	}
 
-		if ((flag & RF_ADDRESS) != 0)
+	void Contact::readName(MA_PIM_ARGS args)
+	{
+		mName = new Name();
+		if (!mName->read(args))
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_ADDR);
-			for (int i=0; i<countValues; i++)
-			{
-				Address* address = new Address();
-				address->read(args, i);
-				mAddresses.add(address);
-			}
+			DELETE(mName);
 		}
+	}
 
-		if ((flag & RF_PHONE) != 0)
+	void Contact::readAddresses(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_ADDR);
+		if (countValues < 0)
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_TEL);
-			for (int i=0; i<countValues; i++)
-			{
-				Phone* phone = new Phone();
-				phone->read(args, i);
-				mPhones.add(phone);
-			}
+			return;
 		}
+		for (int i=0; i<countValues; i++)
+		{
+			Address* address = new Address();
+			address->read(args, i);
+			mAddresses.add(address);
+		}
+	}
 
-		if ((flag & RF_EMAIL) != 0)
+	void Contact::readPhones(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_TEL);
+		if (countValues < 0)
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EMAIL);
-			for (int i=0; i<countValues; i++)
-			{
-				Email* email = new Email();
-				email->read(args, i);
-				mEmails.add(email);
-			}
+			return;
 		}
+		for (int i=0; i<countValues; i++)
+		{
+			Phone* phone = new Phone();
+			phone->read(args, i);
+			mPhones.add(phone);
+		}
+	}
 
-		if ((flag & RF_WEBSITE) != 0)
+	void Contact::readEmails(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EMAIL);
+		if (countValues < 0)
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_URL);
-			for (int i=0; i<countValues; i++)
-			{
-				Website* website = new Website();
-				website->read(args, i);
-				mWebsites.add(website);
-			}
+			return;
 		}
+		for (int i=0; i<countValues; i++)
+		{
+			Email* email = new Email();
+			email->read(args, i);
+			mEmails.add(email);
+		}
+	}
 
-		if ((flag & RF_INSTANTMESSAGING) != 0)
+	void Contact::readWebsites(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_URL);
+		if (countValues < 0)
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_IM);
-			for (int i=0; i<countValues; i++)
-			{
-				InstantMessaging* instantMessaging = new InstantMessaging();
-				instantMessaging->read(args, i);
-				mInstantMessagings.add(instantMessaging);
-			}
+			return;
 		}
+		for (int i=0; i<countValues; i++)
+		{
+			Website* website = new Website();
+			website->read(args, i);
+			mWebsites.add(website);
+		}
+	}
 
-		if ((flag & RF_NOTE) != 0)
+	void Contact::readInstantMessagings(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_IM);
+		if (countValues < 0)
 		{
-			mNote = new Note();
-			mNote->read(args);
+			return;
 		}
+		for (int i=0; i<countValues; i++)
+		{
+			InstantMessaging* instantMessaging = new InstantMessaging();
+			instantMessaging->read(args, i);
+			mInstantMessagings.add(instantMessaging);
+		}
+	}
 
-		if ((flag & RF_ORGANIZATION) != 0)
+	void Contact::readNote(MA_PIM_ARGS args)
+	{
+		mNote = new Note();
+		if (!mNote->read(args))
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_ORG);
-			for (int i=0; i<countValues; i++)
-			{
-				Organization* organization = new Organization();
-				organization->read(args, i);
-				mOrganizations.add(organization);
-			}
+			DELETE(mNote);
 		}
+	}
 
-		if ((flag & RF_SOCIALPROFILE) != 0)
+	void Contact::readOrganizations(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_ORG);
+		if (countValues < 0)
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE);
-			for (int i=0; i<countValues; i++)
-			{
-				SocialProfile* socialProfile = new SocialProfile();
-				socialProfile->read(args, i);
-				mSocialProfiles.add(socialProfile);
-			}
+			return;
 		}
+		for (int i=0; i<countValues; i++)
+		{
+			Organization* organization = new Organization();
+			organization->read(args, i);
+			mOrganizations.add(organization);
+		}
+	}
 
-		if ((flag & RF_EVENT) != 0)
+	void Contact::readSocialProfiles(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE);
+		if (countValues < 0)
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EVENT);
-			for (int i=0; i<countValues; i++)
-			{
-				Event* event = new Event();
-				event->read(args, i);
-				mEvents.add(event);
-			}
+			return;
 		}
+		for (int i=0; i<countValues; i++)
+		{
+			SocialProfile* socialProfile = new SocialProfile();
+			socialProfile->read(args, i);
+			mSocialProfiles.add(socialProfile);
+		}
+	}
 
-		if ((flag & RF_RELATION) != 0)
+	void Contact::readEvents(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EVENT);
+		if (countValues < 0)
 		{
-			int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_RELATION);
-			for (int i=0; i<countValues; i++)
-			{
-				Relation* relation = new Relation();
-				relation->read(args, i);
-				mRelations.add(relation);
-			}
+			return;
 		}
-		return 0;
+		for (int i=0; i<countValues; i++)
+		{
+			Event* event = new Event();
+			event->read(args, i);
+			mEvents.add(event);
+		}
+	}
+
+	void Contact::readRelations(MA_PIM_ARGS args)
+	{
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_RELATION);
+		if (countValues < 0)
+		{
+			return;
+		}
+		for (int i=0; i<countValues; i++)
+		{
+			Relation* relation = new Relation();
+			relation->read(args, i);
+			mRelations.add(relation);
+		}
+	}
+
+	void Contact::readPhoto(MA_PIM_ARGS args)
+	{
+		mPhoto = new Photo();
+		if (!mPhoto->read(args))
+		{
+			DELETE(mPhoto);
+		}
 	}
 
 	/*
@@ -221,6 +459,18 @@ namespace PIM
 			return mID->getID();
 		}
 		return NULL;
+	}
+
+	/*
+	 * Getter for ID field.
+	 */
+	void Contact::setID(wchar* id)
+	{
+		if (mID == NULL)
+		{
+			mID = new ID();
+		}
+		mID->setID(id);
 	}
 
 	/*

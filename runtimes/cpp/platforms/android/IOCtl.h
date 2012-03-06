@@ -613,6 +613,13 @@ namespace Base
 	*/
 	MAHandle _maPimListNext(MAHandle list, JNIEnv* jNIEnv, jobject jThis);
 
+	/** Returns a handle to the PimItem with the specified id in the \a list,
+	* or \< 0 on error.
+	*
+	* You must use maPimItemClose() on every item to prevent memory leaks.
+	*/
+	MAHandle _maPimListFind(MAHandle list, int bufPointer, int bufSize, JNIEnv* jNIEnv, jobject jThis);
+
 	/** Closes a PimList.
 	* \note This does not close the list's items, but it does invalidate them,
 	* so that maPimItemClose() is the only function you can safely use on them.

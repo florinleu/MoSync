@@ -12,8 +12,6 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_NAME;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING_ARRAY;
 
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
-import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
-
 import com.mosync.pim.*;
 
 public class PIMFieldName extends PIMFieldContacts {

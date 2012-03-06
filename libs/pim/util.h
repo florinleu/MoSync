@@ -26,10 +26,15 @@ MA 02110-1301, USA.
 
 #include <MAP/MemoryMgr.h>
 
-#define CHECK_RESULT(a)
+#define CHECK_RESULT(a)	\
+	if (a<0) 			\
+	{return false;}
+
+#define MATCH_FLAGS(flag1, flag2)	((flag1 & flag2) != 0)
 
 #define DELETE(a)					{deleteobject(a);}
 #define DELETE_ARRAY(a,size)		{if(a != NULL){for(int i=0; i<size; i++) deleteobject(a[i]);delete (a);a=NULL;}}
+#define DELETE_VECTOR(a)			{for(int i=0; i<a.size(); i++) deleteobject(a[i]);}
 
 #define BUF_SIZE					512 //we have a limit of 256 widechars
 

@@ -87,18 +87,18 @@ namespace PIM
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getNumber() const;
-			void setNumber(wchar* const street); //fleu TODO is this correct?
+			void setNumber(wchar* number);
 
 			const ePhoneTypes& getType() const;
 			void setType(const ePhoneTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
 
 			const bool isPrimary() const;
 
 		private:
-			void readNumber(MAAddress const buffer);
+			void readNumber(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);

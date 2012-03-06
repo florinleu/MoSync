@@ -34,15 +34,16 @@ namespace PIM
 	class Photo
 	{
 		public:
-			void read(MA_PIM_ARGS& args);
+			Photo();
+			bool read(MA_PIM_ARGS& args);
 
 			const MAHandle& getHandle() const;
 			void setHandle(const MAHandle& handle);
 
-			void setURL(wchar* const url);
+			void setURL(wchar* url);
 
 		private:
-			void readHandle(MAAddress const buffer);
+			void readHandle(const MAAddress buffer);
 
 		private:
 			//The photo handle.

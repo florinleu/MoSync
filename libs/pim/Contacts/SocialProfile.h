@@ -71,34 +71,34 @@ namespace PIM
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getURL() const;
-			void setURL(wchar* const url);
+			void setURL(wchar* url);
 
 			const wchar* getUsername() const;
-			void setUsername(wchar* const username);
+			void setUsername(wchar* username);
 
 			const wchar* getUserIdentifier() const;
-			void setUserIdentifier(wchar* const userIdentifier);
+			void setUserIdentifier(wchar* userIdentifier);
 
 			const eSocialProfileServices& getService() const;
 			void setService(const eSocialProfileServices& service);
 
 			const wchar* getServiceLabel() const;
-			void setServiceLabel(wchar* const serviceLabel);
+			void setServiceLabel(wchar* serviceLabel);
 
 			const eSocialProfileTypes& getType() const;
 			void setType(const eSocialProfileTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
 
 			const bool isPrimary() const;
 
 		private:
-			void readURL(MAAddress const buffer);
-			void readUsername(MAAddress const buffer);
-			void readUserIdentifier(MAAddress const buffer);
-			void readService(MAAddress const buffer);
-			void readServiceLabel(MAAddress const buffer);
+			void readURL(const MAAddress buffer);
+			void readUsername(const MAAddress buffer);
+			void readUserIdentifier(const MAAddress buffer);
+			void readService(const MAAddress buffer);
+			void readServiceLabel(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);

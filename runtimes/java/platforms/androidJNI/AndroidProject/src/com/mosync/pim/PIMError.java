@@ -10,6 +10,7 @@ public class PIMError {
 	public static final int PANIC_INDEX_INVALID = 40076;
 	public static final int PANIC_HANDLE_INVALID = 40077;
 	public static final int PANIC_BUFFER_INVALID = 40078;
+	public static final int PANIC_ID_INVALID = 40079;
 
 	public static String sStrListTypeInvalid = "Invalid list type.";
 	public static String sStrListUnavailable = "List is not available.";

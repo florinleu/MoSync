@@ -48,6 +48,9 @@ public class PIMListContacts extends PIMList {
 			try {
 				String contactId = listCursor.getString(listCursor
 						.getColumnIndex(Contacts.LOOKUP_KEY));
+				if (contactId == null) {
+					contactId = "";
+				}
 				PIMItem pimItem = new PIMItemContacts(contactId, false);
 
 				mList.add(pimItem);

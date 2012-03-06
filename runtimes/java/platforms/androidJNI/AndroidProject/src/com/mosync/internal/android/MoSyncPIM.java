@@ -40,6 +40,10 @@ class MoSyncPIM {
 		return mPIM.maPimListNext(list);
 	}
 
+	int maPimListFind(int list, int buffPointer, int buffSize) {
+		return mPIM.maPimListFind(list, buffPointer, buffSize);
+	}
+
 	int maPimListClose(int list) {
 		return mPIM.maPimListClose(list);
 	}

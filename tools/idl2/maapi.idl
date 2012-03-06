@@ -3985,6 +3985,8 @@ group PIMAPI "PIM API" {
 			NO_LABEL = -17;
 			/// The operation is not allowed by the Address Book database.
 			OPERATION_NOT_PERMITTED = -18;
+			/// The specified ID could not be found.
+			ID_INVALID = -19;
 		}
 	}
 
@@ -4023,6 +4025,18 @@ group PIMAPI "PIM API" {
 		*                    #MA_PIM_ERR_HANDLE_INVALID if the list handle is invalid.
 		*/
 		MAHandle maPimListNext(in MAHandle list);
+
+		/**
+		* \brief Returns a handle to the PimItem with the specified id in the \a list,
+		* or \< 0 on error.
+		* You must use maPimItemClose() on every item to prevent memory leaks.
+		* \param list List handle provided by maPimListOpen(int listType, int index).
+		* \returns \> 0 a PimItem handle.
+		*          \< 0 on error:
+		*                    #MA_PIM_ERR_HANDLE_INVALID if the list handle is invalid.
+		*                    #MA_PIM_ERR_ID_INVALID if the item id is invalid.
+		*/
+		MAHandle maPimListFind(in MAHandle list, in MA_PIM_ARGS args);
 
 		/**
 		* \brief Closes a PimList.

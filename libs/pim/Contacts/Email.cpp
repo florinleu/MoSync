@@ -50,8 +50,8 @@ namespace PIM
 	{
 		printf("@LIB: email read");
 		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) >= 0)
 		{
 			readAddress(args.buf);
 
@@ -60,7 +60,7 @@ namespace PIM
 		}
 	}
 
-	void Email::readAddress(MAAddress const buffer)
+	void Email::readAddress(const MAAddress buffer)
 	{
 		DELETE(mAddress);
 		wchar* src = (wchar*)buffer;
@@ -106,6 +106,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -129,7 +130,7 @@ namespace PIM
 	/*
 	 * Setter for email address.
 	 */
-	void Email::setAddress(wchar* const address)
+	void Email::setAddress(wchar* address)
 	{
 		mAddress = address;
 	}
@@ -161,7 +162,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void Email::setLabel(wchar* const label)
+	void Email::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}

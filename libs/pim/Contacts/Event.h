@@ -60,12 +60,12 @@ namespace PIM
 			void setType(const eEventTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
 
 			const bool isPrimary() const;
 
 		private:
-			void readDate(MAAddress const buffer);
+			void readDate(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);

@@ -27,31 +27,37 @@ MA 02110-1301, USA.
 #include <conprint.h>
 #include <mawstring.h>
 #include "ID.h"
+#include "util.h"
 
 namespace PIM
 {
-	void ID::read(MA_PIM_ARGS& args)
+	bool ID::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: ID read");
 		args.field = MA_PIM_FIELD_CONTACT_UID;
-		//CHECK_RESULT(maPimItemGetValue(&mArgs, 0));
-		if (maPimItemGetValue(&args, 0))
-		{
-			readID(args.buf);
-		}
+		args.bufSize = BUF_SIZE;
+		CHECK_RESULT(maPimItemGetValue(&args, 0));
+
+		readID(args.buf);
+
+		return true;
 	}
 
-	void ID::readID(MAAddress const buffer)
+	void ID::readID(const MAAddress buffer)
 	{
 		wchar* src = (wchar*)buffer;
-		int len = wcslen(src);
-		mID = new wchar[len];
-		wcsncpy(mID, src, len);
+		mID = wcsdup(src);
+		printf("read ID = %S, %d", mID, (int)wcslen(mID));
 	}
 
 	const wchar* ID::getID() const
 	{
 		return mID;
+	}
+
+	void ID::setID(wchar* id)
+	{
+		mID = id;
 	}
 
 } //PIM

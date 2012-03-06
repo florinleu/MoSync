@@ -35,49 +35,52 @@ namespace PIM
 	class Name
 	{
 		public:
-			void read(MA_PIM_ARGS& args);
+			bool read(MA_PIM_ARGS& args);
 
 			const wchar* getDisplayName() const;
-			void setDisplayName(wchar* const displayName);
+			void setDisplayName(wchar* displayName);
 
 			const wchar* getFirstName() const;
-			void setFirstName(wchar* const firstName);
+			void setFirstName(wchar* firstName);
 
 			const wchar* getMiddleName() const;
-			void setMiddleName(wchar* const firstName);
+			void setMiddleName(wchar* middleName);
 
 			const wchar* getLastName() const;
-			void setLastName(wchar* const firstName);
+			void setLastName(wchar* lastName);
 
 			const wchar* getNickname() const;
-			void setNickname(wchar* const firstName);
+			void setNickname(wchar* nickname);
 
 			const wchar* getPrefix() const;
-			void setPrefix(wchar* const firstName);
+			void setPrefix(wchar* prefix);
 
 			const wchar* getSuffix() const;
-			void setSuffix(wchar* const firstName);
+			void setSuffix(wchar* suffix);
 
 			const wchar* getPhoneticFirstName() const;
-			void setPhoneticFirstName(wchar* const firstName);
+			void setPhoneticFirstName(wchar* phoneticFirstName);
 
 			const wchar* getPhoneticMiddleName() const;
-			void setPhoneticMiddleName(wchar* const firstName);
+			void setPhoneticMiddleName(wchar* phoneticMiddleName);
 
 			const wchar* getPhoneticLastName() const;
-			void setPhoneticLastName(wchar* const firstName);
+			void setPhoneticLastName(wchar* phoneticLastName);
+
+			const wchar* getFormattedName() const;
 
 		private:
-			void readDisplayName(MAAddress const buffer);
-			void readFirstName(MAAddress const buffer);
-			void readMiddleName(MAAddress const buffer);
-			void readLastName(MAAddress const buffer);
-			void readNickname(MAAddress const buffer);
-			void readPrefix(MAAddress const buffer);
-			void readSuffix(MAAddress const buffer);
-			void readPhoneticFirstName(MAAddress const buffer);
-			void readPhoneticMiddleName(MAAddress const buffer);
-			void readPhoneticLastName(MAAddress const buffer);
+			void readDisplayName(const MAAddress buffer);
+			void readFirstName(const MAAddress buffer);
+			void readMiddleName(const MAAddress buffer);
+			void readLastName(const MAAddress buffer);
+			void readNickname(const MAAddress buffer);
+			void readPrefix(const MAAddress buffer);
+			void readSuffix(const MAAddress buffer);
+			void readPhoneticFirstName(const MAAddress buffer);
+			void readPhoneticMiddleName(const MAAddress buffer);
+			void readPhoneticLastName(const MAAddress buffer);
+			void readFormattedName(const MAAddress buffer);
 
 		private:
 			//The display name for the contact.
@@ -100,6 +103,8 @@ namespace PIM
 			wchar* mPhoneticMiddleName;
 			//The phonetic version of the family name for the contact.
 			wchar* mPhoneticLastName;
+			//The formatted name for the contact.
+			wchar* mFormattedName;
 	};
 
 } //PIM

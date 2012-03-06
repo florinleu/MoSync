@@ -51,42 +51,42 @@ namespace PIM
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getName() const;
-			void setName(wchar* const street); //fleu TODO is this correct?
+			void setName(wchar* name);
 
 			const wchar* getTitle() const;
-			void setTitle(wchar* const title);
+			void setTitle(wchar* title);
 
 			const wchar* getDepartment() const;
-			void setDepartment(wchar* const department);
+			void setDepartment(wchar* department);
 
 			const wchar* getLocation() const;
-			void setLocation(wchar* const location);
+			void setLocation(wchar* location);
 
 			const wchar* getJobDescription() const;
-			void setJobDescription(wchar* const jobDescription);
+			void setJobDescription(wchar* jobDescription);
 
 			const wchar* getPhoneticName() const;
-			void setPhoneticName(wchar* const phoneticName);
+			void setPhoneticName(wchar* phoneticName);
 
 			const wchar* getSymbol() const;
-			void setSymbol(wchar* const symbol);
+			void setSymbol(wchar* symbol);
 
 			const eOrganizationTypes& getType() const;
 			void setType(const eOrganizationTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
 
 			const bool isPrimary() const;
 
 		private:
-			void readName(MAAddress const buffer);
-			void readTitle(MAAddress const buffer);
-			void readDepartment(MAAddress const buffer);
-			void readLocation(MAAddress const buffer);
-			void readJobDescription(MAAddress const buffer);
-			void readPhoneticName(MAAddress const buffer);
-			void readSymbol(MAAddress const buffer);
+			void readName(const MAAddress buffer);
+			void readTitle(const MAAddress buffer);
+			void readDepartment(const MAAddress buffer);
+			void readLocation(const MAAddress buffer);
+			void readJobDescription(const MAAddress buffer);
+			void readPhoneticName(const MAAddress buffer);
+			void readSymbol(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);

@@ -160,6 +160,7 @@ public class PIMUtil {
 	 * @return
 	 */
 	public static int throwError(int errorCode, int panicCode, String panicText) {
+		DebugPrint("Error: " + errorCode);
 		return MoSyncError.getSingletonObject().error(errorCode, panicCode,
 				panicText);
 	}

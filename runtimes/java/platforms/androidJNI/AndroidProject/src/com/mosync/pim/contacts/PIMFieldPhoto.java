@@ -1,8 +1,8 @@
 package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
+import static com.mosync.internal.android.MoSyncHelpers.SYSLOG;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTRPREFERRED;
@@ -15,6 +15,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_INT;
 
 import android.content.ContentProviderOperation;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
 import android.provider.ContactsContract.Data;
 
@@ -78,10 +79,18 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 
 	public int loadPhoto(byte[] buffer) {
 		DebugPrint("loadPhoto " + buffer);
-		ByteBuffer bBuffer = ByteBuffer.wrap(buffer);
+		// ByteBuffer bBuffer = ByteBuffer.wrap(buffer);
 
 		int photoHandle = PIMUtil.getThread().nativeCreatePlaceholder();
-		PIMUtil.getThread().loadBinary(photoHandle, bBuffer);
+
+		Bitmap bitmap = PIMUtil.getThread().decodeImageFromData(buffer, null);
+
+		if (bitmap != null) {
+			SYSLOG("Bitmap was created!");
+			PIMUtil.getThread().addBitmap(photoHandle, bitmap);
+		}
+
+		// PIMUtil.getThread().loadBinary(photoHandle, bBuffer);
 		return photoHandle;
 	}
 

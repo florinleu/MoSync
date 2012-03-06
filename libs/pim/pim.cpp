@@ -28,12 +28,26 @@ MA 02110-1301, USA.
 
 #include <conprint.h>
 
-MAHandle gContactsList;
+MAHandle gContactsList = 0;
 
-void initContacts()
+/**
+ * Opens the contacts list.
+ * @return true if succeeded.
+ */
+bool initContacts()
 {
 	printf("initContacts");
+	if (gContactsList != 0)
+	{
+		closeContacts();
+	}
 	gContactsList = maPimListOpen(MA_PIM_CONTACTS, 0);
+	if (gContactsList == MA_PIM_ERR_LIST_UNAVAILABLE)
+	{
+		gContactsList = 0;
+		return false;
+	}
+	return true;
 }
 
 MAHandle getListHandle()
@@ -45,4 +59,5 @@ void closeContacts()
 {
 	printf("closeContacts");
 	maPimListClose(gContactsList);
+	gContactsList = 0;
 }

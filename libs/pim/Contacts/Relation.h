@@ -74,18 +74,18 @@ namespace PIM
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getName() const;
-			void setName(wchar* const name);
+			void setName(wchar* name);
 
 			const eRelationTypes& getType() const;
 			void setType(const eRelationTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
 
 			const bool isPrimary() const;
 
 		private:
-			void readName(MAAddress const buffer);
+			void readName(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);

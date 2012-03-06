@@ -50,8 +50,8 @@ namespace PIM
 	{
 		printf("@LIB: event read");
 		args.field = MA_PIM_FIELD_CONTACT_EVENT;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+		if (maPimItemGetValue(&args, index) >= 0)
 		{
 			readDate(args.buf);
 
@@ -60,7 +60,7 @@ namespace PIM
 		}
 	}
 
-	void Event::readDate(MAAddress const buffer)
+	void Event::readDate(const MAAddress buffer)
 	{
 		mDate = *(int*)buffer;
 	}
@@ -99,6 +99,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_EVENT;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -154,7 +155,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void Event::setLabel(wchar* const label)
+	void Event::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}

@@ -36,11 +36,12 @@ namespace PIM
 	class ID
 	{
 		public:
-			void read(MA_PIM_ARGS& args);
+			bool read(MA_PIM_ARGS& args);
 
-			void readID(MAAddress const buffer);
+			void readID(const MAAddress buffer);
 
 			const wchar* getID() const;
+			void setID(wchar* id);
 
 		private:
 			//The ID for the contact.

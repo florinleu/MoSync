@@ -46,7 +46,14 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-	enum ReadFlags {
+//	enum eErrors
+//	{
+//		ERR_NOT_OPENED = -1,
+//		ERR_END_OF_LIST = -2,
+//		ERR_INVALID_ID = -3
+//	};
+
+	enum eReadFlags {
 		RF_NONE = 0,
 		RF_NAME = 0x1,
 		RF_ADDRESS = 0x2,
@@ -59,90 +66,108 @@ namespace PIM
 		RF_SOCIALPROFILE = 0x100,
 		RF_EVENT = 0x200,
 		RF_RELATION = 0x400,
-		RF_ALL = 0x7FF
+		RF_PHOTO = 0x800,
+		RF_ALL = 0xFFF
 	};
 
 	class Contact
 	{
-	public:
+		public:
+			Contact();
+			~Contact();
 
-		Contact(const MAHandle listHandle);
-		~Contact();
+			void cleanFields(bool cleanID = true);
+			int readNext(int flag = RF_ALL);
+			int find(int flag = RF_ALL);
+			int write(int flag = RF_ALL);
+			int remove();
 
-		void clean();
-		int readNext(int flag = RF_ALL);
+			const wchar* getID() const;
+			void setID(wchar* id);
 
-		const wchar* getID() const;
+			const Name* getName() const;
+			void setName(Name* name);
 
-		const Name* getName() const;
-		void setName(Name* name);
+			const int getAddressesCount() const;
+			const Address* getAddress(int index) const;
+			void setAddress(Address* address, int index);
 
-		const int getAddressesCount() const;
-		const Address* getAddress(int index) const;
-		void setAddress(Address* address, int index);
+			const int getPhonesCount() const;
+			const Phone* getPhone(int index) const;
+			void setPhone(Phone* phone, int index);
 
-		const int getPhonesCount() const;
-		const Phone* getPhone(int index) const;
-		void setPhone(Phone* phone, int index);
+			const int getEmailsCount() const;
+			const Email* getEmail(int index) const;
+			void setEmail(Email* email, int index);
 
-		const int getEmailsCount() const;
-		const Email* getEmail(int index) const;
-		void setEmail(Email* email, int index);
+			const int getWebsitesCount() const;
+			const Website* getWebsite(int index) const;
+			void setWebsite(Website* website, int index);
 
-		const int getWebsitesCount() const;
-		const Website* getWebsite(int index) const;
-		void setWebsite(Website* website, int index);
+			const int getInstantMessagingsCount() const;
+			const InstantMessaging* getInstantMessaging(int index) const;
+			void setInstantMessaging(InstantMessaging* instantMessaging, int index);
 
-		const int getInstantMessagingsCount() const;
-		const InstantMessaging* getInstantMessaging(int index) const;
-		void setInstantMessaging(InstantMessaging* instantMessaging, int index);
+			const Note* getNote() const;
+			void setNote(Note* note);
 
-		const Note* getNote() const;
-		void setNote(Note* note);
+			const int getOrganizationsCount() const;
+			const Organization* getOrganization(int index) const;
+			void setOrganization(Organization* organization, int index);
 
-		const int getOrganizationsCount() const;
-		const Organization* getOrganization(int index) const;
-		void setOrganization(Organization* organization, int index);
+			const int getSocialProfilesCount() const;
+			const SocialProfile* getSocialProfile(int index) const;
+			void setSocialProfile(SocialProfile* socialProfile, int index);
 
-		const int getSocialProfilesCount() const;
-		const SocialProfile* getSocialProfile(int index) const;
-		void setSocialProfile(SocialProfile* socialProfile, int index);
+			const int getEventsCount() const;
+			const Event* getEvent(int index) const;
+			void setEvent(Event* event, int index);
 
-		const int getEventsCount() const;
-		const Event* getEvent(int index) const;
-		void setEvent(Event* event, int index);
+			const int getRelationsCount() const;
+			const Relation* getRelation(int index) const;
+			void setRelation(Relation* relation, int index);
 
-		const int getRelationsCount() const;
-		const Relation* getRelation(int index) const;
-		void setRelation(Relation* relation, int index);
+			const Photo* getPhoto() const;
+			void setPhoto(Photo* photo);
 
-		const Photo* getPhoto() const;
-		void setPhoto(Photo* photo); //fleu TODO does this need const?
+	//	int write();
+	//	int remove();
 
-//	int find();
-//	int write();
-//	int remove();
+		private:
+			void initArgs(MA_PIM_ARGS& args);
+			void readID(MA_PIM_ARGS args);
+			void readName(MA_PIM_ARGS args);
+			void readAddresses(MA_PIM_ARGS args);
+			void readPhones(MA_PIM_ARGS args);
+			void readEmails(MA_PIM_ARGS args);
+			void readWebsites(MA_PIM_ARGS args);
+			void readInstantMessagings(MA_PIM_ARGS args);
+			void readNote(MA_PIM_ARGS args);
+			void readOrganizations(MA_PIM_ARGS args);
+			void readSocialProfiles(MA_PIM_ARGS args);
+			void readEvents(MA_PIM_ARGS args);
+			void readRelations(MA_PIM_ARGS args);
+			void readPhoto(MA_PIM_ARGS args);
 
-	private:
-		Contact();
 
-		ID* mID;
-		Name* mName;
-		MAUtil::Vector<Address*> mAddresses;
-		MAUtil::Vector<Phone*> mPhones;
-		MAUtil::Vector<Email*> mEmails;
-		MAUtil::Vector<Website*> mWebsites;
-		MAUtil::Vector<InstantMessaging*> mInstantMessagings;
-		Note* mNote;
-		MAUtil::Vector<Organization*> mOrganizations;
-		MAUtil::Vector<SocialProfile*> mSocialProfiles;
-		MAUtil::Vector<Event*> mEvents;
-		MAUtil::Vector<Relation*> mRelations;
-		Photo* mPhoto;
+		private:
+			ID* mID;
+			Name* mName;
+			MAUtil::Vector<Address*> mAddresses;
+			MAUtil::Vector<Phone*> mPhones;
+			MAUtil::Vector<Email*> mEmails;
+			MAUtil::Vector<Website*> mWebsites;
+			MAUtil::Vector<InstantMessaging*> mInstantMessagings;
+			Note* mNote;
+			MAUtil::Vector<Organization*> mOrganizations;
+			MAUtil::Vector<SocialProfile*> mSocialProfiles;
+			MAUtil::Vector<Event*> mEvents;
+			MAUtil::Vector<Relation*> mRelations;
+			Photo* mPhoto;
 
-		const MAHandle mListHandle;
-		MAHandle mHandle;
-		char* mBuffer;
+			const MAHandle mListHandle;
+			MAHandle mHandle;
+			char* mBuffer;
 	};
 }
 

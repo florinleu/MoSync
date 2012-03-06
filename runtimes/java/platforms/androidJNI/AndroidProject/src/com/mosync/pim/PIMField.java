@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.mosync.pim.contacts.PIMFieldContacts;
-
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.database.Cursor;

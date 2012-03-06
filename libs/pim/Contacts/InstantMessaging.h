@@ -77,26 +77,26 @@ namespace PIM
 			void read(MA_PIM_ARGS& args, int index);
 
 			const wchar* getUsername() const;
-			void setUsername(wchar* const username); //fleu TODO is this correct?
+			void setUsername(wchar* username);
 
 			const eInstantMessagingProtocols& getProtocol() const;
 			void setProtocol(const eInstantMessagingProtocols& protocol);
 
 			const wchar* getProtocolLabel() const;
-			void setProtocolLabel(wchar* const protocolLabel);
+			void setProtocolLabel(wchar* protocolLabel);
 
 			const eInstantMessagingTypes& getType() const;
 			void setType(const eInstantMessagingTypes& type);
 
 			const wchar* getLabel() const;
-			void setLabel(wchar* const label);
+			void setLabel(wchar* label);
 
 			const bool isPrimary() const;
 
 		private:
-			void readUsername(MAAddress const buffer);
-			void readProtocol(MAAddress const buffer);
-			void readProtocolLabel(MAAddress const buffer);
+			void readUsername(const MAAddress buffer);
+			void readProtocol(const MAAddress buffer);
+			void readProtocolLabel(const MAAddress buffer);
 
 			void readType(const MAHandle handle, const int index);
 			void readLabel(const MAHandle handle, const int index);

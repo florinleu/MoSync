@@ -2236,6 +2236,20 @@ namespace Base
 				mJNIEnv,
 				mJThis);
 
+		case maIOCtl_maPimListFind:
+		{
+			SYSLOG("maIOCtl_maPimListFind");
+
+			MA_PIM_ARGS* args = (MA_PIM_ARGS*) SYSCALL_THIS->GetValidatedMemRange(b, sizeof(MA_PIM_ARGS));
+
+			return _maPimListFind(
+				a,
+				args->buf,
+				args->bufSize,
+				mJNIEnv,
+				mJThis);
+		}
+
 		case maIOCtl_maPimListClose:
 			SYSLOG("maIOCtl_maPimListClose");
 			return _maPimListClose(

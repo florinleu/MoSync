@@ -49,8 +49,9 @@ namespace PIM
 	{
 		printf("@LIB: social profile read");
 		args.field = MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE;
-		//CHECK_RESULT(maPimItemGetValue(&args, 0));
-		if (maPimItemGetValue(&args, index))
+		args.bufSize = BUF_SIZE;
+
+		if (maPimItemGetValue(&args, index) > 0)
 		{
 			readURL(args.buf);
 			readUsername(args.buf);
@@ -63,22 +64,22 @@ namespace PIM
 		}
 	}
 
-	void SocialProfile::readURL(MAAddress const buffer)
+	void SocialProfile::readURL(const MAAddress buffer)
 	{
 		mURL = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_SOCIAL_PROFILE_URL);
 	}
 
-	void SocialProfile::readUsername(MAAddress const buffer)
+	void SocialProfile::readUsername(const MAAddress buffer)
 	{
 		mUsername = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_SOCIAL_PROFILE_USERNAME);
 	}
 
-	void SocialProfile::readUserIdentifier(MAAddress const buffer)
+	void SocialProfile::readUserIdentifier(const MAAddress buffer)
 	{
 		mUserIdentifier = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_SOCIAL_PROFILE_USER_IDENTIFIER);
 	}
 
-	void SocialProfile::readService(MAAddress const buffer)
+	void SocialProfile::readService(const MAAddress buffer)
 	{
 		wchar* wstrService = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE);
 		char* strService = wstrtostr(wstrService);
@@ -116,7 +117,7 @@ namespace PIM
 		DELETE(strService);
 	}
 
-	void SocialProfile::readServiceLabel(MAAddress const buffer)
+	void SocialProfile::readServiceLabel(const MAAddress buffer)
 	{
 		mServiceLabel = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_LABEL);
 	}
@@ -155,6 +156,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE;
+		args.bufSize = BUF_SIZE;
 
 		char buf[BUF_SIZE];
 		args.buf = buf;
@@ -179,7 +181,7 @@ namespace PIM
 	/*
 	 * Setter for url.
 	 */
-	void SocialProfile::setURL(wchar* const url)
+	void SocialProfile::setURL(wchar* url)
 	{
 		mURL = url;
 	}
@@ -195,7 +197,7 @@ namespace PIM
 	/*
 	 * Setter for username.
 	 */
-	void SocialProfile::setUsername(wchar* const username)
+	void SocialProfile::setUsername(wchar* username)
 	{
 		mUsername = username;
 	}
@@ -211,7 +213,7 @@ namespace PIM
 	/*
 	 * Setter for user identifier.
 	 */
-	void SocialProfile::setUserIdentifier(wchar* const userIdentifier)
+	void SocialProfile::setUserIdentifier(wchar* userIdentifier)
 	{
 		mUserIdentifier = userIdentifier;
 	}
@@ -243,7 +245,7 @@ namespace PIM
 	/*
 	 * Setter for service label.
 	 */
-	void SocialProfile::setServiceLabel(wchar* const serviceLabel)
+	void SocialProfile::setServiceLabel(wchar* serviceLabel)
 	{
 		mServiceLabel = serviceLabel;
 	}
@@ -275,7 +277,7 @@ namespace PIM
 	/*
 	 * Setter for label.
 	 */
-	void SocialProfile::setLabel(wchar* const label)
+	void SocialProfile::setLabel(wchar* label)
 	{
 		mLabel = label;
 	}
