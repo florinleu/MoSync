@@ -247,7 +247,7 @@ namespace PIM
 			readPhoto(args);
 		}
 
-		maPimItemClose(mHandle); //fleu TODO check this on the runtime
+		maPimItemClose(mHandle); //fleu TODO check this in the runtime
 
 		return 0;
 	}
