@@ -31,8 +31,8 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 		mStrType = Event.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_DATE;
 
-		mNames = new String[] { Event._ID, Event.START_DATE, Event.TYPE,
-				Event.LABEL, Event.IS_PRIMARY };
+		mNames = new String[] { Event.START_DATE, Event.TYPE, Event.LABEL,
+				Event.IS_PRIMARY };
 	}
 
 	protected void createMaps() {
@@ -44,8 +44,8 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 				|| ((val = mValues.get(0)) == null)) {
 			return;
 		} else {
-			val[1] = Integer
-					.toString((int) (getUtcTimeInMillis(val[1]) / 1000));
+			val[0] = Integer
+					.toString((int) (getUtcTimeInMillis(val[0]) / 1000));
 			mValues.set(0, val);
 		}
 	}
@@ -156,7 +156,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[1];
+		return val[0];
 	}
 
 	int getDataSize(String val) {
@@ -170,7 +170,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[1] = data;
+		val[0] = data;
 		mValues.set(index, val);
 	}
 
@@ -180,7 +180,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 				|| ((val = mValues.get(0)) == null)) {
 			return;
 		} else {
-			val[1] = getUtcTime(Long.parseLong(val[1]) * 1000);
+			val[0] = getUtcTime(Long.parseLong(val[0]) * 1000);
 			mValues.set(0, val);
 		}
 	}
@@ -206,7 +206,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 				|| ((val = mValues.get(0)) == null)) {
 			DebugPrint("Not available");
 		} else {
-			DebugPrint("Birthday: " + val[1]);
+			DebugPrint("Birthday: " + val[0]);
 		}
 		DebugPrint("***************************");
 	}

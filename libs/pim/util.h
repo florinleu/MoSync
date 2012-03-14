@@ -36,7 +36,7 @@ MA 02110-1301, USA.
 #define DELETE_ARRAY(a,size)		{if(a != NULL){for(int i=0; i<size; i++) deleteobject(a[i]);delete (a);a=NULL;}}
 #define DELETE_VECTOR(a)			{for(int i=0; i<a.size(); i++) deleteobject(a[i]);}
 
-#define BUF_SIZE					512 //we have a limit of 256 widechars
+#define PIM_BUF_SIZE					512 //we have a limit of 256 widechars
 
 /**
  * Get a wchar array from a specified buffer.

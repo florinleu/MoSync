@@ -1,8 +1,6 @@
 package com.mosync.pim.contacts;
 
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
-import static com.mosync.internal.android.MoSyncHelpers.SYSLOG;
-
 import java.util.ArrayList;
 
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_ATTRPREFERRED;
@@ -239,9 +237,9 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 
 	public void close() {
 		for (int i = 0; i < mValues.size(); i++) {
-			if (!mValues.get(i)[1].equals("")) {
-				PIMUtil.getThread().destroyBinary(
-						Integer.parseInt(mValues.get(i)[1]));
+			if (!mValues.get(i)[0].equals("")) {
+				PIMUtil.getThread().destroyResource(
+						Integer.parseInt(mValues.get(i)[0]));
 			}
 		}
 	}

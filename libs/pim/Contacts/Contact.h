@@ -127,7 +127,7 @@ namespace PIM
 			const Relation* getRelation(int index) const;
 			void setRelation(Relation* relation, int index);
 
-			const Photo* getPhoto() const;
+			Photo* getPhoto() const;
 			void setPhoto(Photo* photo);
 
 	//	int write();

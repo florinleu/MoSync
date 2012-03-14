@@ -28,7 +28,7 @@ public class PIMFieldPhotoURL extends PIMFieldContacts {
 
 		mPermission = Permission.WRITE_ONLY;
 
-		mNames = new String[] { Photo._ID, Photo.PHOTO, Photo.IS_PRIMARY };
+		mNames = new String[] { Photo.PHOTO, Photo.IS_PRIMARY };
 	}
 
 	protected void createMaps() {
@@ -110,7 +110,7 @@ public class PIMFieldPhotoURL extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[1];
+		return val[0];
 	}
 
 	int getDataSize(String val) {
@@ -124,7 +124,7 @@ public class PIMFieldPhotoURL extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[1] = data;
+		val[0] = data;
 		mValues.set(index, val);
 	}
 
@@ -137,7 +137,7 @@ public class PIMFieldPhotoURL extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Photo URL " + i);
-			DebugPrint(mNames[1] + ": " + val[1]);
+			DebugPrint(mNames[0] + ": " + val[0]);
 		}
 		DebugPrint("***************************");
 	}

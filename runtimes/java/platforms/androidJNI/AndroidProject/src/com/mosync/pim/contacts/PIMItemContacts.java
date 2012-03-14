@@ -8,7 +8,9 @@ import java.util.Iterator;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
+import android.database.Cursor;
 import android.provider.ContactsContract;
+import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
 
 import com.mosync.pim.*;
@@ -118,7 +120,8 @@ public class PIMItemContacts extends PIMItem {
 		return mUID.getValue();
 	}
 
-	protected void delete(ContentResolver cr) {
+	protected void delete() {
+		DebugPrint("PIMItemContacts.delete()");
 		if (mState == State.ADDED) {
 			return;
 		}
@@ -129,9 +132,25 @@ public class PIMItemContacts extends PIMItem {
 			fieldsIt.next().close();
 		}
 
-		String id = mUID.getSpecificData(0);
-		cr.delete(RawContacts.CONTENT_URI, RawContacts.CONTACT_ID + " = ?",
-				new String[] { id });
+		try {
+			Cursor cursor = getContentResolver().query(Data.CONTENT_URI,
+					new String[] { Data.CONTACT_ID }, Data.LOOKUP_KEY + "=?",
+					new String[] { mUID.getSpecificData(0) }, null);
+			DebugPrint("cursor size " + cursor.getCount());
+			if (cursor.moveToNext()) {
+				String id = cursor.getString(cursor
+						.getColumnIndex(Data.CONTACT_ID));
+				DebugPrint("id = " + id);
+				int deleted = getContentResolver().delete(
+						RawContacts.CONTENT_URI,
+						RawContacts.CONTACT_ID + " = ?", new String[] { id });
+				DebugPrint("deleted rows = " + deleted);
+			}
+
+			cursor.close();
+			cursor = null;
+		} catch (Exception e) {
+		}
 	}
 
 	/**

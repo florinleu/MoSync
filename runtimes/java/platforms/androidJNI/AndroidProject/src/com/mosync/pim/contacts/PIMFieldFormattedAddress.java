@@ -27,9 +27,9 @@ public class PIMFieldFormattedAddress extends PIMFieldContacts {
 		mStrType = StructuredPostal.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING;
 
-		mNames = new String[] { StructuredPostal._ID,
-				StructuredPostal.FORMATTED_ADDRESS, StructuredPostal.TYPE,
-				StructuredPostal.LABEL, StructuredPostal.IS_PRIMARY };
+		mNames = new String[] { StructuredPostal.FORMATTED_ADDRESS,
+				StructuredPostal.TYPE, StructuredPostal.LABEL,
+				StructuredPostal.IS_PRIMARY };
 
 		mPermission = Permission.READ_ONLY;
 	}
@@ -112,7 +112,7 @@ public class PIMFieldFormattedAddress extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[1];
+		return val[0];
 	}
 
 	int getDataSize(String val) {
@@ -126,7 +126,7 @@ public class PIMFieldFormattedAddress extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[1] = data;
+		val[0] = data;
 		mValues.set(index, val);
 	}
 
@@ -158,7 +158,7 @@ public class PIMFieldFormattedAddress extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Formatted Address " + i);
-			DebugPrint(mNames[1] + ": " + val[1]);
+			DebugPrint(mNames[0] + ": " + val[0]);
 		}
 		DebugPrint("***************************");
 	}

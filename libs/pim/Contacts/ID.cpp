@@ -35,7 +35,7 @@ namespace PIM
 	{
 		printf("@LIB: ID read");
 		args.field = MA_PIM_FIELD_CONTACT_UID;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 		CHECK_RESULT(maPimItemGetValue(&args, 0));
 
 		readID(args.buf);

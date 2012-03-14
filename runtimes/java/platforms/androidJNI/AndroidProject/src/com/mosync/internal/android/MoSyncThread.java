@@ -2841,7 +2841,7 @@ public class MoSyncThread extends Thread
 	 *
 	 * @param resourceIndex the resource index which should be destroyed.
 	 */
-	void destroyResource(int resourceIndex)
+	public void destroyResource(int resourceIndex)
 	{
 		SYSLOG("destroyResource :" + resourceIndex);
 		/*

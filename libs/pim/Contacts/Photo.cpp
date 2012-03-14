@@ -46,7 +46,7 @@ namespace PIM
 	{
 		printf("@LIB: photo read");
 		args.field = MA_PIM_FIELD_CONTACT_PHOTO;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 		CHECK_RESULT(maPimItemGetValue(&args, 0));
 		readHandle(args.buf);
 

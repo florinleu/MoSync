@@ -40,7 +40,7 @@ namespace PIM
 		bool isSupported = false;
 
 		args.field = MA_PIM_FIELD_CONTACT_NAME;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, 0) > 0)
 		{
 			isSupported = true;
@@ -56,7 +56,7 @@ namespace PIM
 		}
 
 		args.field = MA_PIM_FIELD_CONTACT_NICKNAME;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, 0) >=0 )
 		{
 			isSupported = true;
@@ -64,7 +64,7 @@ namespace PIM
 		}
 
 		args.field = MA_PIM_FIELD_CONTACT_FORMATTED_NAME;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, 0) >=0)
 		{
 			isSupported = true;

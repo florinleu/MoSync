@@ -176,7 +176,7 @@ namespace PIM
 		MA_PIM_ARGS args;
 		initArgs(args);
 		args.bufSize = wcslen(getID())*sizeof(wchar);
-		memset(args.buf, 0, BUF_SIZE);
+		memset(args.buf, 0, PIM_BUF_SIZE);
 		memcpy(args.buf, getID(), args.bufSize);
 
 		mHandle = maPimListFind(mListHandle, &args);
@@ -265,14 +265,35 @@ namespace PIM
 	 */
 	int Contact::remove()
 	{
+		if ((getID() == NULL) || (wcslen(getID()) == 0))
+		{
+			return -1;
+		}
+
+		MA_PIM_ARGS args;
+		initArgs(args);
+		args.bufSize = wcslen(getID())*sizeof(wchar);
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		memcpy(args.buf, getID(), args.bufSize);
+
+		mHandle = maPimListFind(mListHandle, &args);
+		args.item = mHandle;
+
+		if (mHandle <= 0)
+		{
+			return -1;
+		}
+
+		maPimItemRemove(mListHandle, mHandle);
+
 		return 0;
 	}
 
 	void Contact::initArgs(MA_PIM_ARGS& args)
 	{
-		mBuffer = new char[BUF_SIZE];
+		mBuffer = new char[PIM_BUF_SIZE];
 		args.buf = mBuffer;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 	}
 
 	void Contact::readID(MA_PIM_ARGS args)
@@ -721,7 +742,7 @@ namespace PIM
 	/*
 	 * Getter for photo field.
 	 */
-	const Photo* Contact::getPhoto() const
+	Photo* Contact::getPhoto() const
 	{
 		return mPhoto;
 	}

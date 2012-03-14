@@ -50,7 +50,7 @@ namespace PIM
 	{
 		printf("@LIB: email read");
 		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
 			readAddress(args.buf);
@@ -104,11 +104,11 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 
-		char buf[BUF_SIZE];
+		char buf[PIM_BUF_SIZE];
 		args.buf = buf;
-		args.bufSize = BUF_SIZE;
+		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
