@@ -49,5 +49,10 @@ MA 02110-1301, USA.
 wchar* getWCharArrayFromBuf(MAAddress const buffer, const int arrayIndex);
 
 char* wstrtostr(const wchar* wstr);
+wchar* strtowstr(const char* str);
+
+wchar* readSubField(const MAAddress buffer, int arrayIndex);
+int writeInt(MAAddress bufferDest, int val, int bufDestSize);
+int writeWString(MAAddress buffer, wchar* str, int bufDestSize);
 
 #endif //__UTIL_H__

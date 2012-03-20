@@ -127,6 +127,8 @@ public class PIMUtil {
 				;
 			crtIndex--;
 			int len = crtIndex - buffIndex;
+			if (len < 0)
+				continue;
 			char[] tmp = new char[len];
 			System.arraycopy(buffer, buffIndex, tmp, 0, len);
 			val[i] = new String(tmp);

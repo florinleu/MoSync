@@ -85,53 +85,50 @@ namespace PIM
 			const wchar* getID() const;
 			void setID(wchar* id);
 
-			const Name* getName() const;
+			Name* getName() const;
 			void setName(Name* name);
 
 			const int getAddressesCount() const;
-			const Address* getAddress(int index) const;
+			Address* getAddress(int index) const;
 			void setAddress(Address* address, int index);
 
 			const int getPhonesCount() const;
-			const Phone* getPhone(int index) const;
+			Phone* getPhone(int index) const;
 			void setPhone(Phone* phone, int index);
 
 			const int getEmailsCount() const;
-			const Email* getEmail(int index) const;
+			Email* getEmail(int index) const;
 			void setEmail(Email* email, int index);
 
 			const int getWebsitesCount() const;
-			const Website* getWebsite(int index) const;
+			Website* getWebsite(int index) const;
 			void setWebsite(Website* website, int index);
 
 			const int getInstantMessagingsCount() const;
-			const InstantMessaging* getInstantMessaging(int index) const;
+			InstantMessaging* getInstantMessaging(int index) const;
 			void setInstantMessaging(InstantMessaging* instantMessaging, int index);
 
-			const Note* getNote() const;
+			Note* getNote() const;
 			void setNote(Note* note);
 
 			const int getOrganizationsCount() const;
-			const Organization* getOrganization(int index) const;
+			Organization* getOrganization(int index) const;
 			void setOrganization(Organization* organization, int index);
 
 			const int getSocialProfilesCount() const;
-			const SocialProfile* getSocialProfile(int index) const;
+			SocialProfile* getSocialProfile(int index) const;
 			void setSocialProfile(SocialProfile* socialProfile, int index);
 
 			const int getEventsCount() const;
-			const Event* getEvent(int index) const;
+			Event* getEvent(int index) const;
 			void setEvent(Event* event, int index);
 
 			const int getRelationsCount() const;
-			const Relation* getRelation(int index) const;
+			Relation* getRelation(int index) const;
 			void setRelation(Relation* relation, int index);
 
 			Photo* getPhoto() const;
 			void setPhoto(Photo* photo);
-
-	//	int write();
-	//	int remove();
 
 		private:
 			void initArgs(MA_PIM_ARGS& args);
@@ -149,6 +146,9 @@ namespace PIM
 			void readRelations(MA_PIM_ARGS args);
 			void readPhoto(MA_PIM_ARGS args);
 
+			void readFields(MA_PIM_ARGS args, int flag);
+
+			void writeName(MA_PIM_ARGS args);
 
 		private:
 			ID* mID;

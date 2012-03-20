@@ -133,6 +133,30 @@ namespace PIM
 		mFormattedName = wcsdup(src);
 	}
 
+	void Name::write(MA_PIM_ARGS& args)
+	{
+		printf("@LIB: name write");
+
+		args.field = MA_PIM_FIELD_CONTACT_NAME;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeInt(args.buf, 9, 0); //fleu TODO magic number
+		args.bufSize += writeWString(args.buf, mLastName, args.bufSize);
+		args.bufSize += writeWString(args.buf, mFirstName, args.bufSize);
+		args.bufSize += writeWString(args.buf, mMiddleName, args.bufSize);
+		args.bufSize += writeWString(args.buf, mPrefix, args.bufSize);
+		args.bufSize += writeWString(args.buf, mSuffix, args.bufSize);
+		args.bufSize += writeWString(args.buf, mPhoneticLastName, args.bufSize);
+		args.bufSize += writeWString(args.buf, mPhoneticFirstName, args.bufSize);
+		args.bufSize += writeWString(args.buf, mPhoneticMiddleName, args.bufSize);
+		args.bufSize += writeWString(args.buf, NULL, args.bufSize);
+		maPimItemSetValue(&args, 0, 0);
+
+		args.field = MA_PIM_FIELD_CONTACT_NICKNAME;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mNickname, 0);
+		maPimItemSetValue(&args, 0, 0);
+	}
+
 	/*
 	 * Getter for display name.
 	 */

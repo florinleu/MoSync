@@ -96,65 +96,7 @@ namespace PIM
 
 		readID(args);
 
-		if (MATCH_FLAGS(flag, RF_NAME))
-		{
-			readName(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_ADDRESS))
-		{
-			readAddresses(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_PHONE))
-		{
-			readPhones(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_EMAIL))
-		{
-			readEmails(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_WEBSITE))
-		{
-			readWebsites(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_INSTANTMESSAGING))
-		{
-			readInstantMessagings(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_NOTE))
-		{
-			readNote(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_ORGANIZATION))
-		{
-			readOrganizations(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_SOCIALPROFILE))
-		{
-			readSocialProfiles(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_EVENT))
-		{
-			readEvents(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_RELATION))
-		{
-			readRelations(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_PHOTO))
-		{
-			readPhoto(args);
-		}
+		readFields(args, flag);
 
 		maPimItemClose(mHandle);
 
@@ -187,65 +129,7 @@ namespace PIM
 			return -1;
 		}
 
-		if (MATCH_FLAGS(flag, RF_NAME))
-		{
-			readName(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_ADDRESS))
-		{
-			readAddresses(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_PHONE))
-		{
-			readPhones(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_EMAIL))
-		{
-			readEmails(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_WEBSITE))
-		{
-			readWebsites(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_INSTANTMESSAGING))
-		{
-			readInstantMessagings(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_NOTE))
-		{
-			readNote(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_ORGANIZATION))
-		{
-			readOrganizations(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_SOCIALPROFILE))
-		{
-			readSocialProfiles(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_EVENT))
-		{
-			readEvents(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_RELATION))
-		{
-			readRelations(args);
-		}
-
-		if (MATCH_FLAGS(flag, RF_PHOTO))
-		{
-			readPhoto(args);
-		}
+		readFields(args, flag);
 
 		maPimItemClose(mHandle); //fleu TODO check this in the runtime
 
@@ -257,6 +141,33 @@ namespace PIM
 	 */
 	int Contact::write(int flag)
 	{
+		//Get the contacts item handle.
+		if ((getID() == NULL) || (wcslen(getID()) == 0))
+		{
+			return -1;
+		}
+
+		MA_PIM_ARGS args;
+		initArgs(args);
+		args.bufSize = wcslen(getID())*sizeof(wchar);
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		memcpy(args.buf, getID(), args.bufSize);
+
+		mHandle = maPimListFind(mListHandle, &args);
+		args.item = mHandle;
+
+		if (mHandle <= 0)
+		{
+			return -1;
+		}
+
+		if (MATCH_FLAGS(flag, RF_NAME))
+		{
+			writeName(args);
+		}
+
+		maPimItemClose(mHandle);
+
 		return 0;
 	}
 
@@ -467,6 +378,74 @@ namespace PIM
 		}
 	}
 
+	void Contact::readFields(MA_PIM_ARGS args, int flag)
+	{
+		if (MATCH_FLAGS(flag, RF_NAME))
+		{
+			readName(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_ADDRESS))
+		{
+			readAddresses(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_PHONE))
+		{
+			readPhones(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_EMAIL))
+		{
+			readEmails(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_WEBSITE))
+		{
+			readWebsites(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_INSTANTMESSAGING))
+		{
+			readInstantMessagings(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_NOTE))
+		{
+			readNote(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_ORGANIZATION))
+		{
+			readOrganizations(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_SOCIALPROFILE))
+		{
+			readSocialProfiles(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_EVENT))
+		{
+			readEvents(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_RELATION))
+		{
+			readRelations(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_PHOTO))
+		{
+			readPhoto(args);
+		}
+	}
+
+	void Contact::writeName(MA_PIM_ARGS args)
+	{
+		mName->write(args);
+	}
+
 	/*
 	 * Getter for ID field.
 	 */
@@ -494,7 +473,7 @@ namespace PIM
 	/*
 	 * Getter for name field.
 	 */
-	const Name* Contact::getName() const
+	Name* Contact::getName() const
 	{
 		return mName;
 	}
@@ -518,7 +497,7 @@ namespace PIM
 	/*
 	 * Getter for address field.
 	 */
-	const Address* Contact::getAddress(int index) const
+	Address* Contact::getAddress(int index) const
 	{
 		return mAddresses[index];
 	}
@@ -542,7 +521,7 @@ namespace PIM
 	/*
 	 * Getter for phone field.
 	 */
-	const Phone* Contact::getPhone(int index) const
+	Phone* Contact::getPhone(int index) const
 	{
 		return mPhones[index];
 	}
@@ -566,7 +545,7 @@ namespace PIM
 	/*
 	 * Getter for email field.
 	 */
-	const Email* Contact::getEmail(int index) const
+	Email* Contact::getEmail(int index) const
 	{
 		return mEmails[index];
 	}
@@ -590,7 +569,7 @@ namespace PIM
 	/*
 	 * Getter for website field.
 	 */
-	const Website* Contact::getWebsite(int index) const
+	Website* Contact::getWebsite(int index) const
 	{
 		return mWebsites[index];
 	}
@@ -614,7 +593,7 @@ namespace PIM
 	/*
 	 * Getter for instant messaging field.
 	 */
-	const InstantMessaging* Contact::getInstantMessaging(int index) const
+	InstantMessaging* Contact::getInstantMessaging(int index) const
 	{
 		return mInstantMessagings[index];
 	}
@@ -630,7 +609,7 @@ namespace PIM
 	/*
 	 * Getter for note field.
 	 */
-	const Note* Contact::getNote() const
+	Note* Contact::getNote() const
 	{
 		return mNote;
 	}
@@ -654,7 +633,7 @@ namespace PIM
 	/*
 	 * Getter for organizations field.
 	 */
-	const Organization* Contact::getOrganization(int index) const
+	Organization* Contact::getOrganization(int index) const
 	{
 		return mOrganizations[index];
 	}
@@ -678,7 +657,7 @@ namespace PIM
 	/*
 	 * Getter for social profile field.
 	 */
-	const SocialProfile* Contact::getSocialProfile(int index) const
+	SocialProfile* Contact::getSocialProfile(int index) const
 	{
 		return mSocialProfiles[index];
 	}
@@ -702,7 +681,7 @@ namespace PIM
 	/*
 	 * Getter for event field.
 	 */
-	const Event* Contact::getEvent(int index) const
+	Event* Contact::getEvent(int index) const
 	{
 		return mEvents[index];
 	}
@@ -726,7 +705,7 @@ namespace PIM
 	/*
 	 * Getter for relation field.
 	 */
-	const Relation* Contact::getRelation(int index) const
+	Relation* Contact::getRelation(int index) const
 	{
 		return mRelations[index];
 	}

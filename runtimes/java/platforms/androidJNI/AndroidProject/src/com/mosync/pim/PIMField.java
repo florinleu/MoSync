@@ -243,13 +243,22 @@ public abstract class PIMField {
 	 * Sets the value of the specified field.
 	 */
 	int setValue(int index, int buffPointer, int buffSize, int attributes) {
+		DebugPrint("setValue(" + index + ", " + buffPointer + ", " + buffSize
+				+ ", " + attributes + ")");
 		if (isReadOnly()) {
 			return MA_PIM_ERR_FIELD_READ_ONLY;
 		}
 
 		if (isEmpty()) {
-			return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
-					PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
+			String[] val = new String[mNames.length];
+			while (index >= mValues.size()) {
+				mValues.add(val);
+				mStates.add(State.ADDED);
+			}
+
+			// return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
+			// PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
+
 		}
 
 		if ((index < 0) || (index >= length())) {

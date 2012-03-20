@@ -54,9 +54,6 @@ wchar* getWCharArrayFromBuf(MAAddress const buffer, const int arrayIndex)
 
 	if (currentArrayIndex == arrayIndex)
 	{
-//		wchar* str = new wchar[wcslen(ptr) + 1];
-//		wcsncpy(str, ptr, wcslen(ptr));
-//		return str;
 		return wcsdup(ptr);
 	}
 	else
@@ -73,9 +70,51 @@ char* wstrtostr(const wchar* wstr)
 	}
 	int len = wcslen(wstr);
 	char* str = new char[len + 1];
-	wcstombs(str, wstr, len + 1);
+	wcstombs(str, wstr, len);
 	str[len] = 0;
 	return str;
+}
+
+wchar* strtowstr(const char* str)
+{
+	if (str == NULL)
+	{
+		return NULL;
+	}
+	int len = strlen(str);
+	wchar* wstr = new wchar[len + 1];
+	mbstowcs(wstr, str, len);
+	wstr[len] = 0;
+	return wstr;
+}
+
+wchar* readSubField(const MAAddress buffer, int arrayIndex) //fleu TODO
+{
+	return NULL;
+}
+
+int writeInt(MAAddress bufferDest, int val, int bufDestSize)
+{
+	*(int*)(((char*)bufferDest) + bufDestSize) = val;
+	return sizeof(int);
+}
+
+int writeWString(MAAddress buffer, wchar* str, int bufDestSize)
+{
+	wchar* dst = (wchar*)buffer;
+	dst += (bufDestSize / sizeof(wchar));
+	const wchar* src = NULL;
+	src = (str != NULL)?str:L"";
+	int size = (wcslen(src) + 1) * sizeof (wchar);
+
+	do
+	{
+		*dst = *src;
+		dst++;
+	}
+	while (*(src++) != 0);
+
+	return size;
 }
 
 #endif //__UTIL_H__

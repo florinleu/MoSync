@@ -31,11 +31,27 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
+	enum eNameSubFields
+	{
+		DISPLAY_NAME = 0,
+		FIRST_NAME,
+		MIDDLE_NAME,
+		LAST_NAME,
+		NICKNAME,
+		PREFIX,
+		SUFFIX,
+		PHONETIC_FIRST_NAME,
+		PHONETIC_MIDDLE_NAME,
+		PHONETIC_LAST_NAME,
+		FORMATTED_NAME
+	};
 
 	class Name
 	{
 		public:
 			bool read(MA_PIM_ARGS& args);
+
+			void write(MA_PIM_ARGS& args);
 
 			const wchar* getDisplayName() const;
 			void setDisplayName(wchar* displayName);
@@ -81,6 +97,8 @@ namespace PIM
 			void readPhoneticMiddleName(const MAAddress buffer);
 			void readPhoneticLastName(const MAAddress buffer);
 			void readFormattedName(const MAAddress buffer);
+
+			int writeLastName(MAAddress buffer);
 
 		private:
 			//The display name for the contact.
