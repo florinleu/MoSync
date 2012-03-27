@@ -17,14 +17,15 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file MainScreen.h.
- * @author Bogdan Iusco.
+ * @file MainScreen.h
+ * @author emma
  */
 
 #ifndef MAINSCREEN_H_
 #define MAINSCREEN_H_
 
 #include <maapi.h>
+
 #include <MAUtil/util.h>
 
 // Include all the wrappers.
@@ -34,14 +35,14 @@ using namespace NativeUI;
 
 class MainScreen:
 	public Screen,
-	public SearchBarListener
+	public ButtonListener
 {
 
 public:
 	/**
 	 * Constructor.
 	 */
-		MainScreen();
+	MainScreen();
 
 	/**
 	 * Destructor.
@@ -50,22 +51,17 @@ public:
 
 private:
 
+    /**
+     * This method is called if the touch-up event was inside the
+     * bounds of the button.
+     * @param button The button object that generated the event.
+     */
+    virtual void buttonClicked(Widget* button);
+
 	/**
 	 * Creates and adds main layout to the screen.
 	 */
 	void createMainLayout();
-
-    /**
-     * This method is called when the search button is clicked.
-     * @param searchBar The search bar object that generated the event.
-     */
-    virtual void searchBarSearchButtonClicked(SearchBar* searchBar);
-
-    /**
-     * This method is called when the cancel button is clicked.
-     * @param searchBar The search bar object that generated the event.
-     */
-    virtual void searchBarCancelButtonClicked(SearchBar* searchBar);
 
 private:
 	/**
@@ -73,12 +69,15 @@ private:
 	 */
 	VerticalLayout* mMainLayout;
 
-	SearchBar* mSearchBar;
+	VerticalLayout* mLayout;
+	Button* mRemoveLabel;
+	Label* mLabel;
 
-	/*
-	 * Label used to observe the events received by the search bar
-	 */
-	Label *mDebugLabel;
+	HorizontalLayout* mTestLayout;
+	Button* mRemoveLayout;
+	Button* one;
+	Button* two;
 };
+
 
 #endif /* MAINSCREEN_H_ */
