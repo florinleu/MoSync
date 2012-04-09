@@ -31,59 +31,62 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-	enum eNameSubFields
-	{
-		DISPLAY_NAME = 0,
-		FIRST_NAME,
-		MIDDLE_NAME,
-		LAST_NAME,
-		NICKNAME,
-		PREFIX,
-		SUFFIX,
-		PHONETIC_FIRST_NAME,
-		PHONETIC_MIDDLE_NAME,
-		PHONETIC_LAST_NAME,
-		FORMATTED_NAME
-	};
-
 	class Name
 	{
 		public:
+			enum eSubFields
+			{
+				DISPLAY_NAME = 0,
+				FIRST_NAME,
+				MIDDLE_NAME,
+				LAST_NAME,
+				NICKNAME,
+				PREFIX,
+				SUFFIX,
+				PHONETIC_FIRST_NAME,
+				PHONETIC_MIDDLE_NAME,
+				PHONETIC_LAST_NAME,
+				FORMATTED_NAME
+			};
+
+		public:
+			~Name();
+
 			bool read(MA_PIM_ARGS& args);
 
 			void write(MA_PIM_ARGS& args);
 
-			const wchar* getDisplayName() const;
-			void setDisplayName(wchar* displayName);
+			const wchar* const getDisplayName() const;
+			void setDisplayName(const wchar* const displayName);
 
-			const wchar* getFirstName() const;
-			void setFirstName(wchar* firstName);
+			const wchar* const getFirstName() const;
+			void setFirstName(const wchar* const firstName);
 
-			const wchar* getMiddleName() const;
-			void setMiddleName(wchar* middleName);
+			const wchar* const getMiddleName() const;
+			void setMiddleName(const wchar* const middleName);
 
-			const wchar* getLastName() const;
-			void setLastName(wchar* lastName);
+			const wchar* const getLastName() const;
+			void setLastName(const wchar* const lastName);
 
-			const wchar* getNickname() const;
-			void setNickname(wchar* nickname);
+			const wchar* const getNickname() const;
+			void setNickname(const wchar* const nickname);
 
-			const wchar* getPrefix() const;
-			void setPrefix(wchar* prefix);
+			const wchar* const getPrefix() const;
+			void setPrefix(const wchar* const prefix);
 
-			const wchar* getSuffix() const;
-			void setSuffix(wchar* suffix);
+			const wchar* const getSuffix() const;
+			void setSuffix(const wchar* const suffix);
 
-			const wchar* getPhoneticFirstName() const;
-			void setPhoneticFirstName(wchar* phoneticFirstName);
+			const wchar* const getPhoneticFirstName() const;
+			void setPhoneticFirstName(const wchar* const phoneticFirstName);
 
-			const wchar* getPhoneticMiddleName() const;
-			void setPhoneticMiddleName(wchar* phoneticMiddleName);
+			const wchar* const getPhoneticMiddleName() const;
+			void setPhoneticMiddleName(const wchar* const phoneticMiddleName);
 
-			const wchar* getPhoneticLastName() const;
-			void setPhoneticLastName(wchar* phoneticLastName);
+			const wchar* const getPhoneticLastName() const;
+			void setPhoneticLastName(const wchar* const phoneticLastName);
 
-			const wchar* getFormattedName() const;
+			const wchar* const getFormattedName() const;
 
 		private:
 			void readDisplayName(const MAAddress buffer);

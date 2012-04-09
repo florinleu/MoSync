@@ -453,6 +453,7 @@ public class PIM {
 			return PIMUtil.throwError(MA_PIM_ERR_HANDLE_INVALID,
 					PIMError.PANIC_HANDLE_INVALID, PIMError.sStrHandleInvalid);
 		}
+		DebugPrint("pimItem.close()");
 		pimItem.close();
 		pimItem = null;
 

@@ -36,12 +36,19 @@ namespace PIM
 	class ID
 	{
 		public:
+			enum eSubFields
+			{
+				DATA = 0
+			};
+		public:
+			~ID();
+
 			bool read(MA_PIM_ARGS& args);
 
 			void readID(const MAAddress buffer);
 
-			const wchar* getID() const;
-			void setID(wchar* id);
+			const wchar* const getID() const; //fleu TODO add const for all fields
+			void setID(const wchar* const id);
 
 		private:
 			//The ID for the contact.

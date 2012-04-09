@@ -34,6 +34,21 @@ MA 02110-1301, USA.
 namespace PIM
 {
 
+	Name::~Name()
+	{
+		DELETE(mDisplayName);
+		DELETE(mFirstName);
+		DELETE(mMiddleName);
+		DELETE(mLastName);
+		DELETE(mNickname);
+		DELETE(mPrefix);
+		DELETE(mSuffix);
+		DELETE(mPhoneticFirstName);
+		DELETE(mPhoneticMiddleName);
+		DELETE(mPhoneticLastName);
+		DELETE(mFormattedName);
+	}
+
 	bool Name::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: name read");
@@ -96,7 +111,6 @@ namespace PIM
 
 	void Name::readNickname(const MAAddress buffer)
 	{
-		DELETE(mNickname);
 		wchar* src = (wchar*)buffer;
 		mNickname = wcsdup(src);
 	}
@@ -128,7 +142,6 @@ namespace PIM
 
 	void Name::readFormattedName(const MAAddress buffer)
 	{
-		DELETE(mFormattedName);
 		wchar* src = (wchar*)buffer;
 		mFormattedName = wcsdup(src);
 	}
@@ -160,7 +173,7 @@ namespace PIM
 	/*
 	 * Getter for display name.
 	 */
-	const wchar* Name::getDisplayName() const
+	const wchar* const Name::getDisplayName() const
 	{
 		return mDisplayName;
 	}
@@ -168,15 +181,16 @@ namespace PIM
 	/*
 	 * Setter for display name.
 	 */
-	void Name::setDisplayName(wchar* displayName)
+	void Name::setDisplayName(const wchar* const displayName)
 	{
-		mDisplayName = displayName;
+		DELETE(mDisplayName);
+		mDisplayName = wcsdup(displayName);
 	}
 
 	/*
 	 * Getter for first name.
 	 */
-	const wchar* Name::getFirstName() const
+	const wchar* const Name::getFirstName() const
 	{
 		return mFirstName;
 	}
@@ -184,15 +198,16 @@ namespace PIM
 	/*
 	 * Setter for first name.
 	 */
-	void Name::setFirstName(wchar* firstName)
+	void Name::setFirstName(const wchar* const firstName)
 	{
-		mFirstName = firstName;
+		DELETE(mFirstName);
+		mFirstName = wcsdup(firstName);
 	}
 
 	/*
 	 * Getter for middle name.
 	 */
-	const wchar* Name::getMiddleName() const
+	const wchar* const Name::getMiddleName() const
 	{
 		return mMiddleName;
 	}
@@ -200,15 +215,16 @@ namespace PIM
 	/*
 	 * Setter for middle name.
 	 */
-	void Name::setMiddleName(wchar* middleName)
+	void Name::setMiddleName(const wchar* const middleName)
 	{
-		mMiddleName = middleName;
+		DELETE(mFirstName);
+		mMiddleName = wcsdup(middleName);
 	}
 
 	/*
 	 * Getter for last name.
 	 */
-	const wchar* Name::getLastName() const
+	const wchar* const Name::getLastName() const
 	{
 		return mLastName;
 	}
@@ -216,15 +232,16 @@ namespace PIM
 	/*
 	 * Setter for last name.
 	 */
-	void Name::setLastName(wchar* lastName)
+	void Name::setLastName(const wchar* const lastName)
 	{
-		mLastName = lastName;
+		DELETE(mFirstName);
+		mLastName = wcsdup(lastName);
 	}
 
 	/*
 	 * Getter for nickname.
 	 */
-	const wchar* Name::getNickname() const
+	const wchar* const Name::getNickname() const
 	{
 		return mNickname;
 	}
@@ -232,15 +249,16 @@ namespace PIM
 	/*
 	 * Setter for nickname.
 	 */
-	void Name::setNickname(wchar* nickname)
+	void Name::setNickname(const wchar* const nickname)
 	{
-		mNickname = nickname;
+		DELETE(mFirstName);
+		mNickname = wcsdup(nickname);
 	}
 
 	/*
 	 * Getter for prefix.
 	 */
-	const wchar* Name::getPrefix() const
+	const wchar* const Name::getPrefix() const
 	{
 		return mPrefix;
 	}
@@ -248,15 +266,16 @@ namespace PIM
 	/*
 	 * Setter for prefix.
 	 */
-	void Name::setPrefix(wchar* prefix)
+	void Name::setPrefix(const wchar* const prefix)
 	{
-		mPrefix = prefix;
+		DELETE(mFirstName);
+		mPrefix = wcsdup(prefix);
 	}
 
 	/*
 	 * Getter for suffix.
 	 */
-	const wchar* Name::getSuffix() const
+	const wchar* const Name::getSuffix() const
 	{
 		return mSuffix;
 	}
@@ -264,15 +283,16 @@ namespace PIM
 	/*
 	 * Setter for suffix.
 	 */
-	void Name::setSuffix(wchar* suffix)
+	void Name::setSuffix(const wchar* const suffix)
 	{
-		mSuffix = suffix;
+		DELETE(mFirstName);
+		mSuffix = wcsdup(suffix);
 	}
 
 	/*
 	 * Getter for phonetic first name.
 	 */
-	const wchar* Name::getPhoneticFirstName() const
+	const wchar* const Name::getPhoneticFirstName() const
 	{
 		return mPhoneticFirstName;
 	}
@@ -280,15 +300,16 @@ namespace PIM
 	/*
 	 * Setter for phonetic first name.
 	 */
-	void Name::setPhoneticFirstName(wchar* phoneticFirstName)
+	void Name::setPhoneticFirstName(const wchar* const phoneticFirstName)
 	{
-		mPhoneticFirstName = phoneticFirstName;
+		DELETE(mFirstName);
+		mPhoneticFirstName = wcsdup(phoneticFirstName);
 	}
 
 	/*
 	 * Getter for phonetic middle name.
 	 */
-	const wchar* Name::getPhoneticMiddleName() const
+	const wchar* const Name::getPhoneticMiddleName() const
 	{
 		return mPhoneticMiddleName;
 	}
@@ -296,15 +317,16 @@ namespace PIM
 	/*
 	 * Setter for phonetic middle name.
 	 */
-	void Name::setPhoneticMiddleName(wchar* phoneticMiddleName)
+	void Name::setPhoneticMiddleName(const wchar* const phoneticMiddleName)
 	{
-		mPhoneticMiddleName = phoneticMiddleName;
+		DELETE(mFirstName);
+		mPhoneticMiddleName = wcsdup(phoneticMiddleName);
 	}
 
 	/*
 	 * Getter for phonetic last name.
 	 */
-	const wchar* Name::getPhoneticLastName() const
+	const wchar* const Name::getPhoneticLastName() const
 	{
 		return mPhoneticLastName;
 	}
@@ -312,15 +334,16 @@ namespace PIM
 	/*
 	 * Setter for phonetic last name.
 	 */
-	void Name::setPhoneticLastName(wchar* phoneticLastName)
+	void Name::setPhoneticLastName(const wchar* const phoneticLastName)
 	{
-		mPhoneticLastName = phoneticLastName;
+		DELETE(mFirstName);
+		mPhoneticLastName = wcsdup(phoneticLastName);
 	}
 
 	/*
 	 * Getter for formatted name.
 	 */
-	const wchar* Name::getFormattedName() const
+	const wchar* const Name::getFormattedName() const
 	{
 		return mFormattedName;
 	}

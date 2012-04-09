@@ -402,7 +402,7 @@ public abstract class PIMField {
 
 	}
 
-	public void add(ArrayList<ContentProviderOperation> ops, int contactId) {
+	public void add(ArrayList<ContentProviderOperation> ops, String lookup) {
 		if (isReadOnly()) {
 			return;
 		}
@@ -410,12 +410,12 @@ public abstract class PIMField {
 		print();
 		postProcessData();
 		for (int i = 0; i < mValues.size(); i++) {
-			addToDisk(ops, contactId, mNames, mValues.get(i));
+			addToDisk(ops, lookup, mNames, mValues.get(i));
 		}
 	}
 
 	public void update(ContentResolver cr,
-			ArrayList<ContentProviderOperation> ops, int contactId) {
+			ArrayList<ContentProviderOperation> ops, String lookup) {
 		if (isReadOnly()) {
 			return;
 		}
@@ -423,19 +423,33 @@ public abstract class PIMField {
 
 		for (int i = 0; i < mValues.size(); i++) {
 			if (mStates.get(i) == State.ADDED) {
-				addToDisk(ops, contactId, mNames, mValues.get(i));
+				addToDisk(ops, lookup, mNames, mValues.get(i));
 			} else if (mStates.get(i) == State.UPDATED) {
-				updateToDisk(ops, contactId, mNames, mValues.get(i));
+				updateToDisk(ops, lookup, mNames, mValues.get(i));
 			}
 		}
 
 		for (int i = 0; i < mDeletedValues.size(); i++) {
-			deleteFromDisk(ops, contactId, mDeletedValues.get(i));
+			deleteFromDisk(ops, lookup, mDeletedValues.get(i));
 		}
 	}
 
 	protected void addToDisk(ArrayList<ContentProviderOperation> ops,
-			int rawContactInsertIndex, String[] names, String[] values) {
+			String lookup, String[] names, String[] values) {
+		int rawContactInsertIndex = 0;
+		Cursor cursor = getContentResolver().query(Data.CONTENT_URI,
+				new String[] { Data.CONTACT_ID }, Data.LOOKUP_KEY + "=?",
+				new String[] { lookup }, null);
+		if (cursor.moveToNext()) {
+			String id = cursor
+					.getString(cursor.getColumnIndex(Data.CONTACT_ID));
+			try {
+				rawContactInsertIndex = Integer.parseInt(id);
+			} catch (NumberFormatException e) {
+				DebugPrint("Cannot parse id: " + id);
+			}
+		}
+
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newInsert(Data.CONTENT_URI)
 				.withValueBackReference(Data.RAW_CONTACT_ID,
@@ -452,14 +466,21 @@ public abstract class PIMField {
 	}
 
 	protected void updateToDisk(ArrayList<ContentProviderOperation> ops,
-			int rawContactId, String[] names, String[] values) {
-		DebugPrint("UPDATE");
+			String lookup, String[] names, String[] values) {
+		DebugPrint("updateToDisk " + lookup);
+		Cursor cursor = getContentResolver().query(
+				Data.CONTENT_URI,
+				new String[] { Data._ID },
+				/* Data.LOOKUP_KEY + "=?" + " AND " + */Data.MIMETYPE + "=?"
+						+ " AND " + Data._ID + "=?",
+				new String[] { /* lookup, */mStrType, values[0] }, null);
+		DebugPrint("Cursor size = " + cursor.getCount());
+
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newUpdate(Data.CONTENT_URI).withSelection(
 						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
 								+ " AND " + Data._ID + "=?",
-						new String[] { Integer.toString(rawContactId),
-								mStrType, values[0] });
+						new String[] { lookup, mStrType, values[0] });
 
 		for (int i = 1; i < names.length; i++) {
 			if ((values[i] != null) && (!names[i].equals(DUMMY))) {
@@ -470,16 +491,16 @@ public abstract class PIMField {
 		ops.add(builder.build());
 	}
 
-	void deleteFromDisk(ArrayList<ContentProviderOperation> ops,
-			int rawContactId, long id) {
+	void deleteFromDisk(ArrayList<ContentProviderOperation> ops, String lookup,
+			long id) {
 		DebugPrint("DELETE");
 		ops.add(ContentProviderOperation
 				.newDelete(Data.CONTENT_URI)
 				.withSelection(
 						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
 								+ " AND " + Data._ID + "=?",
-						new String[] { Integer.toString(rawContactId),
-								mStrType, Long.toString(id) }).build());
+						new String[] { lookup, mStrType, Long.toString(id) })
+				.build());
 	}
 
 	public void close() {

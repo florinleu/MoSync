@@ -31,6 +31,11 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
+	ID::~ID()
+	{
+		DELETE(mID);
+	}
+
 	bool ID::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: ID read");
@@ -49,14 +54,14 @@ namespace PIM
 		mID = wcsdup(src);
 	}
 
-	const wchar* ID::getID() const
+	const wchar* const ID::getID() const
 	{
 		return mID;
 	}
 
-	void ID::setID(wchar* id)
+	void ID::setID(const wchar* const id)
 	{
-		mID = id;
+		DELETE(mID);
+		mID = wcsdup(id);
 	}
-
 } //PIM

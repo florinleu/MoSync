@@ -41,4 +41,11 @@ public class PIMItemEvents extends PIMItem {
 	protected String getID() {
 		return null;
 	}
+
+	/**
+	 * Closes the item
+	 */
+	protected void close() {
+
+	}
 }

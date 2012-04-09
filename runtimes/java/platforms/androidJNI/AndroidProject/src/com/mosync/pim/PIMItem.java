@@ -307,6 +307,5 @@ public abstract class PIMItem {
 	/**
 	 * Closes the item
 	 */
-	protected void close() {
-	}
+	protected abstract void close();
 }

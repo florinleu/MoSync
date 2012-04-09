@@ -136,7 +136,6 @@ public class PIMItemContacts extends PIMItem {
 			Cursor cursor = getContentResolver().query(Data.CONTENT_URI,
 					new String[] { Data.CONTACT_ID }, Data.LOOKUP_KEY + "=?",
 					new String[] { mUID.getSpecificData(0) }, null);
-			DebugPrint("cursor size " + cursor.getCount());
 			if (cursor.moveToNext()) {
 				String id = cursor.getString(cursor
 						.getColumnIndex(Data.CONTACT_ID));
@@ -156,30 +155,45 @@ public class PIMItemContacts extends PIMItem {
 	/**
 	 * Closes the item
 	 */
-	protected void close(ContentResolver cr) {
-		DebugPrint("PIMItem.close()");
+	protected void close() {
+		DebugPrint("PIMItemContacts.close()");
 		ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 		Iterator<PIMField> fieldsIt = mPIMFields.iterator();
 
-		int rawContactIndex = 0;
+		// int rawContactIndex = 0;
 		if (mState == State.ADDED) {
-			rawContactIndex = ops.size();
+			// rawContactIndex = ops.size();
 			ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
 					.withValue(RawContacts.ACCOUNT_TYPE, null)
 					.withValue(RawContacts.ACCOUNT_NAME, null).build());
 			while (fieldsIt.hasNext()) {
-				fieldsIt.next().add(ops, rawContactIndex);
+				// fieldsIt.next().add(ops, rawContactIndex);
+				fieldsIt.next().add(ops, mUID.getSpecificData(0));
 			}
 		} else if (mState == State.UPDATED) {
-			rawContactIndex = Integer.parseInt(mUID.getSpecificData(0));
+			// Cursor cursor = getContentResolver().query(Data.CONTENT_URI,
+			// new String[] { Data.CONTACT_ID }, Data.LOOKUP_KEY + "=?",
+			// new String[] { mUID.getSpecificData(0) }, null);
+			// if (cursor.moveToNext()) {
+			// String id = cursor.getString(cursor
+			// .getColumnIndex(Data.CONTACT_ID));
+			//
+			// try {
+			// rawContactIndex = Integer.parseInt(id);
+			DebugPrint("Fields = " + mPIMFields.size());
 			while (fieldsIt.hasNext()) {
-				fieldsIt.next().update(cr, ops, rawContactIndex);
+				fieldsIt.next().update(getContentResolver(), ops,
+						mUID.getSpecificData(0));
 			}
+			// } catch (NumberFormatException e) {
+			// DebugPrint("Cannot parse id: " + id);
+			// }
+			// }
 		}
-
+		DebugPrint("Update ended.");
 		setState(State.NONE);
 		try {
-			ContentProviderResult[] res = cr.applyBatch(
+			ContentProviderResult[] res = getContentResolver().applyBatch(
 					ContactsContract.AUTHORITY, ops);
 		} catch (Exception e) {
 			e.printStackTrace();
