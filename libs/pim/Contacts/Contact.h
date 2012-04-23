@@ -149,6 +149,7 @@ namespace PIM
 			void readFields(MA_PIM_ARGS args, int flag);
 
 			void writeName(MA_PIM_ARGS args);
+			void writeAddresses(MA_PIM_ARGS args);
 
 		private:
 			ID* mID;

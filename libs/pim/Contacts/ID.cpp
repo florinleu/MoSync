@@ -31,11 +31,19 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
+	/**
+	 * Destructor.
+	 */
 	ID::~ID()
 	{
 		DELETE(mID);
 	}
 
+	/**
+	 * Reads the id.
+	 * @param args The arguments needed to read the id.
+	 * @return true on success.
+	 */
 	bool ID::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: ID read");
@@ -43,22 +51,34 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		CHECK_RESULT(maPimItemGetValue(&args, 0));
 
-		readID(args.buf);
+		readData(args.buf);
 
 		return true;
 	}
 
-	void ID::readID(const MAAddress buffer)
+	/**
+	 * Reads the id data.
+	 * @param buffer The buffer to read from.
+	 */
+	void ID::readData(const MAAddress buffer)
 	{
 		wchar* src = (wchar*)buffer;
 		mID = wcsdup(src);
 	}
 
+	/**
+	 * Gets the contact's id.
+	 * @return The ID for the contact.
+	 */
 	const wchar* const ID::getID() const
 	{
 		return mID;
 	}
 
+	/**
+	 * Sets the contact's id.
+	 * @param id The value to set.
+	 */
 	void ID::setID(const wchar* const id)
 	{
 		DELETE(mID);

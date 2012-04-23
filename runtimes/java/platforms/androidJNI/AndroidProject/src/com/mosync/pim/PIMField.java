@@ -18,10 +18,11 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.provider.ContactsContract.Data;
+import android.provider.ContactsContract.RawContacts;
 
 public abstract class PIMField {
 
-	protected static final String DUMMY = Data._ID;
+	protected static final String DUMMY = Data.LOOKUP_KEY;
 	protected int MAX_SIZE;
 
 	protected enum State {
@@ -275,7 +276,7 @@ public abstract class PIMField {
 		setData(index, buffer);
 
 		if (mStates.get(index) != State.ADDED) {
-			DebugPrint("set state to UPDATED");
+			DebugPrint("###########################set state to UPDATED");
 			mStates.set(index, State.UPDATED);
 		}
 
@@ -416,12 +417,16 @@ public abstract class PIMField {
 
 	public void update(ContentResolver cr,
 			ArrayList<ContentProviderOperation> ops, String lookup) {
+		DebugPrint("Update + " + mStrType);
 		if (isReadOnly()) {
 			return;
 		}
 		postProcessData();
 
+		DebugPrint("Values = " + mValues.size());
+
 		for (int i = 0; i < mValues.size(); i++) {
+			DebugPrint("State " + i + ": " + mStates.get(i));
 			if (mStates.get(i) == State.ADDED) {
 				addToDisk(ops, lookup, mNames, mValues.get(i));
 			} else if (mStates.get(i) == State.UPDATED) {
@@ -436,59 +441,101 @@ public abstract class PIMField {
 
 	protected void addToDisk(ArrayList<ContentProviderOperation> ops,
 			String lookup, String[] names, String[] values) {
-		int rawContactInsertIndex = 0;
+		DebugPrint("addToDisk " + lookup + "; data type: " + mStrType);
+
 		Cursor cursor = getContentResolver().query(Data.CONTENT_URI,
-				new String[] { Data.CONTACT_ID }, Data.LOOKUP_KEY + "=?",
+				new String[] { Data.RAW_CONTACT_ID }, Data.LOOKUP_KEY + "=?",
 				new String[] { lookup }, null);
+		String id = null;
 		if (cursor.moveToNext()) {
-			String id = cursor
-					.getString(cursor.getColumnIndex(Data.CONTACT_ID));
-			try {
-				rawContactInsertIndex = Integer.parseInt(id);
-			} catch (NumberFormatException e) {
-				DebugPrint("Cannot parse id: " + id);
-			}
+			id = cursor.getString(cursor.getColumnIndex(Data.RAW_CONTACT_ID));
 		}
 
+		cursor.close();
+
+		// cursor = getContentResolver().query(
+		// RawContacts.CONTENT_URI,
+		// new String[] { RawContacts.ACCOUNT_TYPE,
+		// RawContacts.ACCOUNT_NAME },
+		// RawContacts.CONTACT_ID + "=?", new String[] { id }, null);
+		//
+		// String accountType = null;
+		// String accountName = null;
+		// if (cursor.moveToNext()) {
+		// accountType = cursor.getString(cursor
+		// .getColumnIndex(RawContacts.ACCOUNT_TYPE));
+		// accountName = cursor.getString(cursor
+		// .getColumnIndex(RawContacts.ACCOUNT_NAME));
+		// }
+		//
+		// DebugPrint("account type = " + accountType + "; accountName = "
+		// + accountName);
+		//
+		// cursor.close();
+
+		// int rawContactInsertIndex = ops.size();
+
+		// ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+		// .withValue(RawContacts.ACCOUNT_TYPE, accountType)
+		// .withValue(RawContacts.ACCOUNT_NAME, accountName).build());
+
+		// ContentProviderOperation.Builder builder = ContentProviderOperation
+		// .newInsert(Data.CONTENT_URI).withValueBackReference(
+		// Data.RAW_CONTACT_ID, rawContactInsertIndex);
 		ContentProviderOperation.Builder builder = ContentProviderOperation
-				.newInsert(Data.CONTENT_URI)
-				.withValueBackReference(Data.RAW_CONTACT_ID,
-						rawContactInsertIndex)
+				.newInsert(Data.CONTENT_URI).withValue(Data.RAW_CONTACT_ID, id)
 				.withValue(Data.MIMETYPE, mStrType);
 
-		for (int i = 0; i < names.length; i++) {
+		builder = builder.withValue(Data.MIMETYPE, mStrType);
+		boolean canBuild = false;
+		for (int i = 1; i < names.length; i++) {
+			DebugPrint(names[i] + ": " + values[i]);
 			if ((values[i] != null) && (!names[i].equals(DUMMY))) {
 				builder = builder.withValue(names[i], values[i]);
+				canBuild = true;
 			}
 		}
 
-		ops.add(builder.build());
+		if (canBuild) {
+			DebugPrint("Operation ADD");
+			ops.add(builder.build());
+		}
 	}
 
 	protected void updateToDisk(ArrayList<ContentProviderOperation> ops,
 			String lookup, String[] names, String[] values) {
-		DebugPrint("updateToDisk " + lookup);
-		Cursor cursor = getContentResolver().query(
-				Data.CONTENT_URI,
-				new String[] { Data._ID },
-				/* Data.LOOKUP_KEY + "=?" + " AND " + */Data.MIMETYPE + "=?"
-						+ " AND " + Data._ID + "=?",
-				new String[] { /* lookup, */mStrType, values[0] }, null);
-		DebugPrint("Cursor size = " + cursor.getCount());
-
+		DebugPrint("updateToDisk " + lookup + "; data type: " + mStrType);
+		// Cursor cursor = getContentResolver().query(
+		// Data.CONTENT_URI,
+		// new String[] { Data._ID },
+		// Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
+		// + " AND " + Data._ID + "=?",
+		// new String[] { lookup, mStrType, values[0] }, null);
+		// DebugPrint("*************Cursor size = " + cursor.getCount());
+		// if (cursor.moveToNext()) {
+		// DebugPrint("id = " + values[0] + "; cursor id = "
+		// + cursor.getString(0));
+		// }
+		// cursor.close();
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newUpdate(Data.CONTENT_URI).withSelection(
 						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
 								+ " AND " + Data._ID + "=?",
 						new String[] { lookup, mStrType, values[0] });
 
+		boolean canBuild = false;
 		for (int i = 1; i < names.length; i++) {
 			if ((values[i] != null) && (!names[i].equals(DUMMY))) {
+				DebugPrint("values[" + i + "]=" + values[i]);
 				builder = builder.withValue(names[i], values[i]);
+				canBuild = true;
 			}
 		}
 
-		ops.add(builder.build());
+		if (canBuild) {
+			DebugPrint("Operation UPDATE");
+			ops.add(builder.build());
+		}
 	}
 
 	void deleteFromDisk(ArrayList<ContentProviderOperation> ops, String lookup,

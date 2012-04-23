@@ -32,8 +32,8 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-	/*
-	 * Constructor
+	/**
+	 * Constructor.
 	 */
 	Address::Address():
 		mIsPrimary(false)
@@ -41,8 +41,26 @@ namespace PIM
 
 	}
 
-	/*
-	 * Read a complete address.
+	/**
+	 * Destructor.
+	 */
+	Address::~Address()
+	{
+		DELETE(mStreet);
+		DELETE(mCity);
+		DELETE(mState);
+		DELETE(mPostalCode);
+		DELETE(mCountry);
+		DELETE(mNeighborhood);
+		DELETE(mPOBox);
+		DELETE(mFormattedAddress);
+		DELETE(mLabel);
+	}
+
+	/**
+	 * Reads a contact's address.
+	 * @param args The arguments needed to read the address.
+	 * @param index The index of the address to read.
 	 */
 	void Address::read(MA_PIM_ARGS& args, int index)
 	{
@@ -52,13 +70,13 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) > 0)
 		{
-			readStreet(args.buf);
-			readCity(args.buf);
-			readState(args.buf);
-			readPostalCode(args.buf);
-			readCountry(args.buf);
-			readNeighborhood(args.buf);
-			readPOBox(args.buf);
+			mStreet = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_ADDR_STREET);
+			mCity = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_ADDR_LOCALITY);
+			mState = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_ADDR_REGION);
+			mPostalCode = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_ADDR_POSTALCODE);
+			mCountry = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_ADDR_COUNTRY);
+			mNeighborhood = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_ADDR_NEIGHBORHOOD);
+			mPOBox = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_ADDR_POBOX);
 
 			readType(args.item, index);
 			readLabel(args.item, index);
@@ -68,52 +86,44 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >=0 )
 		{
-			readFormattedAddress(args.buf);
+			DELETE(mFormattedAddress);
+			wchar* src = (wchar*)args.buf;
+			mFormattedAddress = wcsdup(src);
 		}
 	}
 
-	void Address::readStreet(const MAAddress buffer)
+	/**
+	 * Writes a contact's address.
+	 * @param args The values to write.
+	 * @index args The index of the address to write.
+	 */
+	void Address::write(MA_PIM_ARGS& args, int index)
 	{
-		mStreet = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_STREET);
+		printf("@LIB: address write");
+
+		args.field = MA_PIM_FIELD_CONTACT_ADDR;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeInt(args.buf, MA_PIM_CONTACT_ADDR_COUNT, 0);
+		args.bufSize += writeWString(args.buf, mPOBox, args.bufSize);
+		args.bufSize += writeWString(args.buf, NULL, args.bufSize);
+		args.bufSize += writeWString(args.buf, mStreet, args.bufSize);
+		args.bufSize += writeWString(args.buf, mCity, args.bufSize);
+		args.bufSize += writeWString(args.buf, mState, args.bufSize);
+		args.bufSize += writeWString(args.buf, mPostalCode, args.bufSize);
+		args.bufSize += writeWString(args.buf, mCountry, args.bufSize);
+		args.bufSize += writeWString(args.buf, mNeighborhood, args.bufSize);
+		maPimItemSetValue(&args, index, getAttribute());
+
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mLabel, 0);
+		maPimItemSetLabel(&args, index);
 	}
 
-	void Address::readCity(const MAAddress buffer)
-	{
-		mCity = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_LOCALITY);
-	}
-
-	void Address::readState(const MAAddress buffer)
-	{
-		mState = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_REGION);
-	}
-
-	void Address::readPostalCode(const MAAddress buffer)
-	{
-		mPostalCode = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_POSTALCODE);
-	}
-
-	void Address::readCountry(const MAAddress buffer)
-	{
-		mCountry = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_COUNTRY);
-	}
-
-	void Address::readNeighborhood(const MAAddress buffer)
-	{
-		mNeighborhood = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_NEIGHBORHOOD);
-	}
-
-	void Address::readPOBox(const MAAddress buffer)
-	{
-		mPOBox = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_ADDR_POBOX);
-	}
-
-	void Address::readFormattedAddress(const MAAddress buffer)
-	{
-		DELETE(mFormattedAddress);
-		wchar* src = (wchar*)buffer;
-		mFormattedAddress = wcsdup(src);
-	}
-
+	/**
+	 * Reads the type of the address.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this address.
+	 */
 	void Address::readType(const MAHandle handle, const int index)
 	{
 		int attribute = maPimItemGetAttributes(handle, MA_PIM_FIELD_CONTACT_ADDR, index);
@@ -129,20 +139,25 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_ADDR_HOME:
-				mType = ADDRESS_HOME;
+				mType = HOME;
 				break;
 			case MA_PIM_ATTR_ADDR_WORK:
-				mType = ADDRESS_WORK;
+				mType = WORK;
 				break;
 			case MA_PIM_ATTR_ADDR_CUSTOM:
-				mType = ADDRESS_CUSTOM;
+				mType = CUSTOM;
 				break;
 			default:
-				mType = ADDRESS_OTHER;
+				mType = OTHER;
 				break;
 		}
 	}
 
+	/**
+	 * Reads the label of the address.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this address.
+	 */
 	void Address::readLabel(const MAHandle handle, const int index)
 	{
 		MA_PIM_ARGS args;
@@ -160,164 +175,228 @@ namespace PIM
 		mLabel = wcsdup(src);
 	}
 
-	/*
-	 * Getter for street.
+	/**
+	 * Gets the contact's street.
+	 * @return The street of the contact.
 	 */
-	const wchar* Address::getStreet() const
+	const wchar* const Address::getStreet() const
 	{
 		return mStreet;
 	}
 
-	/*
-	 * Setter for street.
+	/**
+	 * Sets the contact's street.
+	 * @param street The value to set.
 	 */
-	void Address::setStreet(wchar* street)
+	void Address::setStreet(const wchar* const street)
 	{
-		mStreet = street;
+		DELETE(mStreet);
+		mStreet = wcsdup(street);
 	}
 
-	/*
-	 * Getter for city.
+	/**
+	 * Gets the contact's city.
+	 * @return The city of the contact.
 	 */
-	const wchar* Address::getCity() const
+	const wchar* const Address::getCity() const
 	{
 		return mCity;
 	}
 
-	/*
-	 * Setter for city.
+	/**
+	 * Sets the contact's city.
+	 * @param city The value to set.
 	 */
-	void Address::setCity(wchar* city)
+	void Address::setCity(const wchar* const city)
 	{
-		mCity = city;
+		DELETE(mCity);
+		mCity = wcsdup(city);
 	}
 
-	/*
-	 * Getter for state.
+	/**
+	 * Gets the contact's state.
+	 * @return The state of the contact.
 	 */
-	const wchar* Address::getState() const
+	const wchar* const Address::getState() const
 	{
 		return mState;
 	}
 
-	/*
-	 * Setter for state.
+	/**
+	 * Sets the contact's state.
+	 * @param state The value to set.
 	 */
-	void Address::setState(wchar* state)
+	void Address::setState(const wchar* const state)
 	{
-		mState = state;
+		DELETE(mState);
+		mState = wcsdup(state);
 	}
 
-	/*
-	 * Getter for postalCode.
+	/**
+	 * Gets the contact's postal code.
+	 * @return The postal code of the contact.
 	 */
-	const wchar* Address::getPostalCode() const
+	const wchar* const Address::getPostalCode() const
 	{
 		return mPostalCode;
 	}
 
-	/*
-	 * Setter for postalCode.
+	/**
+	 * Sets the contact's postal code.
+	 * @param postalCode The value to set.
 	 */
-	void Address::setPostalCode(wchar* postalCode)
+	void Address::setPostalCode(const wchar* const postalCode)
 	{
-		mPostalCode = postalCode;
+		DELETE(mPostalCode);
+		mPostalCode = wcsdup(postalCode);
 	}
 
-	/*
-	 * Getter for country.
+	/**
+	 * Gets the contact's country.
+	 * @return The country of the contact.
 	 */
-	const wchar* Address::getCountry() const
+	const wchar* const Address::getCountry() const
 	{
 		return mCountry;
 	}
 
-	/*
-	 * Setter for country.
+	/**
+	 * Sets the contact's country.
+	 * @param country The value to set.
 	 */
-	void Address::setCountry(wchar* country)
+	void Address::setCountry(const wchar* const country)
 	{
-		mCountry = country;
+		DELETE(mCountry);
+		mCountry = wcsdup(country);
 	}
 
-	/*
-	 * Getter for neighborhood.
+	/**
+	 * Gets the contact's neighborhood.
+	 * @return The neighborhood of the contact.
 	 */
-	const wchar* Address::getNeighborhood() const
+	const wchar* const Address::getNeighborhood() const
 	{
 		return mNeighborhood;
 	}
 
-	/*
-	 * Setter for neighborhood.
+	/**
+	 * Sets the contact's neighborhood.
+	 * @param neighborhood The value to set.
 	 */
-	void Address::setNeighborhood(wchar* neighborhood)
+	void Address::setNeighborhood(const wchar* const neighborhood)
 	{
-		mNeighborhood = neighborhood;
+		DELETE(mNeighborhood);
+		mNeighborhood = wcsdup(neighborhood);
 	}
 
-	/*
-	 * Getter for pobox.
+	/**
+	 * Gets the contact's po box.
+	 * @return The po box of the contact.
 	 */
-	const wchar* Address::getPOBox() const
+	const wchar* const Address::getPOBox() const
 	{
 		return mPOBox;
 	}
 
-	/*
-	 * Setter for pobox.
+	/**
+	 * Sets the contact's po box.
+	 * @param pobox The value to set.
 	 */
-	void Address::setPOBox(wchar* pobox)
+	void Address::setPOBox(const wchar* const pobox)
 	{
-		mPOBox = pobox;
+		DELETE(mPOBox);
+		mPOBox = wcsdup(pobox);
 	}
 
-	/*
-	 * Getter for formatted address.
+	/**
+	 * Gets the contact's formatted address.
+	 * @return The formatted address of the contact.
 	 */
-	const wchar* Address::getFormattedAddress() const
+	const wchar* const Address::getFormattedAddress() const
 	{
 		return mFormattedAddress;
 	}
 
-	/*
-	 * Getter for type.
+	/**
+	 * Gets the address type.
+	 * @return The type of the address.
 	 */
-	const eAddressTypes& Address::getType() const
+	const Address::eTypes& Address::getType() const
 	{
 		return mType;
 	}
 
-	/*
-	 * Setter for type.
+	/**
+	 * Sets the address type.
+	 * @param state The value to set.
 	 */
-	void Address::setType(const eAddressTypes& type)
+	void Address::setType(const Address::eTypes& type)
 	{
 		mType = type;
 	}
 
-	/*
-	 * Getter for label.
+	/**
+	 * Gets the address label.
+	 * @return The label of the address.
 	 */
-	const wchar* Address::getLabel() const
+	const wchar* const Address::getLabel() const
 	{
 		return mLabel;
 	}
 
-	/*
-	 * Setter for label.
+	/**
+	 * Sets the address label.
+	 * @param state The value to set.
 	 */
-	void Address::setLabel(wchar* label)
+	void Address::setLabel(const wchar* const label)
 	{
-		mLabel = label;
+		DELETE(mLabel);
+		mLabel = wcsdup(label);
 	}
 
-	/*
-	 * Returns true if this is set as the primary address.
+	/**
+	 * Checks if this is or not a primary address.
+	 * @return True if this is a primary address.
 	 */
 	const bool Address::isPrimary() const
 	{
 		return mIsPrimary;
+	}
+
+	/**
+	 * Sets this as a primary address.
+	 */
+	void Address::setPrimary(const bool primary)
+	{
+		mIsPrimary = primary;
+	}
+
+	/**
+	 * Computes the address attribute.
+	 * @return The address attribute.
+	 */
+	const int Address::getAttribute() const
+	{
+		int attribute = 0;
+		switch (mType)
+		{
+			case HOME:
+				attribute = MA_PIM_ATTR_ADDR_HOME;
+				break;
+			case WORK:
+				attribute = MA_PIM_ATTR_ADDR_WORK;
+				break;
+			case CUSTOM:
+				attribute = MA_PIM_ATTR_ADDR_CUSTOM;
+				break;
+			default:
+				attribute = MA_PIM_ATTR_ADDR_OTHER;
+				break;
+		}
+
+		attribute |= (mIsPrimary ? MA_PIM_ATTRPREFERRED : 0);
+
+		return attribute;
 	}
 
 } //PIM

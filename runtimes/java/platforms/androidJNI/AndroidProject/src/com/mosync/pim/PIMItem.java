@@ -41,6 +41,7 @@ public abstract class PIMItem {
 	}
 
 	protected void setState(State state) {
+		DebugPrint("###########################Set state to " + state);
 		if ((mState != State.ADDED) && (state != State.NONE))
 			mState = state;
 	}

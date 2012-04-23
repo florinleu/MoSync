@@ -3593,6 +3593,8 @@ group PIMAPI "PIM API" {
 			COUNTRY = 6;
 			/// Index for #MA_PIM_FIELD_CONTACT_ADDR. Neighborhood.
 			NEIGHBORHOOD = 7;
+			/// Index for #MA_PIM_FIELD_CONTACT_ADDR. Subfields number.
+			COUNT = 8;
 		}
 
 		constset int MA_PIM_CONTACT_NAME_ {
@@ -3614,6 +3616,8 @@ group PIMAPI "PIM API" {
 			PHONETIC_OTHER = 7;
 			/// Index for #MA_PIM_FIELD_CONTACT_NAME. Display name.
 			DISPLAY = 8;
+			/// Index for #MA_PIM_FIELD_CONTACT_NAME. Subfields number.
+			COUNT = 9;
 		}
 
 		constset int MA_PIM_CONTACT_ORG_INFO_ {

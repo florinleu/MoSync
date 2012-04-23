@@ -166,6 +166,11 @@ namespace PIM
 			writeName(args);
 		}
 
+		if (MATCH_FLAGS(flag, RF_ADDRESS))
+		{
+			writeAddresses(args);
+		}
+
 		maPimItemClose(mHandle);
 
 		return 0;
@@ -444,6 +449,19 @@ namespace PIM
 	void Contact::writeName(MA_PIM_ARGS args)
 	{
 		mName->write(args);
+	}
+
+	void Contact::writeAddresses(MA_PIM_ARGS args)
+	{
+		int count = mAddresses.size();
+		if (count < 0)
+		{
+			return;
+		}
+		for (int i=0; i<count; i++)
+		{
+			mAddresses[i]->write(args, i);
+		}
 	}
 
 	/*

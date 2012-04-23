@@ -8,7 +8,9 @@ import java.util.Iterator;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
+import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
@@ -162,6 +164,7 @@ public class PIMItemContacts extends PIMItem {
 
 		// int rawContactIndex = 0;
 		if (mState == State.ADDED) {
+			DebugPrint("Add item.");
 			// rawContactIndex = ops.size();
 			ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
 					.withValue(RawContacts.ACCOUNT_TYPE, null)
@@ -171,6 +174,7 @@ public class PIMItemContacts extends PIMItem {
 				fieldsIt.next().add(ops, mUID.getSpecificData(0));
 			}
 		} else if (mState == State.UPDATED) {
+			DebugPrint("Update item.");
 			// Cursor cursor = getContentResolver().query(Data.CONTENT_URI,
 			// new String[] { Data.CONTACT_ID }, Data.LOOKUP_KEY + "=?",
 			// new String[] { mUID.getSpecificData(0) }, null);
@@ -190,14 +194,20 @@ public class PIMItemContacts extends PIMItem {
 			// }
 			// }
 		}
-		DebugPrint("Update ended.");
 		setState(State.NONE);
 		try {
-			ContentProviderResult[] res = getContentResolver().applyBatch(
-					ContactsContract.AUTHORITY, ops);
-		} catch (Exception e) {
+			DebugPrint("APPLY BATCH " + ops.size());
+			if (ops.size() > 0) {
+				ContentProviderResult[] res = getContentResolver().applyBatch(
+						ContactsContract.AUTHORITY, ops);
+				DebugPrint("Result = " + res.length);
+			}
+		} catch (OperationApplicationException e) {
+			DebugPrint("OperationApplicationException: " + e.getMessage());
 			e.printStackTrace();
-			DebugPrint("Exception: " + e.getMessage());
+		} catch (RemoteException e) {
+			DebugPrint("RemoteException: " + e.getMessage());
+			e.printStackTrace();
 		}
 
 		fieldsIt = mPIMFields.iterator();

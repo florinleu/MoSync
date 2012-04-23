@@ -43,6 +43,8 @@ public class PIMListContacts extends PIMList {
 					PIMError.sStrListUnavailable);
 		}
 
+		DebugPrint("Contacts number: " + listCursor.getCount());
+
 		// create the items
 		while (listCursor.moveToNext()) {
 			try {

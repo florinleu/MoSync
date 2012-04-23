@@ -94,7 +94,11 @@ public class PIM {
 
 			Cursor managedCursor = null;
 			try {
-				managedCursor = getContentResolver().query(calendars,
+				managedCursor = getContentResolver().query(calendars, // fleu
+																		// TODO
+																		// close
+																		// this
+																		// cursor
 						projection, selection, null, sortOrder);
 			} catch (IllegalArgumentException e) {
 				DebugPrint("Failed to get provider at [" + calendars.toString()

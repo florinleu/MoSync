@@ -33,7 +33,9 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-
+	/**
+	 * Destructor.
+	 */
 	Name::~Name()
 	{
 		DELETE(mDisplayName);
@@ -49,6 +51,11 @@ namespace PIM
 		DELETE(mFormattedName);
 	}
 
+	/**
+	 * Reads the contact's name.
+	 * @param args The arguments needed to read the name.
+	 * @return true on success.
+	 */
 	bool Name::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: name read");
@@ -59,15 +66,15 @@ namespace PIM
 		if (maPimItemGetValue(&args, 0) > 0)
 		{
 			isSupported = true;
-			readDisplayName(args.buf);
-			readFirstName(args.buf);
-			readMiddleName(args.buf);
-			readLastName(args.buf);
-			readPrefix(args.buf);
-			readSuffix(args.buf);
-			readPhoneticFirstName(args.buf);
-			readPhoneticMiddleName(args.buf);
-			readPhoneticLastName(args.buf);
+			mDisplayName = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_DISPLAY);
+			mFirstName = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_GIVEN);
+			mMiddleName = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_OTHER);
+			mLastName = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_FAMILY);
+			mPrefix = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_PREFIX);
+			mSuffix = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_SUFFIX);
+			mPhoneticFirstName = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_PHONETIC_GIVEN);
+			mPhoneticMiddleName = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_PHONETIC_OTHER);
+			mPhoneticLastName = getWCharArrayFromBuf(args.buf, MA_PIM_CONTACT_NAME_PHONETIC_FAMILY);
 		}
 
 		args.field = MA_PIM_FIELD_CONTACT_NICKNAME;
@@ -75,7 +82,8 @@ namespace PIM
 		if (maPimItemGetValue(&args, 0) >=0 )
 		{
 			isSupported = true;
-			readNickname(args.buf);
+			wchar* src = (wchar*)args.buf;
+			mNickname = wcsdup(src);
 		}
 
 		args.field = MA_PIM_FIELD_CONTACT_FORMATTED_NAME;
@@ -83,76 +91,24 @@ namespace PIM
 		if (maPimItemGetValue(&args, 0) >=0)
 		{
 			isSupported = true;
-			readFormattedName(args.buf);
+			wchar* src = (wchar*)args.buf;
+			mFormattedName = wcsdup(src);
 		}
 
 		return isSupported;
 	}
 
-	void Name::readDisplayName(const MAAddress buffer)
-	{
-		mDisplayName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_DISPLAY);
-	}
-
-	void Name::readFirstName(const MAAddress buffer)
-	{
-		mFirstName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_GIVEN);
-	}
-
-	void Name::readMiddleName(const MAAddress buffer)
-	{
-		mMiddleName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_OTHER);
-	}
-
-	void Name::readLastName(const MAAddress buffer)
-	{
-		mLastName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_FAMILY);
-	}
-
-	void Name::readNickname(const MAAddress buffer)
-	{
-		wchar* src = (wchar*)buffer;
-		mNickname = wcsdup(src);
-	}
-
-	void Name::readPrefix(const MAAddress buffer)
-	{
-		mPrefix = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PREFIX);
-	}
-
-	void Name::readSuffix(const MAAddress buffer)
-	{
-		mSuffix = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_SUFFIX);
-	}
-
-	void Name::readPhoneticFirstName(const MAAddress buffer)
-	{
-		mPhoneticFirstName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PHONETIC_GIVEN);
-	}
-
-	void Name::readPhoneticMiddleName(const MAAddress buffer)
-	{
-		mPhoneticMiddleName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PHONETIC_OTHER);
-	}
-
-	void Name::readPhoneticLastName(const MAAddress buffer)
-	{
-		mPhoneticLastName = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_NAME_PHONETIC_FAMILY);
-	}
-
-	void Name::readFormattedName(const MAAddress buffer)
-	{
-		wchar* src = (wchar*)buffer;
-		mFormattedName = wcsdup(src);
-	}
-
+	/**
+	 * Writes the contact's id.
+	 * @param args The values to write.
+	 */
 	void Name::write(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: name write");
 
 		args.field = MA_PIM_FIELD_CONTACT_NAME;
 		memset(args.buf, 0, PIM_BUF_SIZE);
-		args.bufSize = writeInt(args.buf, 9, 0); //fleu TODO magic number
+		args.bufSize = writeInt(args.buf, MA_PIM_CONTACT_NAME_COUNT, 0);
 		args.bufSize += writeWString(args.buf, mLastName, args.bufSize);
 		args.bufSize += writeWString(args.buf, mFirstName, args.bufSize);
 		args.bufSize += writeWString(args.buf, mMiddleName, args.bufSize);
@@ -170,16 +126,18 @@ namespace PIM
 		maPimItemSetValue(&args, 0, 0);
 	}
 
-	/*
-	 * Getter for display name.
+	/**
+	 * Gets the contact's display name.
+	 * @return The display name of the contact.
 	 */
 	const wchar* const Name::getDisplayName() const
 	{
 		return mDisplayName;
 	}
 
-	/*
-	 * Setter for display name.
+	/**
+	 * Sets the contact's display name.
+	 * @param displayName The value to set.
 	 */
 	void Name::setDisplayName(const wchar* const displayName)
 	{
@@ -187,16 +145,18 @@ namespace PIM
 		mDisplayName = wcsdup(displayName);
 	}
 
-	/*
-	 * Getter for first name.
+	/**
+	 * Gets the contact's first name.
+	 * @return The first name of the contact.
 	 */
 	const wchar* const Name::getFirstName() const
 	{
 		return mFirstName;
 	}
 
-	/*
-	 * Setter for first name.
+	/**
+	 * Sets the contact's first name.
+	 * @param firstName The value to set.
 	 */
 	void Name::setFirstName(const wchar* const firstName)
 	{
@@ -204,16 +164,18 @@ namespace PIM
 		mFirstName = wcsdup(firstName);
 	}
 
-	/*
-	 * Getter for middle name.
+	/**
+	 * Gets the contact's middle name.
+	 * @return The middle name of the contact.
 	 */
 	const wchar* const Name::getMiddleName() const
 	{
 		return mMiddleName;
 	}
 
-	/*
-	 * Setter for middle name.
+	/**
+	 * Sets the contact's middle name.
+	 * @param middleName The value to set.
 	 */
 	void Name::setMiddleName(const wchar* const middleName)
 	{
@@ -221,16 +183,18 @@ namespace PIM
 		mMiddleName = wcsdup(middleName);
 	}
 
-	/*
-	 * Getter for last name.
+	/**
+	 * Gets the contact's last name.
+	 * @return The last name of the contact.
 	 */
 	const wchar* const Name::getLastName() const
 	{
 		return mLastName;
 	}
 
-	/*
-	 * Setter for last name.
+	/**
+	 * Sets the contact's last name.
+	 * @param lastName The value to set.
 	 */
 	void Name::setLastName(const wchar* const lastName)
 	{
@@ -238,16 +202,18 @@ namespace PIM
 		mLastName = wcsdup(lastName);
 	}
 
-	/*
-	 * Getter for nickname.
+	/**
+	 * Gets the contact's nickname.
+	 * @return The nickname of the contact.
 	 */
 	const wchar* const Name::getNickname() const
 	{
 		return mNickname;
 	}
 
-	/*
-	 * Setter for nickname.
+	/**
+	 * Sets the contact's nickname.
+	 * @param nickname The value to set.
 	 */
 	void Name::setNickname(const wchar* const nickname)
 	{
@@ -255,16 +221,18 @@ namespace PIM
 		mNickname = wcsdup(nickname);
 	}
 
-	/*
-	 * Getter for prefix.
+	/**
+	 * Gets the contact's prefix.
+	 * @return The prefix of the contact.
 	 */
 	const wchar* const Name::getPrefix() const
 	{
 		return mPrefix;
 	}
 
-	/*
-	 * Setter for prefix.
+	/**
+	 * Sets the contact's prefix.
+	 * @param prefix The value to set.
 	 */
 	void Name::setPrefix(const wchar* const prefix)
 	{
@@ -272,16 +240,18 @@ namespace PIM
 		mPrefix = wcsdup(prefix);
 	}
 
-	/*
-	 * Getter for suffix.
+	/**
+	 * Gets the contact's suffix.
+	 * @return The suffix of the contact.
 	 */
 	const wchar* const Name::getSuffix() const
 	{
 		return mSuffix;
 	}
 
-	/*
-	 * Setter for suffix.
+	/**
+	 * Sets the contact's suffix.
+	 * @param suffix The value to set.
 	 */
 	void Name::setSuffix(const wchar* const suffix)
 	{
@@ -289,16 +259,18 @@ namespace PIM
 		mSuffix = wcsdup(suffix);
 	}
 
-	/*
-	 * Getter for phonetic first name.
+	/**
+	 * Gets the contact's phonetic first name.
+	 * @return The phonetic first name of the contact.
 	 */
 	const wchar* const Name::getPhoneticFirstName() const
 	{
 		return mPhoneticFirstName;
 	}
 
-	/*
-	 * Setter for phonetic first name.
+	/**
+	 * Sets the contact's phonetic first name.
+	 * @param phoneticFirstName The value to set.
 	 */
 	void Name::setPhoneticFirstName(const wchar* const phoneticFirstName)
 	{
@@ -306,16 +278,18 @@ namespace PIM
 		mPhoneticFirstName = wcsdup(phoneticFirstName);
 	}
 
-	/*
-	 * Getter for phonetic middle name.
+	/**
+	 * Gets the contact's phonetic middle name.
+	 * @return The phonetic middle name of the contact.
 	 */
 	const wchar* const Name::getPhoneticMiddleName() const
 	{
 		return mPhoneticMiddleName;
 	}
 
-	/*
-	 * Setter for phonetic middle name.
+	/**
+	 * Sets the contact's phonetic middle name.
+	 * @param phoneticMiddleName The value to set.
 	 */
 	void Name::setPhoneticMiddleName(const wchar* const phoneticMiddleName)
 	{
@@ -323,16 +297,18 @@ namespace PIM
 		mPhoneticMiddleName = wcsdup(phoneticMiddleName);
 	}
 
-	/*
-	 * Getter for phonetic last name.
+	/**
+	 * Gets the contact's phonetic last name.
+	 * @return The phonetic last name of the contact.
 	 */
 	const wchar* const Name::getPhoneticLastName() const
 	{
 		return mPhoneticLastName;
 	}
 
-	/*
-	 * Setter for phonetic last name.
+	/**
+	 * Sets the contact's phonetic last name.
+	 * @param phoneticLastName The value to set.
 	 */
 	void Name::setPhoneticLastName(const wchar* const phoneticLastName)
 	{
@@ -340,8 +316,9 @@ namespace PIM
 		mPhoneticLastName = wcsdup(phoneticLastName);
 	}
 
-	/*
-	 * Getter for formatted name.
+	/**
+	 * Gets the contact's formatted name.
+	 * @return The formatted name of the contact.
 	 */
 	const wchar* const Name::getFormattedName() const
 	{

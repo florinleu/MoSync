@@ -38,16 +38,38 @@ namespace PIM
 		public:
 			enum eSubFields
 			{
+				// The data of the id.
 				DATA = 0
 			};
 		public:
+			/**
+			 * Destructor.
+			 */
 			~ID();
 
+			/**
+			 * Reads the contact's id.
+			 * @param args The arguments needed to read the id.
+			 * @return true on success.
+			 */
 			bool read(MA_PIM_ARGS& args);
 
-			void readID(const MAAddress buffer);
+			/**
+			 * Reads the id data.
+			 * @param buffer The buffer to read from.
+			 */
+			void readData(const MAAddress buffer);
 
-			const wchar* const getID() const; //fleu TODO add const for all fields
+			/**
+			 * Gets the contact's id.
+			 * @return The ID for the contact.
+			 */
+			const wchar* const getID() const;
+
+			/**
+			 * Sets the contact's id.
+			 * @param id The value to set.
+			 */
 			void setID(const wchar* const id);
 
 		private:
