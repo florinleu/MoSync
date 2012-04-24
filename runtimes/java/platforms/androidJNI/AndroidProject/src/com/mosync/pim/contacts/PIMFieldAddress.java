@@ -27,8 +27,8 @@ public class PIMFieldAddress extends PIMFieldContacts {
 		mStrType = StructuredPostal.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING_ARRAY;
 
-		mNames = new String[] { StructuredPostal.POBOX, DUMMY,
-				StructuredPostal.STREET, StructuredPostal.CITY,
+		mNames = new String[] { StructuredPostal._ID, StructuredPostal.POBOX,
+				DUMMY, StructuredPostal.STREET, StructuredPostal.CITY,
 				StructuredPostal.REGION, StructuredPostal.POSTCODE,
 				StructuredPostal.COUNTRY, StructuredPostal.NEIGHBORHOOD,
 				StructuredPostal.TYPE, StructuredPostal.LABEL,
@@ -106,9 +106,9 @@ public class PIMFieldAddress extends PIMFieldContacts {
 
 	String[] getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		String[] ret = new String[val.length - 3];
-		for (int i = 0; i < val.length - 3; i++) {
-			ret[i] = val[i];
+		String[] ret = new String[val.length - 4];
+		for (int i = 1; i < val.length - 3; i++) {
+			ret[i - 1] = val[i];
 		}
 		return ret;
 	}
@@ -132,7 +132,7 @@ public class PIMFieldAddress extends PIMFieldContacts {
 	void setSpecificData(String[] data, int index) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < data.length; i++) {
-			val[i] = data[i];
+			val[i + 1] = data[i];
 		}
 		mValues.set(index, val);
 	}
