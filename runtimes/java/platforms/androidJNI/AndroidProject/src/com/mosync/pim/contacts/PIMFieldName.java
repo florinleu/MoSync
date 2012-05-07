@@ -12,6 +12,8 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_NAME;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING_ARRAY;
 
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+
 import com.mosync.pim.*;
 
 public class PIMFieldName extends PIMFieldContacts {
@@ -134,10 +136,9 @@ public class PIMFieldName extends PIMFieldContacts {
 	}
 
 	protected int setAttribute(int index, int attribute) {
-		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
-			setColumnValue(index, StructuredName.IS_PRIMARY,
-					Integer.toString(1));
-		}
+		setColumnValue(index, StructuredName.IS_PRIMARY,
+				Integer.toString(((attribute & MA_PIM_ATTRPREFERRED) != 0) ? 1
+						: 0));
 		attribute &= 0xFFFF;
 
 		if (attribute != 0) {

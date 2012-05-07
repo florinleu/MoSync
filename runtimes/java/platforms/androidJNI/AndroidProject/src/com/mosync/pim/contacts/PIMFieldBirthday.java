@@ -18,6 +18,8 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_DATE;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.provider.ContactsContract.CommonDataKinds.Event;
 import android.provider.ContactsContract.CommonDataKinds.StructuredName;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+
 import com.mosync.pim.*;
 
 public class PIMFieldBirthday extends PIMFieldContacts {
@@ -83,8 +85,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 
 	protected int checkForPreferredAttribute(int index) {
 		try {
-			if (Integer.parseInt(getColumnValue(index,
-					StructuredName.IS_PRIMARY)) != 0)
+			if (Integer.parseInt(getColumnValue(index, Event.IS_PRIMARY)) != 0)
 				return MA_PIM_ATTRPREFERRED;
 		} catch (NumberFormatException e) {
 		}
@@ -98,9 +99,9 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 	}
 
 	protected int setAttribute(int index, int attribute) {
-		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
-			setColumnValue(index, Email.IS_PRIMARY, Integer.toString(1));
-		}
+		setColumnValue(index, Event.IS_PRIMARY,
+				Integer.toString(((attribute & MA_PIM_ATTRPREFERRED) != 0) ? 1
+						: 0));
 		attribute &= 0xFFFF;
 
 		if (attribute != 0) {

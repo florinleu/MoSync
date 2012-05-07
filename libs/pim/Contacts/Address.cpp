@@ -114,6 +114,8 @@ namespace PIM
 		args.bufSize += writeWString(args.buf, mNeighborhood, args.bufSize);
 		maPimItemSetValue(&args, index, getAttribute());
 
+		printf("address atribute = %d", getAttribute());
+
 		memset(args.buf, 0, PIM_BUF_SIZE);
 		args.bufSize = writeWString(args.buf, mLabel, 0);
 		maPimItemSetLabel(&args, index);
@@ -368,6 +370,7 @@ namespace PIM
 	 */
 	void Address::setPrimary(const bool primary)
 	{
+		printf("setPrimary %d", primary);
 		mIsPrimary = primary;
 	}
 
@@ -377,6 +380,7 @@ namespace PIM
 	 */
 	const int Address::getAttribute() const
 	{
+		printf("getAttribute = %d", mIsPrimary);
 		int attribute = 0;
 		switch (mType)
 		{

@@ -15,6 +15,7 @@ import android.content.ContentProviderOperation;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.provider.ContactsContract.CommonDataKinds.Photo;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.Data;
 
 import com.mosync.pim.*;
@@ -110,9 +111,9 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 	}
 
 	protected int setAttribute(int index, int attribute) {
-		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
-			setColumnValue(index, Photo.IS_PRIMARY, Integer.toString(1));
-		}
+		setColumnValue(index, Photo.IS_PRIMARY,
+				Integer.toString(((attribute & MA_PIM_ATTRPREFERRED) != 0) ? 1
+						: 0));
 		attribute &= 0xFFFF;
 
 		if (attribute != 0) {

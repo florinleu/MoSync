@@ -17,6 +17,7 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_ERR_ATTRIBUTE_COMBO_UN
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_URL;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 import android.provider.ContactsContract.CommonDataKinds.Website;
 
 import com.mosync.pim.*;
@@ -133,9 +134,9 @@ public class PIMFieldURL extends PIMFieldContacts {
 	}
 
 	protected int setAttribute(int index, int attribute) {
-		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
-			setColumnValue(index, Website.IS_PRIMARY, Integer.toString(1));
-		}
+		setColumnValue(index, Website.IS_PRIMARY,
+				Integer.toString(((attribute & MA_PIM_ATTRPREFERRED) != 0) ? 1
+						: 0));
 		attribute &= 0xFFFF;
 
 		int ret = 0;

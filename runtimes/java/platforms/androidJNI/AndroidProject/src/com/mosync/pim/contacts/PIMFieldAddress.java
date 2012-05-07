@@ -138,10 +138,9 @@ public class PIMFieldAddress extends PIMFieldContacts {
 	}
 
 	protected int setAttribute(int index, int attribute) {
-		if ((attribute & MA_PIM_ATTRPREFERRED) != 0) {
-			setColumnValue(index, StructuredPostal.IS_PRIMARY,
-					Integer.toString(1));
-		}
+		setColumnValue(index, StructuredPostal.IS_PRIMARY,
+				Integer.toString(((attribute & MA_PIM_ATTRPREFERRED) != 0) ? 1
+						: 0));
 		attribute &= 0xFFFF;
 
 		int ret = 0;

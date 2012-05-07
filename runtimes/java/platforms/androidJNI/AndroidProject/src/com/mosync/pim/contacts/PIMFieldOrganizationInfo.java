@@ -13,6 +13,8 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_ORG_INFO
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING_ARRAY;
 
 import android.provider.ContactsContract.CommonDataKinds.Organization;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
+
 import com.mosync.pim.*;
 
 public class PIMFieldOrganizationInfo extends PIMFieldContacts {
@@ -135,9 +137,9 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 	}
 
 	protected int setAttribute(int index, int attribute) {
-		if ((attribute | MA_PIM_ATTRPREFERRED) != 0) {
-			setColumnValue(index, Organization.IS_PRIMARY, Integer.toString(1));
-		}
+		setColumnValue(index, Organization.IS_PRIMARY,
+				Integer.toString(((attribute & MA_PIM_ATTRPREFERRED) != 0) ? 1
+						: 0));
 		attribute &= 0xFFFF;
 
 		int ret = 0;
