@@ -40,17 +40,6 @@ MA 02110-1301, USA.
 using namespace NativeUI;
 using namespace PIM;
 
-/**
- * Available address types.
- */
-const char* ContactsScreen::sAddressTypes[Address::CUSTOM + 1] =
-{
-	"Home",
-	"Work",
-	"Other",
-	"Custom"
-};
-
 ContactsScreen::ContactsScreen()
 {
 	createUI();
@@ -166,6 +155,17 @@ void ContactsScreen::stackScreenScreenPopped(StackScreen* stackScreen, Screen* f
 }
 
 /**
+ * Available address types.
+ */
+const char* ContactsScreen::sAddressTypes[Address::CUSTOM + 1] =
+{
+	"Home",
+	"Work",
+	"Other",
+	"Custom"
+};
+
+/**
  * Gets the name of the address type.
  * @param type	The address type.
  * @return 		The type name.
@@ -177,5 +177,49 @@ const char* ContactsScreen::getAddressTypeString(PIM::Address::eTypes type, cons
 		return wstrtostr(label);
 	}
 
-	return ContactsScreen::sAddressTypes[type];
+	return sAddressTypes[type];
+}
+
+/**
+ * Available phone types.
+ */
+const char* ContactsScreen::sPhoneTypes[Phone::CUSTOM + 1] =
+{
+	"Home",
+	"Mobile",
+	"Home fax",
+	"Work fax",
+	"Pager",
+	"iPhone",
+	"Work",
+	"Callback",
+	"Car",
+	"Company main",
+	"ISDN",
+	"Other fax",
+	"Radio",
+	"Telex",
+	"TTY TDD",
+	"Work mobile",
+	"Work pager",
+	"Assistant",
+	"MMS",
+	"Other",
+	"Custom"
+};
+
+/**
+ * Gets the name of the phone type.
+ * @param type	The phone type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getPhoneTypeString(PIM::Phone::eTypes type, const wchar* label)
+{
+	printf("getPhoneTypeString %d %S", type, label);
+	if (type == PIM::Phone::CUSTOM)
+	{
+		printf("return label");
+		return wstrtostr(label);
+	}
+	return sPhoneTypes[type];
 }

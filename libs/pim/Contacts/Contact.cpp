@@ -171,6 +171,11 @@ namespace PIM
 			writeAddresses(args);
 		}
 
+		if (MATCH_FLAGS(flag, RF_PHONE))
+		{
+			writePhones(args);
+		}
+
 		maPimItemClose(mHandle);
 
 		return 0;
@@ -461,6 +466,19 @@ namespace PIM
 		for (int i=0; i<count; i++)
 		{
 			mAddresses[i]->write(args, i);
+		}
+	}
+
+	void Contact::writePhones(MA_PIM_ARGS args)
+	{
+		int count = mPhones.size();
+		if (count < 0)
+		{
+			return;
+		}
+		for (int i=0; i<count; i++)
+		{
+			mPhones[i]->write(args, i);
 		}
 	}
 

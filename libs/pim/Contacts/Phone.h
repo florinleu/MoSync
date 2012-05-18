@@ -31,84 +31,160 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-
-	enum ePhoneTypes
-	{
-		//The constant describes a home phone number.
-		PHONE_HOME = 0,
-		//The constant describes a mobile phone number.
-		PHONE_MOBILE,
-		//The constant describes a home fax phone number.
-		PHONE_HOME_FAX,
-		//The constant describes a work fax phone number.
-		PHONE_WORK_FAX,
-		//The constant describes a pager phone number.
-		PHONE_PAGER,
-		//The constant describes an iPhone phone number.
-		PHONE_IPHONE,
-		//The constant describes a work phone number.
-		PHONE_WORK,
-		//The constant describes a callback phone number.
-		PHONE_CALLBACK,
-		//The constant describes a car phone number.
-		PHONE_CAR,
-		//The constant describes a company main phone number.
-		PHONE_COMPANY_MAIN,
-		//The constant describes a ISDN phone number.
-		PHONE_ISDN,
-		//The constant describes a other fax type phone number.
-		PHONE_OTHER_FAX,
-		//The constant describes a radio phone number.
-		PHONE_RADIO,
-		//The constant describes a telex phone number.
-		PHONE_TELEX,
-		//The constant describes a TTY TDD phone number.
-		PHONE_TTY_TDD,
-		//The constant describes a work mobile phone number.
-		PHONE_WORK_MOBILE,
-		//The constant describes a work pager phone number.
-		PHONE_WORK_PAGER,
-		//The constant describes an assistant phone number.
-		PHONE_ASSISTANT,
-		//The constant describes a MMS phone number.
-		PHONE_MMS,
-		//The constant describes a different phone number type.
-		PHONE_OTHER,
-		//The constant describes a custom phone number type.
-		//The field's label can be set.
-		PHONE_CUSTOM,
-	};
-
 	class Phone
 	{
 		public:
+			enum eTypes
+			{
+				//The constant describes a home phone number.
+				HOME = 0,
+				//The constant describes a mobile phone number.
+				MOBILE,
+				//The constant describes a home fax phone number.
+				HOME_FAX,
+				//The constant describes a work fax phone number.
+				WORK_FAX,
+				//The constant describes a pager phone number.
+				PAGER,
+				//The constant describes an iPhone phone number.
+				IPHONE,
+				//The constant describes a work phone number.
+				WORK,
+				//The constant describes a callback phone number.
+				CALLBACK,
+				//The constant describes a car phone number.
+				CAR,
+				//The constant describes a company main phone number.
+				COMPANY_MAIN,
+				//The constant describes a ISDN phone number.
+				ISDN,
+				//The constant describes a other fax type phone number.
+				OTHER_FAX,
+				//The constant describes a radio phone number.
+				RADIO,
+				//The constant describes a telex phone number.
+				TELEX,
+				//The constant describes a TTY TDD phone number.
+				TTY_TDD,
+				//The constant describes a work mobile phone number.
+				WORK_MOBILE,
+				//The constant describes a work pager phone number.
+				WORK_PAGER,
+				//The constant describes an assistant phone number.
+				ASSISTANT,
+				//The constant describes a MMS phone number.
+				MMS,
+				//The constant describes a different phone number type.
+				OTHER,
+				//The constant describes a custom phone number type.
+				//The field's label can be set.
+				CUSTOM,
+			};
+
+			enum eSubFields
+			{
+				//The constant describes a phone number.
+				NUMBER = 0,
+			};
+
+			/**
+			 * Constructor.
+			 */
 			Phone();
 
+			/**
+			 * Destructor.
+			 */
+			~Phone();
+
+			/**
+			 * Reads a contact's phone.
+			 * @param args The arguments needed to read the phone.
+			 * @param index The index of the phone to read.
+			 */
 			void read(MA_PIM_ARGS& args, int index);
 
-			const wchar* getNumber() const;
-			void setNumber(wchar* number);
+			/**
+			 * Writes a contact's phone.
+			 * @param args The values to write.
+			 * @index args The index of the phone to write.
+			 */
+			void write(MA_PIM_ARGS& args, int index);
 
-			const ePhoneTypes& getType() const;
-			void setType(const ePhoneTypes& type);
+			/**
+			 * Gets the contact's phone number.
+			 * @return The number of the contact.
+			 */
+			const wchar* const getNumber() const;
 
-			const wchar* getLabel() const;
-			void setLabel(wchar* label);
+			/**
+			 * Sets the contact's phone number.
+			 * @param number The value to set.
+			 */
+			void setNumber(const wchar* const number);
 
+			/**
+			 * Gets the phone type.
+			 * @return The type of the phone.
+			 */
+			const eTypes& getType() const;
+
+			/**
+			 * Sets the phone type.
+			 * @param type The value to set.
+			 */
+			void setType(const eTypes& type);
+
+			/**
+			 * Gets the phone label.
+			 * @return The label of the phone.
+			 */
+			const wchar* const getLabel() const;
+
+			/**
+			 * Sets the phone label.
+			 * @param state The value to set.
+			 */
+			void setLabel(const wchar* const label);
+
+			/**
+			 * Checks if this is or not a primary phone.
+			 * @return True if this is a primary phone.
+			 */
 			const bool isPrimary() const;
 
-		private:
-			void readNumber(const MAAddress buffer);
+			/**
+			 * Sets this as a primary phone.
+			 * @param primary true if this is a primary phone.
+			 */
+			void setPrimary(const bool primary);
 
+		private:
+			/**
+			 * Reads the type of the phone.
+			 * @param handle The handle of the phone.
+			 * @param index The index of this phone.
+			 */
 			void readType(const MAHandle handle, const int index);
+
+			/**
+			 * Reads the label of the phone.
+			 * @param handle The handle of the contact.
+			 * @param index The index of this phone.
+			 */
 			void readLabel(const MAHandle handle, const int index);
 
+			/**
+			 * Computes the phone attribute.
+			 * @return The phone attribute.
+			 */
+			const int getAttribute() const;
 		private:
 			//The phone number.
 			wchar* mNumber;
 
 			//The type of data.
-			ePhoneTypes mType;
+			eTypes mType;
 			//The user defined label.
 			wchar* mLabel;
 			//Shows if this is a primary phone number or not.

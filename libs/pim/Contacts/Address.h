@@ -189,7 +189,7 @@ namespace PIM
 
 			/**
 			 * Sets the address type.
-			 * @param state The value to set.
+			 * @param type The value to set.
 			 */
 			void setType(const eTypes& type);
 
@@ -213,6 +213,7 @@ namespace PIM
 
 			/**
 			 * Sets this as a primary address.
+			 * @param primary true if this is a primary address.
 			 */
 			void setPrimary(const bool primary);
 

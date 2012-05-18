@@ -26,6 +26,8 @@ MA 02110-1301, USA.
 
 #include <util.h>
 
+#include "ContactsScreen.h"
+
 #include "ViewPhone.h"
 #include "ViewDefines.h"
 
@@ -73,12 +75,8 @@ void ViewPhone::addBody()
 	for (int i=0; i<mOwner->getPhonesCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getPhoneTypeString(mOwner->getPhone(i)->getType()));
-		if (mOwner->getPhone(i)->getType() == PHONE_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mOwner->getPhone(i)->getLabel());
-		}
-		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
+		sprintf(title, "%d. %s", i + 1, ContactsScreen::getPhoneTypeString(mOwner->getPhone(i)->getType(), mOwner->getPhone(i)->getLabel()));
+		addSubTitle(title, mOwner->getPhone(i)->isPrimary());
 		DELETE(title);
 
 		const char* datas[] =
@@ -88,39 +86,4 @@ void ViewPhone::addBody()
 
 		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
 	}
-}
-
-/**
- * Gets the name of the phone type.
- * @param type	The phone type.
- * @return 		The type name.
- */
-const char* ViewPhone::getPhoneTypeString(ePhoneTypes type)
-{
-	const char* phoneType[] =
-	{
-		"Home",
-		"Mobile",
-		"Home fax",
-		"Work fax",
-		"Pager",
-		"iPhone",
-		"Work",
-		"Callback",
-		"Car",
-		"Company main",
-		"ISDN",
-		"Other fax",
-		"Radio",
-		"Telex",
-		"TTY TDD",
-		"Work mobile",
-		"Work pager",
-		"Assistant",
-		"MMS",
-		"Other",
-		"Custom"
-	};
-
-	return phoneType[type];
 }

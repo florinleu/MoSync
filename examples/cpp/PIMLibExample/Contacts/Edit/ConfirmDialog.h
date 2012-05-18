@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 MoSync AB
+/* Copyright (C) 2012 MoSync AB
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License,
@@ -16,51 +16,47 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditDelete.h
+ * @file TypeDialog.h
  * @author Florin Leu
- * @date 13 Mar 2012
+ * @date 09 May 2012
  *
- * @brief Delete Button Layout.
+ * @brief Edit type dialog.
  *
  **/
 
-#ifndef __EDITDELETE_H__
-#define __EDITDELETE_H__
+#ifndef __CONFIRMDIALOG_H__
+#define __CONFIRMDIALOG_H__
 
-#include <NativeUI/VerticalLayout.h>
+#include <NativeUI/Dialog.h>
 #include <NativeUI/Button.h>
 #include <NativeUI/ButtonListener.h>
-#include <Contacts/Contact.h>
+#include <NativeUI/CheckBox.h>
+#include <NativeUI/CheckBoxListener.h>
+#include <NativeUI/EditBox.h>
 
-class ConfirmDialog;
+class EditDelete;
 
-class EditDelete :
-	public NativeUI::VerticalLayout,
+class ConfirmDialog :
+	public NativeUI::Dialog,
 	public NativeUI::ButtonListener
 {
 	public:
 		/**
 		 * Constructor.
 		 */
-		EditDelete(PIM::Contact* contact);
+		ConfirmDialog(EditDelete* owner);
 
 		/**
 		 * Destructor.
 		 */
-		virtual ~EditDelete();
+		~ConfirmDialog();
 
+	private:
 		/**
-		 * Deletes the contact.
-		 */
-		void update();
-
-	protected:
-		/**
-		 * Create the UI for delete button.
+		 * Creates the UI for this screen.
 		 */
 		void createUI();
 
-	private:
         /**
          * This method is called if the touch-up event was inside the
          * bounds of the button.
@@ -69,9 +65,12 @@ class EditDelete :
         void buttonClicked(Widget* button);
 
 	private:
-		PIM::Contact* mOwner;
-		NativeUI::Button* mButton;
-		ConfirmDialog* mDialog;
+        static ConfirmDialog *instance;
+
+        EditDelete* mOwner;
+
+		NativeUI::Button* mOKButton;
+		NativeUI::Button* mCancelButton;
 };
 
-#endif // __EDITDELETE_H__
+#endif //__TYPEDIALOG_H__

@@ -505,18 +505,7 @@ public abstract class PIMField {
 	protected void updateToDisk(ArrayList<ContentProviderOperation> ops,
 			String lookup, String[] names, String[] values) {
 		DebugPrint("updateToDisk " + lookup + "; data type: " + mStrType);
-		// Cursor cursor = getContentResolver().query(
-		// Data.CONTENT_URI,
-		// new String[] { Data._ID },
-		// Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
-		// + " AND " + Data._ID + "=?",
-		// new String[] { lookup, mStrType, values[0] }, null);
-		// DebugPrint("*************Cursor size = " + cursor.getCount());
-		// if (cursor.moveToNext()) {
-		// DebugPrint("id = " + values[0] + "; cursor id = "
-		// + cursor.getString(0));
-		// }
-		// cursor.close();
+
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newUpdate(Data.CONTENT_URI).withSelection(
 						Data.LOOKUP_KEY + "=?" + " AND " + Data.MIMETYPE + "=?"
@@ -526,7 +515,6 @@ public abstract class PIMField {
 		boolean canBuild = false;
 		for (int i = 1; i < names.length; i++) {
 			if ((values[i] != null) && (!names[i].equals(DUMMY))) {
-				DebugPrint("values[" + i + "]=" + values[i]);
 				builder = builder.withValue(names[i], values[i]);
 				canBuild = true;
 			}

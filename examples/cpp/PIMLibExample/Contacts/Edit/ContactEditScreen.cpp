@@ -44,6 +44,7 @@ MA 02110-1301, USA.
 #include "EditID.h"
 #include "EditName.h"
 #include "EditAddress.h"
+#include "EditPhone.h"
 #include "EditDelete.h"
 #include "EditDefines.h"
 
@@ -55,7 +56,6 @@ ContactEditScreen::ContactEditScreen(wchar* id)
 	mContact = new Contact();
 	mContact->setID(id);
 	mContact->find();
-
 	createUI();
 }
 
@@ -67,23 +67,24 @@ ContactEditScreen::~ContactEditScreen()
 
 void ContactEditScreen::createUI()
 {
+	printf("############### 0 phone 2 type %d", mContact->getPhone(2)->getType());
 	mLayout = new VerticalLayout();
 	mLayout->fillSpaceHorizontally();
 	mLayout->setChildHorizontalAlignment(MAW_ALIGNMENT_CENTER);
 	mLayout->setChildVerticalAlignment(MAW_ALIGNMENT_CENTER);
-
+	printf("############### 1 phone 2 type %d", mContact->getPhone(2)->getType());
 	addNavigationBar();
-
+	printf("############### 2 phone 2 type %d", mContact->getPhone(2)->getType());
 	addPhoto();
-
+	printf("############### 3 phone 2 type %d", mContact->getPhone(2)->getType());
 	addID();
-
+	printf("############### 4 phone 2 type %d", mContact->getPhone(2)->getType());
 	addName();
-
+	printf("############### 5 phone 2 type %d", mContact->getPhone(2)->getType());
 	addAddress();
-/*
+	printf("############### 6 phone 2 type %d", mContact->getPhone(2)->getType());
 	addPhone();
-
+/*
 	addEmail();
 
 	addWebsite();
@@ -205,63 +206,11 @@ void ContactEditScreen::addAddress()
 
 void ContactEditScreen::addPhone()
 {
-	const char* labels[] =
-	{
-		"number",
-	};
+	EditPhone* phone = new EditPhone(mContact);
 
-	for (int i=0; i<mContact->getPhonesCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getPhoneTypeString(mContact->getPhone(i)->getType()));
-		if (mContact->getPhone(i)->getType() == PHONE_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getPhone(i)->getLabel());
-		}
-		const char* datas[] =
-		{
-			wstrtostr(mContact->getPhone(i)->getNumber())
-		};
+	mLayout->addChild(phone);
 
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getPhone(i)->isPrimary());
-
-		DELETE(title);
-	}
-
-	if (mContact->getPhonesCount() > 0)
-	{
-		addSpacer();
-	}
-}
-
-const char* ContactEditScreen::getPhoneTypeString(PIM::ePhoneTypes type)
-{
-	const char* phoneType[] =
-	{
-		"Home",
-		"Mobile",
-		"Home fax",
-		"Work fax",
-		"Pager",
-		"iPhone",
-		"Work",
-		"Callback",
-		"Car",
-		"Company main",
-		"ISDN",
-		"Other fax",
-		"Radio",
-		"Telex",
-		"TTY TDD",
-		"Work mobile",
-		"Work pager",
-		"Assistant",
-		"MMS",
-		"Other",
-		"Custom"
-	};
-
-	return phoneType[type];
+	addSpacer();
 }
 
 void ContactEditScreen::addEmail()

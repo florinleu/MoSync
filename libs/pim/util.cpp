@@ -83,8 +83,8 @@ wchar* strtowstr(const char* str)
 	}
 	int len = strlen(str);
 	wchar* wstr = new wchar[len + 1];
-	mbstowcs(wstr, str, len);
-	wstr[len] = 0;
+	memset(wstr, 0, (len + 1)*sizeof(wchar));
+	mbstowcs(wstr, str, len + 1);
 	return wstr;
 }
 

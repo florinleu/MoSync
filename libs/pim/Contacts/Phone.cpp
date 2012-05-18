@@ -32,7 +32,7 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-	/*
+	/**
 	 * Constructor
 	 */
 	Phone::Phone():
@@ -41,8 +41,18 @@ namespace PIM
 
 	}
 
-	/*
-	 * Read a complete phone number.
+	/**
+	 * Constructor
+	 */
+	Phone::~Phone()
+	{
+		DELETE(mNumber);
+	}
+
+	/**
+	 * Reads a contact's phone.
+	 * @param args The arguments needed to read the phone.
+	 * @param index The index of the phone to read.
 	 */
 	void Phone::read(MA_PIM_ARGS& args, int index)
 	{
@@ -51,20 +61,41 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
-			readNumber(args.buf);
+			DELETE(mNumber);
+			wchar* src = (wchar*)args.buf;
+			mNumber = wcsdup(src);
 
 			readType(args.item, index);
 			readLabel(args.item, index);
 		}
 	}
 
-	void Phone::readNumber(const MAAddress buffer)
+	/**
+	 * Writes a contact's phone.
+	 * @param args The values to write.
+	 * @index args The index of the phone to write.
+	 */
+	void Phone::write(MA_PIM_ARGS& args, int index)
 	{
-		DELETE(mNumber);
-		wchar* src = (wchar*)buffer;
-		mNumber = wcsdup(src);
+		printf("@LIB: phone write");
+
+		args.field = MA_PIM_FIELD_CONTACT_TEL;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mNumber, args.bufSize);
+		maPimItemSetValue(&args, index, getAttribute());
+
+		printf("phone atribute = %d", getAttribute());
+
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mLabel, 0);
+		maPimItemSetLabel(&args, index);
 	}
 
+	/**
+	 * Reads the type of the phone.
+	 * @param handle The handle of the phone.
+	 * @param index The index of this phone.
+	 */
 	void Phone::readType(const MAHandle handle, const int index)
 	{
 		int attribute = maPimItemGetAttributes(handle, MA_PIM_FIELD_CONTACT_TEL, index);
@@ -77,74 +108,80 @@ namespace PIM
 			attribute = (attribute & 0xFFFF);
 		}
 
+		printf("attribute = %d", attribute);
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_PHONE_HOME:
-				mType = PHONE_HOME;
+				mType = HOME;
 				break;
 			case MA_PIM_ATTR_PHONE_MOBILE:
-				mType = PHONE_MOBILE;
+				mType = MOBILE;
 				break;
 			case MA_PIM_ATTR_PHONE_HOME_FAX:
-				mType = PHONE_HOME_FAX;
+				mType = HOME_FAX;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK_FAX:
-				mType = PHONE_WORK_FAX;
+				mType = WORK_FAX;
 				break;
 			case MA_PIM_ATTR_PHONE_PAGER:
-				mType = PHONE_PAGER;
+				mType = PAGER;
 				break;
 			case MA_PIM_ATTR_PHONE_IPHONE:
-				mType = PHONE_IPHONE;
+				mType = IPHONE;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK:
-				mType = PHONE_WORK;
+				mType = WORK;
 				break;
 			case MA_PIM_ATTR_PHONE_CALLBACK:
-				mType = PHONE_CALLBACK;
+				mType = CALLBACK;
 				break;
 			case MA_PIM_ATTR_PHONE_CAR:
-				mType = PHONE_CAR;
+				mType = CAR;
 				break;
 			case MA_PIM_ATTR_PHONE_COMPANY_MAIN:
-				mType = PHONE_COMPANY_MAIN;
+				mType = COMPANY_MAIN;
 				break;
 			case MA_PIM_ATTR_PHONE_ISDN:
-				mType = PHONE_ISDN;
+				mType = ISDN;
 				break;
 			case MA_PIM_ATTR_PHONE_OTHER_FAX:
-				mType = PHONE_OTHER_FAX;
+				mType = OTHER_FAX;
 				break;
 			case MA_PIM_ATTR_PHONE_RADIO:
-				mType = PHONE_RADIO;
+				mType = RADIO;
 				break;
 			case MA_PIM_ATTR_PHONE_TELEX:
-				mType = PHONE_TELEX;
+				mType = TELEX;
 				break;
 			case MA_PIM_ATTR_PHONE_TTY_TDD:
-				mType = PHONE_TTY_TDD;
+				mType = TTY_TDD;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK_MOBILE:
-				mType = PHONE_WORK_MOBILE;
+				mType = WORK_MOBILE;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK_PAGER:
-				mType = PHONE_WORK_PAGER;
+				mType = WORK_PAGER;
 				break;
 			case MA_PIM_ATTR_PHONE_ASSISTANT:
-				mType = PHONE_ASSISTANT;
+				mType = ASSISTANT;
 				break;
 			case MA_PIM_ATTR_PHONE_MMS:
-				mType = PHONE_MMS;
+				mType = MMS;
 				break;
 			case MA_PIM_ATTR_PHONE_CUSTOM:
-				mType = PHONE_CUSTOM;
+				mType = CUSTOM;
 				break;
 			default:
-				mType = PHONE_OTHER;
+				mType = OTHER;
 				break;
 		}
 	}
 
+	/**
+	 * Reads the label of the phone.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this phone.
+	 */
 	void Phone::readLabel(const MAHandle handle, const int index)
 	{
 		MA_PIM_ARGS args;
@@ -156,65 +193,164 @@ namespace PIM
 		args.buf = buf;
 		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
+
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
 		mLabel = wcsdup(src);
 	}
 
-	/*
-	 * Getter for phone number.
+	/**
+	 * Gets the contact's phone number.
+	 * @return The number of the contact.
 	 */
-	const wchar* Phone::getNumber() const
+	const wchar* const Phone::getNumber() const
 	{
 		return mNumber;
 	}
 
-	/*
-	 * Setter for phone number.
+	/**
+	 * Sets the contact's phone number.
+	 * @param number The value to set.
 	 */
-	void Phone::setNumber(wchar* number)
+	void Phone::setNumber(const wchar* const number)
 	{
-		mNumber = number;
+		DELETE(mNumber);
+		mNumber = wcsdup(number);
 	}
 
-	/*
-	 * Getter for type.
+	/**
+	 * Gets the phone type.
+	 * @return The type of the phone.
 	 */
-	const ePhoneTypes& Phone::getType() const
+	const Phone::eTypes& Phone::getType() const
 	{
 		return mType;
 	}
 
-	/*
-	 * Setter for type.
+	/**
+	 * Sets the phone type.
+	 * @param type The value to set.
 	 */
-	void Phone::setType(const ePhoneTypes& type)
+	void Phone::setType(const Phone::eTypes& type)
 	{
 		mType = type;
 	}
 
-	/*
-	 * Getter for label.
+	/**
+	 * Gets the phone label.
+	 * @return The label of the phone.
 	 */
-	const wchar* Phone::getLabel() const
+	const wchar* const Phone::getLabel() const
 	{
 		return mLabel;
 	}
 
-	/*
-	 * Setter for label.
+	/**
+	 * Sets the phone label.
+	 * @param state The value to set.
 	 */
-	void Phone::setLabel(wchar* label)
+	void Phone::setLabel(const wchar* const label)
 	{
-		mLabel = label;
+		DELETE(mLabel);
+		mLabel = wcsdup(label);
 	}
 
-	/*
-	 * Returns true if this is set as the primary phone.
+	/**
+	 * Checks if this is or not a primary phone.
+	 * @return True if this is a primary phone.
 	 */
 	const bool Phone::isPrimary() const
 	{
 		return mIsPrimary;
+	}
+
+	/**
+	 * Sets this as a primary phone.
+	 * @param primary true if this is a primary phone.
+	 */
+	void Phone::setPrimary(const bool primary)
+	{
+		mIsPrimary = primary;
+	}
+
+	/**
+	 * Computes the phone attribute.
+	 * @return The phone attribute.
+	 */
+	const int Phone::getAttribute() const
+	{
+		printf("getAttribute = %d", mIsPrimary);
+		int attribute = 0;
+		switch (mType)
+		{
+			case HOME:
+				attribute = MA_PIM_ATTR_PHONE_HOME;
+				break;
+			case MOBILE:
+				attribute = MA_PIM_ATTR_PHONE_MOBILE;
+				break;
+			case HOME_FAX:
+				attribute = MA_PIM_ATTR_PHONE_HOME_FAX;
+				break;
+			case WORK_FAX:
+				attribute = MA_PIM_ATTR_PHONE_WORK_FAX;
+				break;
+			case PAGER:
+				attribute = MA_PIM_ATTR_PHONE_PAGER;
+				break;
+			case IPHONE:
+				attribute = MA_PIM_ATTR_PHONE_IPHONE;
+				break;
+			case WORK:
+				attribute = MA_PIM_ATTR_PHONE_WORK;
+				break;
+			case CALLBACK:
+				attribute = MA_PIM_ATTR_PHONE_CALLBACK;
+				break;
+			case CAR:
+				attribute = MA_PIM_ATTR_PHONE_CAR;
+				break;
+			case COMPANY_MAIN:
+				attribute = MA_PIM_ATTR_PHONE_COMPANY_MAIN;
+				break;
+			case ISDN:
+				attribute = MA_PIM_ATTR_PHONE_ISDN;
+				break;
+			case OTHER_FAX:
+				attribute = MA_PIM_ATTR_PHONE_OTHER_FAX;
+				break;
+			case RADIO:
+				attribute = MA_PIM_ATTR_PHONE_RADIO;
+				break;
+			case TELEX:
+				attribute = MA_PIM_ATTR_PHONE_TELEX;
+				break;
+			case TTY_TDD:
+				attribute = MA_PIM_ATTR_PHONE_TTY_TDD;
+				break;
+			case WORK_MOBILE:
+				attribute = MA_PIM_ATTR_PHONE_WORK_MOBILE;
+				break;
+			case WORK_PAGER:
+				attribute = MA_PIM_ATTR_PHONE_WORK_PAGER;
+				break;
+			case ASSISTANT:
+				attribute = MA_PIM_ATTR_PHONE_ASSISTANT;
+				break;
+			case MMS:
+				attribute = MA_PIM_ATTR_PHONE_MMS;
+				break;
+			case CUSTOM:
+				attribute = MA_PIM_ATTR_PHONE_CUSTOM;
+				break;
+			default:
+				attribute = MA_PIM_ATTR_ADDR_OTHER;
+				break;
+		}
+
+		attribute |= (mIsPrimary ? MA_PIM_ATTRPREFERRED : 0);
+
+		return attribute;
 	}
 
 } //PIM

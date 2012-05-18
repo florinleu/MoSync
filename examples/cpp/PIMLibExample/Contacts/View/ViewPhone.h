@@ -55,13 +55,6 @@ class ViewPhone :
 		 * Creates the view.
 		 */
 		void addBody();
-
-		/**
-		 * Gets the name of the phone type.
-		 * @param type	The phone type.
-		 * @return 		The type name.
-		 */
-		const char* getPhoneTypeString(PIM::ePhoneTypes type);
 };
 
 #endif /* __VIEWPHONE_H__ */

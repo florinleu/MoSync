@@ -25,8 +25,10 @@ MA 02110-1301, USA.
  **/
 
 #include <pim.h>
+#include <util.h>
 #include "EditDelete.h"
 #include "ScreenContainer.h"
+#include "ConfirmDialog.h"
 
 using namespace NativeUI;
 using namespace PIM;
@@ -45,6 +47,7 @@ EditDelete::EditDelete(Contact* contact):
  */
 EditDelete::~EditDelete()
 {
+	DELETE(mDialog);
 }
 
 /**
@@ -62,6 +65,8 @@ void EditDelete::createUI()
 	mButton->addButtonListener(this);
 
 	addChild(mButton);
+
+	mDialog = new ConfirmDialog(this);
 }
 
 /**
@@ -73,8 +78,16 @@ void EditDelete::buttonClicked(Widget* button)
 {
 	if (button == mButton)
 	{
-		ScreenContainer::getInstance()->pop();
-		mOwner->remove();
-		closeContacts();
+		mDialog->show();
 	}
+}
+
+/**
+ * Deletes the contact.
+ */
+void EditDelete::update()
+{
+	ScreenContainer::getInstance()->pop();
+	mOwner->remove();
+	closeContacts();
 }

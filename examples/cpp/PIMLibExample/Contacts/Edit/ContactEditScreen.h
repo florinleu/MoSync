@@ -49,9 +49,7 @@ class ContactEditScreen : public NativeUI::Screen
 		void addID();
 		void addName();
 		void addAddress();
-		const char* getAddressTypeString(PIM::Address::eTypes type);
 		void addPhone();
-		const char* getPhoneTypeString(PIM::ePhoneTypes type);
 		void addEmail();
 		const char* getEmailTypeString(PIM::eEmailTypes type);
 		void addWebsite();

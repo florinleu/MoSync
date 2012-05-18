@@ -74,8 +74,16 @@ class ContactsScreen :
 		 */
 		static const char* getAddressTypeString(PIM::Address::eTypes type, const wchar* label);
 
+		/**
+		 * Gets the name of the phone type.
+		 * @param type	The phone type.
+		 * @return 		The type name.
+		 */
+		static const char* getPhoneTypeString(PIM::Phone::eTypes type, const wchar* label);
+
 	public:
-		static const char* sAddressTypes[4];
+		static const char* sAddressTypes[PIM::Address::CUSTOM + 1];
+		static const char* sPhoneTypes[PIM::Phone::CUSTOM + 1];
 
 	private:
 		NativeUI::VerticalLayout* mLayout;

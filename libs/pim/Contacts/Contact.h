@@ -150,6 +150,7 @@ namespace PIM
 
 			void writeName(MA_PIM_ARGS args);
 			void writeAddresses(MA_PIM_ARGS args);
+			void writePhones(MA_PIM_ARGS args);
 
 		private:
 			ID* mID;

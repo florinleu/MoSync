@@ -26,6 +26,7 @@ MA 02110-1301, USA.
 #include <util.h>
 #include <MAUtil/String.h>
 #include <mawvsprintf.h>
+#include <mawstring.h>
 
 #include "ContactsScreen.h"
 
@@ -258,6 +259,8 @@ void EditAddress::update(int index, int type, String label)
 
 	if (type == Address::CUSTOM)
 	{
+		wchar* tmp = strtowstr(label.c_str());
+		printf("size %d, string %S", wcslen(tmp), tmp);
 		printf("Update label for the Address");
 		mOwner->getAddress(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 	}
