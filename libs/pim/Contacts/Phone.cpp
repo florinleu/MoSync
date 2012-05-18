@@ -84,8 +84,6 @@ namespace PIM
 		args.bufSize = writeWString(args.buf, mNumber, args.bufSize);
 		maPimItemSetValue(&args, index, getAttribute());
 
-		printf("phone atribute = %d", getAttribute());
-
 		memset(args.buf, 0, PIM_BUF_SIZE);
 		args.bufSize = writeWString(args.buf, mLabel, 0);
 		maPimItemSetLabel(&args, index);
@@ -108,7 +106,6 @@ namespace PIM
 			attribute = (attribute & 0xFFFF);
 		}
 
-		printf("attribute = %d", attribute);
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_PHONE_HOME:
@@ -279,7 +276,6 @@ namespace PIM
 	 */
 	const int Phone::getAttribute() const
 	{
-		printf("getAttribute = %d", mIsPrimary);
 		int attribute = 0;
 		switch (mType)
 		{

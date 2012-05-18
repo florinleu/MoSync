@@ -37,7 +37,8 @@ namespace PIM
 	 * Constructor.
 	 */
 	Photo::Photo():
-			mHandle(-1)
+		mHandle(-1),
+		mURL(NULL)
 	{
 
 	}

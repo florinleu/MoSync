@@ -34,6 +34,24 @@ MA 02110-1301, USA.
 namespace PIM
 {
 	/**
+	 * Constructor.
+	 */
+	Name::Name():
+		mDisplayName(NULL),
+		mFirstName(NULL),
+		mMiddleName(NULL),
+		mLastName(NULL),
+		mNickname(NULL),
+		mPrefix(NULL),
+		mSuffix(NULL),
+		mPhoneticFirstName(NULL),
+		mPhoneticMiddleName(NULL),
+		mPhoneticLastName(NULL),
+		mFormattedName(NULL)
+	{
+	}
+
+	/**
 	 * Destructor.
 	 */
 	Name::~Name()

@@ -38,6 +38,8 @@ namespace PIM
 	 * Constructor
 	 */
 	Email::Email():
+		mAddress(NULL),
+		mLabel(NULL),
 		mIsPrimary(false)
 	{
 
@@ -104,7 +106,6 @@ namespace PIM
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
-		args.bufSize = PIM_BUF_SIZE;
 
 		char buf[PIM_BUF_SIZE];
 		args.buf = buf;

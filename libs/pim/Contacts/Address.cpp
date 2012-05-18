@@ -36,6 +36,15 @@ namespace PIM
 	 * Constructor.
 	 */
 	Address::Address():
+		mStreet(NULL),
+		mCity(NULL),
+		mState(NULL),
+		mPostalCode(NULL),
+		mCountry(NULL),
+		mNeighborhood(NULL),
+		mPOBox(NULL),
+		mFormattedAddress(NULL),
+		mLabel(NULL),
 		mIsPrimary(false)
 	{
 

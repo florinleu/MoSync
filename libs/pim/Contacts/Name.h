@@ -62,6 +62,11 @@ namespace PIM
 
 		public:
 			/**
+			 * Constructor.
+			 */
+			Name();
+
+			/**
 			 * Destructor.
 			 */
 			~Name();
