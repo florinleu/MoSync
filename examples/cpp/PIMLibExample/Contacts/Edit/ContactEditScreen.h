@@ -51,7 +51,6 @@ class ContactEditScreen : public NativeUI::Screen
 		void addAddress();
 		void addPhone();
 		void addEmail();
-		const char* getEmailTypeString(PIM::eEmailTypes type);
 		void addWebsite();
 		const char* getWebsiteTypeString(PIM::eWebsiteTypes type);
 		void addInstantMessaging();

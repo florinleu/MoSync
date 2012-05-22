@@ -31,53 +31,137 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-
-	enum eEmailTypes
-	{
-		//The constant describes a home e-mail address.
-		EMAIL_HOME = 0,
-		//The constant describes a work e-mail address.
-		EMAIL_WORK,
-		//The constant describes a mobile e-mail address.
-		EMAIL_MOBILE,
-		//The constant describes a different e-mail address type.
-		EMAIL_OTHER,
-		//The constant describes a custom e-mail address type.
-		//The field's label can be set.
-		EMAIL_CUSTOM
-	};
-
 	class Email
 	{
 		public:
+			enum eTypes
+			{
+				//The constant describes a home e-mail address.
+				HOME = 0,
+				//The constant describes a work e-mail address.
+				WORK,
+				//The constant describes a mobile e-mail address.
+				MOBILE,
+				//The constant describes a different e-mail address type.
+				OTHER,
+				//The constant describes a custom e-mail address type.
+				//The field's label can be set.
+				CUSTOM,
+			};
+
+			enum eSubFields
+			{
+				//The constant describes an e-mail address.
+				ADDRESS = 0,
+			};
+
+			/**
+			 * Constructor.
+			 */
 			Email();
 
+			/**
+			 * Destructor.
+			 */
+			~Email();
+
+			/**
+			 * Reads a contact's e-mail.
+			 * @param args The arguments needed to read the e-mail.
+			 * @param index The index of the e-mail to read.
+			 */
 			void read(MA_PIM_ARGS& args, int index);
 
-			const wchar* getAddress() const;
-			void setAddress(wchar* street);
+			/**
+			 * Writes a contact's e-mail.
+			 * @param args The values to write.
+			 * @index args The index of the e-mail to write.
+			 */
+			void write(MA_PIM_ARGS& args, int index);
 
-			const eEmailTypes& getType() const;
-			void setType(const eEmailTypes& type);
+			/**
+			 * Deletes a contact's e-mail.
+			 * @param handle The handle of the contact.
+			 * @param index  The index of the e-mail to delete.
+			 */
+			void remove(MAHandle handle, int index);
 
-			const wchar* getLabel() const;
-			void setLabel(wchar* label);
+			/**
+			 * Gets the contact's e-mail address.
+			 * @return The address of the contact.
+			 */
+			const wchar* const getAddress() const;
 
+			/**
+			 * Sets the contact's e-mail address.
+			 * @param address The value to set.
+			 */
+			void setAddress(const wchar* const address);
+
+			/**
+			 * Gets the e-mail type.
+			 * @return The type of the e-mail.
+			 */
+			const eTypes& getType() const;
+
+			/**
+			 * Sets the e-mail type.
+			 * @param type The value to set.
+			 */
+			void setType(const eTypes& type);
+
+			/**
+			 * Gets the e-mail label.
+			 * @return The label of the e-mail.
+			 */
+			const wchar* const getLabel() const;
+
+			/**
+			 * Sets the e-mail label.
+			 * @param state The value to set.
+			 */
+			void setLabel(const wchar* const label);
+
+			/**
+			 * Checks if this is or not a primary e-mail.
+			 * @return True if this is a primary e-mail.
+			 */
 			const bool isPrimary() const;
 
-		private:
-			void readAddress(const MAAddress buffer);
+			/**
+			 * Sets this as a primary e-mail.
+			 * @param primary true if this is a primary e-mail.
+			 */
+			void setPrimary(const bool primary);
 
+		private:
+			/**
+			 * Reads the type of the e-mail.
+			 * @param handle The handle of the contact.
+			 * @param index The index of this e-mail.
+			 */
 			void readType(const MAHandle handle, const int index);
+
+			/**
+			 * Reads the label of the e-mail.
+			 * @param handle The handle of the contact.
+			 * @param index The index of this e-mail.
+			 */
 			void readLabel(const MAHandle handle, const int index);
+
+			/**
+			 * Computes the e-mail attribute.
+			 * @return The e-mail attribute.
+			 */
+			const int getAttribute() const;
 
 		private:
 			//The email address.
 			wchar* mAddress;
 
 			//The type of data.
-			eEmailTypes mType;
-			//The user defined label
+			eTypes mType;
+			//The user defined label.
 			wchar* mLabel;
 			//Shows if this is a primary email or not.
 			bool mIsPrimary;

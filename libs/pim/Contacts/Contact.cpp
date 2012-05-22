@@ -109,22 +109,9 @@ namespace PIM
 	int Contact::find(int flag)
 	{
 		cleanFields(false);
-		//Get the contacts item handle.
-		if ((getID() == NULL) || (wcslen(getID()) == 0))
-		{
-			return -1;
-		}
 
 		MA_PIM_ARGS args;
-		initArgs(args);
-		args.bufSize = wcslen(getID())*sizeof(wchar);
-		memset(args.buf, 0, PIM_BUF_SIZE);
-		memcpy(args.buf, getID(), args.bufSize);
-
-		mHandle = maPimListFind(mListHandle, &args);
-		args.item = mHandle;
-
-		if (mHandle <= 0)
+		if (!getHandle(getID(), args))
 		{
 			return -1;
 		}
@@ -141,22 +128,8 @@ namespace PIM
 	 */
 	int Contact::write(int flag)
 	{
-		//Get the contacts item handle.
-		if ((getID() == NULL) || (wcslen(getID()) == 0))
-		{
-			return -1;
-		}
-
 		MA_PIM_ARGS args;
-		initArgs(args);
-		args.bufSize = wcslen(getID())*sizeof(wchar);
-		memset(args.buf, 0, PIM_BUF_SIZE);
-		memcpy(args.buf, getID(), args.bufSize);
-
-		mHandle = maPimListFind(mListHandle, &args);
-		args.item = mHandle;
-
-		if (mHandle <= 0)
+		if (!getHandle(getID(), args))
 		{
 			return -1;
 		}
@@ -176,6 +149,11 @@ namespace PIM
 			writePhones(args);
 		}
 
+		if (MATCH_FLAGS(flag, RF_EMAIL))
+		{
+			writeEmails(args);
+		}
+
 		maPimItemClose(mHandle);
 
 		return 0;
@@ -186,21 +164,8 @@ namespace PIM
 	 */
 	int Contact::remove()
 	{
-		if ((getID() == NULL) || (wcslen(getID()) == 0))
-		{
-			return -1;
-		}
-
 		MA_PIM_ARGS args;
-		initArgs(args);
-		args.bufSize = wcslen(getID())*sizeof(wchar);
-		memset(args.buf, 0, PIM_BUF_SIZE);
-		memcpy(args.buf, getID(), args.bufSize);
-
-		mHandle = maPimListFind(mListHandle, &args);
-		args.item = mHandle;
-
-		if (mHandle <= 0)
+		if (!getHandle(getID(), args))
 		{
 			return -1;
 		}
@@ -482,6 +447,19 @@ namespace PIM
 		}
 	}
 
+	void Contact::writeEmails(MA_PIM_ARGS args)
+	{
+		int count = mEmails.size();
+		if (count < 0)
+		{
+			return;
+		}
+		for (int i=0; i<count; i++)
+		{
+			mEmails[i]->write(args, i);
+		}
+	}
+
 	/*
 	 * Getter for ID field.
 	 */
@@ -522,6 +500,21 @@ namespace PIM
 		mName = name;
 	}
 
+	/**
+	 * Delete the given name.
+	 */
+	void Contact::removeName()
+	{
+		MA_PIM_ARGS args;
+		if (getHandle(getID(), args))
+		{
+			mName->remove(mHandle);
+			DELETE(mName);
+
+			maPimItemClose(mHandle);
+		}
+	}
+
 	/*
 	 * Getter for the number of addresses.
 	 */
@@ -544,6 +537,26 @@ namespace PIM
 	void Contact::setAddress(Address* address, int index)
 	{
 		mAddresses[index] = address;
+	}
+
+	/*
+	 * Delete the given address.
+	 */
+	void Contact::removeAddress(int index)
+	{
+		if (index < mAddresses.size())
+		{
+			MA_PIM_ARGS args;
+			if (getHandle(getID(), args))
+			{
+				Address* address = mAddresses[index];
+				address->remove(mHandle, index);
+				mAddresses.remove(index);
+				DELETE(address);
+
+				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*
@@ -571,6 +584,26 @@ namespace PIM
 	}
 
 	/*
+	 * Delete the given phone.
+	 */
+	void Contact::removePhone(int index)
+	{
+		if (index < mPhones.size())
+		{
+			MA_PIM_ARGS args;
+			if (getHandle(getID(), args))
+			{
+				Phone* phone = mPhones[index];
+				phone->remove(mHandle, index);
+				mPhones.remove(index);
+				DELETE(phone);
+
+				maPimItemClose(mHandle);
+			}
+		}
+	}
+
+	/*
 	 * Getter for the number of emails.
 	 */
 	const int Contact::getEmailsCount() const
@@ -592,6 +625,26 @@ namespace PIM
 	void Contact::setEmail(Email* email, int index)
 	{
 		mEmails[index] = email;
+	}
+
+	/*
+	 * Delete the given e-mail.
+	 */
+	void Contact::removeEmail(int index)
+	{
+		if (index < mEmails.size())
+		{
+			MA_PIM_ARGS args;
+			if (getHandle(getID(), args))
+			{
+				Email* email = mEmails[index];
+				email->remove(mHandle, index);
+				mEmails.remove(index);
+				DELETE(email);
+
+				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*
@@ -768,5 +821,33 @@ namespace PIM
 	void Contact::setPhoto(Photo* photo)
 	{
 		mPhoto = photo;
+	}
+
+	/**
+	 * Finds a contact by it's id.
+	 * @param id The contact's id.
+	 * @param args
+	 * @return true on success.
+	 */
+	bool Contact::getHandle(const wchar* id, MA_PIM_ARGS& args)
+	{
+		if ((getID() == NULL) || (wcslen(getID()) == 0))
+		{
+			return false;
+		}
+
+		initArgs(args);
+		args.bufSize = wcslen(id)*sizeof(wchar);
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		memcpy(args.buf, id, args.bufSize);
+
+		mHandle = maPimListFind(mListHandle, &args); //why always search?
+		args.item = mHandle;
+		if (mHandle <= 0)
+		{
+			return false;
+		}
+
+		return true;
 	}
 }

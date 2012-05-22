@@ -32,11 +32,14 @@ MA 02110-1301, USA.
 #include <NativeUI/ButtonListener.h>
 #include <Contacts/Contact.h>
 
+#include "Observer.h"
+
 class ConfirmDialog;
 
 class EditDelete :
 	public NativeUI::VerticalLayout,
-	public NativeUI::ButtonListener
+	public NativeUI::ButtonListener,
+	public Observer
 {
 	public:
 		/**

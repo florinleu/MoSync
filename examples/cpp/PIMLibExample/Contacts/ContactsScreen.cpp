@@ -170,9 +170,9 @@ const char* ContactsScreen::sAddressTypes[Address::CUSTOM + 1] =
  * @param type	The address type.
  * @return 		The type name.
  */
-const char* ContactsScreen::getAddressTypeString(PIM::Address::eTypes type, const wchar* label)
+const char* ContactsScreen::getAddressTypeString(Address::eTypes type, const wchar* label)
 {
-	if (type == PIM::Address::CUSTOM)
+	if (type == Address::CUSTOM)
 	{
 		return wstrtostr(label);
 	}
@@ -213,13 +213,40 @@ const char* ContactsScreen::sPhoneTypes[Phone::CUSTOM + 1] =
  * @param type	The phone type.
  * @return 		The type name.
  */
-const char* ContactsScreen::getPhoneTypeString(PIM::Phone::eTypes type, const wchar* label)
+const char* ContactsScreen::getPhoneTypeString(Phone::eTypes type, const wchar* label)
 {
 	printf("getPhoneTypeString %d %S", type, label);
-	if (type == PIM::Phone::CUSTOM)
+	if (type == Phone::CUSTOM)
 	{
 		printf("return label");
 		return wstrtostr(label);
 	}
 	return sPhoneTypes[type];
+}
+
+/**
+ * Available e-mail types.
+ */
+const char* ContactsScreen::sEmailTypes[Email::CUSTOM + 1] =
+{
+	"Home",
+	"Work",
+	"Mobile",
+	"Other",
+	"Custom"
+};
+
+/**
+ * Gets the name of the email type.
+ * @param type	The email type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getEmailTypeString(Email::eTypes type, const wchar* label)
+{
+	if (type == Email::CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sEmailTypes[type];
 }

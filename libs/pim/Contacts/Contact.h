@@ -87,18 +87,22 @@ namespace PIM
 
 			Name* getName() const;
 			void setName(Name* name);
+			void removeName();
 
 			const int getAddressesCount() const;
 			Address* getAddress(int index) const;
 			void setAddress(Address* address, int index);
+			void removeAddress(int index);
 
 			const int getPhonesCount() const;
 			Phone* getPhone(int index) const;
 			void setPhone(Phone* phone, int index);
+			void removePhone(int index);
 
 			const int getEmailsCount() const;
 			Email* getEmail(int index) const;
 			void setEmail(Email* email, int index);
+			void removeEmail(int index);
 
 			const int getWebsitesCount() const;
 			Website* getWebsite(int index) const;
@@ -151,6 +155,15 @@ namespace PIM
 			void writeName(MA_PIM_ARGS args);
 			void writeAddresses(MA_PIM_ARGS args);
 			void writePhones(MA_PIM_ARGS args);
+			void writeEmails(MA_PIM_ARGS args);
+
+			/**
+			 * Finds a contact by it's id.
+			 * @param id The contact's id.
+			 * @param args
+			 * @return true on success.
+			 */
+			bool getHandle(const wchar* id, MA_PIM_ARGS& args);
 
 		private:
 			ID* mID;

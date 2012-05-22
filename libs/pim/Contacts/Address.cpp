@@ -129,6 +129,18 @@ namespace PIM
 	}
 
 	/**
+	 * Deletes a contact's address.
+	 * @param handle The handle of the contact.
+	 * @param index  The index of the address to delete.
+	 */
+	void Address::remove(MAHandle handle, int index)
+	{
+		printf("@LIB: address delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_ADDR, index);
+	}
+
+	/**
 	 * Reads the type of the address.
 	 * @param handle The handle of the contact.
 	 * @param index The index of this address.

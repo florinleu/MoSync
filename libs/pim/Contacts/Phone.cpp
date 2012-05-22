@@ -33,20 +33,23 @@ MA 02110-1301, USA.
 namespace PIM
 {
 	/**
-	 * Constructor
+	 * Constructor.
 	 */
 	Phone::Phone():
+		mNumber(NULL),
+		mLabel(NULL),
 		mIsPrimary(false)
 	{
 
 	}
 
 	/**
-	 * Constructor
+	 * Destructor.
 	 */
 	Phone::~Phone()
 	{
 		DELETE(mNumber);
+		DELETE(mLabel);
 	}
 
 	/**
@@ -81,7 +84,7 @@ namespace PIM
 
 		args.field = MA_PIM_FIELD_CONTACT_TEL;
 		memset(args.buf, 0, PIM_BUF_SIZE);
-		args.bufSize = writeWString(args.buf, mNumber, args.bufSize);
+		args.bufSize = writeWString(args.buf, mNumber, 0);
 		maPimItemSetValue(&args, index, getAttribute());
 
 		memset(args.buf, 0, PIM_BUF_SIZE);
@@ -90,8 +93,20 @@ namespace PIM
 	}
 
 	/**
+	 * Deletes a contact's phone.
+	 * @param handle The handle of the contact.
+	 * @param index  The index of the phone to delete.
+	 */
+	void Phone::remove(MAHandle handle, int index)
+	{
+		printf("@LIB: phone delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_TEL, index);
+	}
+
+	/**
 	 * Reads the type of the phone.
-	 * @param handle The handle of the phone.
+	 * @param handle The handle of the contact.
 	 * @param index The index of this phone.
 	 */
 	void Phone::readType(const MAHandle handle, const int index)

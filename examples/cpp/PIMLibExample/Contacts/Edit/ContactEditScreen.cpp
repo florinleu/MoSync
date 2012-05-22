@@ -45,6 +45,7 @@ MA 02110-1301, USA.
 #include "EditName.h"
 #include "EditAddress.h"
 #include "EditPhone.h"
+#include "EditEmail.h"
 #include "EditDelete.h"
 #include "EditDefines.h"
 
@@ -67,40 +68,39 @@ ContactEditScreen::~ContactEditScreen()
 
 void ContactEditScreen::createUI()
 {
-	printf("############### 0 phone 2 type %d", mContact->getPhone(2)->getType());
 	mLayout = new VerticalLayout();
 	mLayout->fillSpaceHorizontally();
 	mLayout->setChildHorizontalAlignment(MAW_ALIGNMENT_CENTER);
 	mLayout->setChildVerticalAlignment(MAW_ALIGNMENT_CENTER);
-	printf("############### 1 phone 2 type %d", mContact->getPhone(2)->getType());
+
 	addNavigationBar();
-	printf("############### 2 phone 2 type %d", mContact->getPhone(2)->getType());
+
 	addPhoto();
-	printf("############### 3 phone 2 type %d", mContact->getPhone(2)->getType());
+
 	addID();
-	printf("############### 4 phone 2 type %d", mContact->getPhone(2)->getType());
+
 	addName();
-	printf("############### 5 phone 2 type %d", mContact->getPhone(2)->getType());
+
 	addAddress();
-	printf("############### 6 phone 2 type %d", mContact->getPhone(2)->getType());
+
 	addPhone();
-/*
+
 	addEmail();
 
-	addWebsite();
+//	addWebsite();
+//
+//	addInstantMessaging();
+//
+//	addNote();
+//
+//	addOrganization();
+//
+//	addSocialProfile();
+//
+//	addEvent();
+//
+//	addRelation();
 
-	addInstantMessaging();
-
-	addNote();
-
-	addOrganization();
-
-	addSocialProfile();
-
-	addEvent();
-
-	addRelation();
-*/
 	addDeleteButton();
 
 	mLayout->setScrollable(true);
@@ -215,47 +215,11 @@ void ContactEditScreen::addPhone()
 
 void ContactEditScreen::addEmail()
 {
-	const char* labels[] =
-	{
-		"address",
-	};
+	EditEmail* email = new EditEmail(mContact);
 
-	for (int i=0; i<mContact->getEmailsCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getEmailTypeString(mContact->getEmail(i)->getType()));
-		if (mContact->getEmail(i)->getType() == EMAIL_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getEmail(i)->getLabel());
-		}
-		const char* datas[] =
-		{
-			wstrtostr(mContact->getEmail(i)->getAddress())
-		};
+	mLayout->addChild(email);
 
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getEmail(i)->isPrimary());
-
-		DELETE(title);
-	}
-
-	if (mContact->getEmailsCount() > 0)
-	{
-		addSpacer();
-	}
-}
-
-const char* ContactEditScreen::getEmailTypeString(PIM::eEmailTypes type)
-{
-	const char* emailType[] =
-	{
-		"Home",
-		"Work",
-		"Mobile",
-		"Other",
-		"Custom"
-	};
-
-	return emailType[type];
+	addSpacer();
 }
 
 void ContactEditScreen::addWebsite()

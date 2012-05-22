@@ -16,7 +16,7 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file TypeDialog.h
+ * @file ConfirmDialog.h
  * @author Florin Leu
  * @date 09 May 2012
  *
@@ -34,17 +34,20 @@ MA 02110-1301, USA.
 #include <NativeUI/CheckBoxListener.h>
 #include <NativeUI/EditBox.h>
 
+#include "Subject.h"
+
 class EditDelete;
 
 class ConfirmDialog :
 	public NativeUI::Dialog,
-	public NativeUI::ButtonListener
+	public NativeUI::ButtonListener,
+	public Subject
 {
 	public:
 		/**
 		 * Constructor.
 		 */
-		ConfirmDialog(EditDelete* owner);
+		ConfirmDialog(Observer* owner);
 
 		/**
 		 * Destructor.

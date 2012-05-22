@@ -28,6 +28,7 @@ MA 02110-1301, USA.
 
 #include "ViewEmail.h"
 #include "ViewDefines.h"
+#include "ContactsScreen.h"
 
 using namespace PIM;
 using namespace NativeUI;
@@ -73,12 +74,8 @@ void ViewEmail::addBody()
 	for (int i=0; i<mOwner->getEmailsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getEmailTypeString(mOwner->getEmail(i)->getType()));
-		if (mOwner->getEmail(i)->getType() == EMAIL_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mOwner->getEmail(i)->getLabel());
-		}
-		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
+		sprintf(title, "%d. %s", i + 1, ContactsScreen::getEmailTypeString(mOwner->getEmail(i)->getType(), mOwner->getEmail(i)->getLabel()));
+		addSubTitle(title, mOwner->getEmail(i)->isPrimary());
 		DELETE(title);
 
 		const char* datas[] =
@@ -88,23 +85,4 @@ void ViewEmail::addBody()
 
 		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
 	}
-}
-
-/**
- * Gets the name of the email type.
- * @param type	The email type.
- * @return 		The type name.
- */
-const char* ViewEmail::getEmailTypeString(eEmailTypes type)
-{
-	const char* emailType[] =
-	{
-		"Home",
-		"Work",
-		"Mobile",
-		"Other",
-		"Custom"
-	};
-
-	return emailType[type];
 }

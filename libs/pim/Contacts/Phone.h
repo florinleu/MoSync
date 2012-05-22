@@ -112,6 +112,13 @@ namespace PIM
 			void write(MA_PIM_ARGS& args, int index);
 
 			/**
+			 * Deletes a contact's phone.
+			 * @param handle The handle of the contact.
+			 * @param index  The index of the phone to delete.
+			 */
+			void remove(MAHandle handle, int index);
+
+			/**
 			 * Gets the contact's phone number.
 			 * @return The number of the contact.
 			 */
@@ -162,7 +169,7 @@ namespace PIM
 		private:
 			/**
 			 * Reads the type of the phone.
-			 * @param handle The handle of the phone.
+			 * @param handle The handle of the contact.
 			 * @param index The index of this phone.
 			 */
 			void readType(const MAHandle handle, const int index);

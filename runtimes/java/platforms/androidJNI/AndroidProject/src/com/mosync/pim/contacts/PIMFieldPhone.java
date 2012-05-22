@@ -33,8 +33,6 @@ import static com.mosync.internal.generated.IX_PIM.MA_PIM_FIELD_CONTACT_TEL;
 import static com.mosync.internal.generated.IX_PIM.MA_PIM_TYPE_STRING;
 
 import android.provider.ContactsContract.CommonDataKinds.Phone;
-import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
-
 import com.mosync.pim.*;
 
 public class PIMFieldPhone extends PIMFieldContacts {
@@ -47,7 +45,7 @@ public class PIMFieldPhone extends PIMFieldContacts {
 		mStrType = Phone.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING;
 
-		mNames = new String[] { Phone.NUMBER, Phone.TYPE, Phone.LABEL,
+		mNames = new String[] { Phone._ID, Phone.NUMBER, Phone.TYPE, Phone.LABEL,
 				Phone.IS_PRIMARY };
 	}
 
@@ -175,7 +173,7 @@ public class PIMFieldPhone extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[0];
+		return val[1];
 	}
 
 	int getDataSize(String val) {
@@ -188,8 +186,9 @@ public class PIMFieldPhone extends PIMFieldContacts {
 	}
 
 	void setSpecificData(String data, int index) {
+		DebugPrint("PIMFieldPhone.setSpecificData(" + data + ", " + index + ")");
 		String[] val = mValues.get(index);
-		val[0] = data;
+		val[1] = data;
 		mValues.set(index, val);
 	}
 
@@ -226,7 +225,7 @@ public class PIMFieldPhone extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Phone " + i);
-			DebugPrint(mNames[0] + ": " + val[0]);
+			DebugPrint(mNames[1] + ": " + val[1]);
 		}
 		DebugPrint("***************************");
 	}

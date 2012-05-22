@@ -29,7 +29,7 @@ public class PIMFieldEmail extends PIMFieldContacts {
 		mStrType = Email.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING;
 
-		mNames = new String[] { Email.DATA, Email.TYPE, Email.LABEL,
+		mNames = new String[] { Email._ID, Email.DATA, Email.TYPE, Email.LABEL,
 				Email.IS_PRIMARY };
 	}
 
@@ -110,7 +110,7 @@ public class PIMFieldEmail extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[0];
+		return val[1];
 	}
 
 	int getDataSize(String val) {
@@ -124,7 +124,7 @@ public class PIMFieldEmail extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[0] = data;
+		val[1] = data;
 		mValues.set(index, val);
 	}
 
@@ -155,7 +155,7 @@ public class PIMFieldEmail extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Email " + i);
-			DebugPrint(mNames[0] + ": " + val[0]);
+			DebugPrint(mNames[1] + ": " + val[1]);
 		}
 		DebugPrint("***************************");
 	}

@@ -38,6 +38,8 @@ MA 02110-1301, USA.
 
 #include <MAUtil/String.h>
 
+class ConfirmDialog;
+
 class EditField :
 	public NativeUI::VerticalLayout,
 	public NativeUI::ButtonListener,
@@ -90,11 +92,16 @@ class EditField :
 		virtual void addBody();
 
 		/**
+		 * Clears the view.
+		 */
+		virtual void clearBody();
+
+		/**
 		 * Ads subtitle for multivalue fields.
 		 * @param text		The subtitle text.
-		 * @param isPrimary
+		 * @param index		The index of the subfield
 		 */
-		void addSubTitle(const char* text);
+		void addSubTitle(const char* text, const int index);
 
 		/**
 		 * Ads type for multivalue fields.
@@ -172,16 +179,31 @@ class EditField :
 		NativeUI::Button* mTitle;
 
 		/**
-		 * Button widget for type.
-		 */
-		MAUtil::Vector<NativeUI::Button*> mTypes;
-
-	private:
-		/**
 		 * Vertical layout for the body.
 		 */
 		NativeUI::VerticalLayout* mBody;
 
+		/**
+		 * Button widget for type.
+		 */
+		MAUtil::Vector<NativeUI::Button*> mTypes;
+
+		/**
+		 * Delete button widget.
+		 */
+		NativeUI::Button** mDeleteButton;
+
+		/**
+		 * Confirm dialog.
+		 */
+		ConfirmDialog* mDialog;
+
+		/**
+		 * The selected subfield.
+		 */
+		int mCurrentSubField;
+
+	private:
 		/**
 		 * The font used for title.
 		 */

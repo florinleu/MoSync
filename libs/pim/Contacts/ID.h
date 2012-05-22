@@ -43,6 +43,11 @@ namespace PIM
 			};
 		public:
 			/**
+			 * Constructor.
+			 */
+			ID();
+
+			/**
 			 * Destructor.
 			 */
 			~ID();

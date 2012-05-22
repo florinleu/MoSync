@@ -145,6 +145,18 @@ namespace PIM
 	}
 
 	/**
+	 * Deletes a contact's name.
+	 * @param handle The handle of the contact.
+	 */
+	void Name::remove(MAHandle handle)
+	{
+		printf("@LIB: name delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_NAME, 0);
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_NICKNAME, 0);
+	}
+
+	/**
 	 * Gets the contact's display name.
 	 * @return The display name of the contact.
 	 */

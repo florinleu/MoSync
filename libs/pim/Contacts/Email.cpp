@@ -28,14 +28,12 @@ MA 02110-1301, USA.
 #include <mawstring.h>
 
 #include "Email.h"
-#include "Phone.h"
 #include "util.h"
 
 namespace PIM
 {
-
-	/*
-	 * Constructor
+	/**
+	 * Constructor.
 	 */
 	Email::Email():
 		mAddress(NULL),
@@ -45,8 +43,19 @@ namespace PIM
 
 	}
 
-	/*
-	 * Read a complete email.
+	/**
+	 * Destructor.
+	 */
+	Email::~Email()
+	{
+		DELETE(mAddress);
+		DELETE(mLabel);
+	}
+
+	/**
+	 * Reads a contact's e-mail.
+	 * @param args The arguments needed to read the e-mail.
+	 * @param index The index of the e-mail to read.
 	 */
 	void Email::read(MA_PIM_ARGS& args, int index)
 	{
@@ -55,20 +64,51 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
-			readAddress(args.buf);
+			DELETE(mAddress);
+			wchar* src = (wchar*)args.buf;
+			mAddress = wcsdup(src);
 
 			readType(args.item, index);
 			readLabel(args.item, index);
 		}
 	}
 
-	void Email::readAddress(const MAAddress buffer)
+	/**
+	 * Writes a contact's e-mail.
+	 * @param args The values to write.
+	 * @index args The index of the e-mail to write.
+	 */
+	void Email::write(MA_PIM_ARGS& args, int index)
 	{
-		DELETE(mAddress);
-		wchar* src = (wchar*)buffer;
-		mAddress = wcsdup(src);
+		printf("@LIB: e-mail write");
+
+		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mAddress, 0);
+		maPimItemSetValue(&args, index, getAttribute());
+
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mLabel, 0);
+		maPimItemSetLabel(&args, index);
 	}
 
+	/**
+	 * Deletes a contact's e-mail.
+	 * @param handle The handle of the contact.
+	 * @param index  The index of the e-mail to delete.
+	 */
+	void Email::remove(MAHandle handle, int index)
+	{
+		printf("@LIB: e-mail delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_EMAIL, index);
+	}
+
+	/**
+	 * Reads the type of the e-mail.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this e-mail.
+	 */
 	void Email::readType(const MAHandle handle, const int index)
 	{
 		int attribute = maPimItemGetAttributes(handle, MA_PIM_FIELD_CONTACT_EMAIL, index);
@@ -84,92 +124,149 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_EMAIL_HOME:
-				mType = EMAIL_HOME;
+				mType = HOME;
 				break;
 			case MA_PIM_ATTR_EMAIL_WORK:
-				mType = EMAIL_WORK;
+				mType = WORK;
 				break;
 			case MA_PIM_ATTR_EMAIL_MOBILE:
-				mType = EMAIL_MOBILE;
+				mType = MOBILE;
 				break;
 			case MA_PIM_ATTR_EMAIL_CUSTOM:
-				mType = EMAIL_CUSTOM;
+				mType = CUSTOM;
 				break;
 			default:
-				mType = EMAIL_OTHER;
+				mType = OTHER;
 				break;
 		}
 	}
 
+	/**
+	 * Reads the label of the e-mail.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this e-mail.
+	 */
 	void Email::readLabel(const MAHandle handle, const int index)
 	{
 		MA_PIM_ARGS args;
 		args.item = handle;
 		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
+		args.bufSize = PIM_BUF_SIZE;
 
 		char buf[PIM_BUF_SIZE];
 		args.buf = buf;
 		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
+
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
 		mLabel = wcsdup(src);
 	}
 
-	/*
-	 * Getter for email address.
+	/**
+	 * Gets the contact's e-mail address.
+	 * @return The address of the contact.
 	 */
-	const wchar* Email::getAddress() const
+	const wchar* const Email::getAddress() const
 	{
 		return mAddress;
 	}
 
-	/*
-	 * Setter for email address.
+	/**
+	 * Sets the contact's e-mail address.
+	 * @param number The value to set.
 	 */
-	void Email::setAddress(wchar* address)
+	void Email::setAddress(const wchar* const address)
 	{
-		mAddress = address;
+		printf("@LIB email setAddress: %S", address);
+		DELETE(mAddress);
+		mAddress = wcsdup(address);
 	}
 
-	/*
-	 * Getter for type.
+	/**
+	 * Gets the e-mail type.
+	 * @return The type of the e-mail.
 	 */
-	const eEmailTypes& Email::getType() const
+	const Email::eTypes& Email::getType() const
 	{
 		return mType;
 	}
 
-	/*
-	 * Setter for type.
+	/**
+	 * Sets the e-mail type.
+	 * @param type The value to set.
 	 */
-	void Email::setType(const eEmailTypes& type)
+	void Email::setType(const Email::eTypes& type)
 	{
 		mType = type;
 	}
 
-	/*
-	 * Getter for label.
+	/**
+	 * Gets the e-mail label.
+	 * @return The label of the e-mail.
 	 */
-	const wchar* Email::getLabel() const
+	const wchar* const Email::getLabel() const
 	{
 		return mLabel;
 	}
 
-	/*
-	 * Setter for label.
+	/**
+	 * Sets the e-mail label.
+	 * @param state The value to set.
 	 */
-	void Email::setLabel(wchar* label)
+	void Email::setLabel(const wchar* const label)
 	{
-		mLabel = label;
+		DELETE(mLabel);
+		mLabel = wcsdup(label);
 	}
 
-	/*
-	 * Returns true if this is set as the primary email.
+	/**
+	 * Checks if this is or not a primary e-mail.
+	 * @return True if this is a primary e-mail.
 	 */
 	const bool Email::isPrimary() const
 	{
 		return mIsPrimary;
+	}
+
+	/**
+	 * Sets this as a primary e-mail.
+	 * @param primary true if this is a primary e-mail.
+	 */
+	void Email::setPrimary(const bool primary)
+	{
+		mIsPrimary = primary;
+	}
+
+	/**
+	 * Computes the e-mail attribute.
+	 * @return The e-mail attribute.
+	 */
+	const int Email::getAttribute() const
+	{
+		int attribute = 0;
+		switch (mType)
+		{
+			case HOME:
+				attribute = MA_PIM_ATTR_EMAIL_HOME;
+				break;
+			case WORK:
+				attribute = MA_PIM_ATTR_EMAIL_WORK;
+				break;
+			case MOBILE:
+				attribute = MA_PIM_ATTR_EMAIL_MOBILE;
+				break;
+			case CUSTOM:
+				attribute = MA_PIM_ATTR_EMAIL_CUSTOM;
+				break;
+			default:
+				attribute = MA_PIM_ATTR_EMAIL_OTHER;
+				break;
+		}
+
+		attribute |= (mIsPrimary ? MA_PIM_ATTRPREFERRED : 0);
+
+		return attribute;
 	}
 
 } //PIM

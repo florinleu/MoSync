@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 MoSync AB
+/* Copyright (C) 2012 MoSync AB
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License,
@@ -16,45 +16,28 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file ViewEmail.h
+ * @file Subject.h
  * @author Florin Leu
- * @date 08 Mar 2012
+ * @date 22 May 2012
  *
- * @brief Email view Layout.
+ * @brief Subject interface.
  *
  **/
 
-#ifndef __VIEWEMAIL_H__
-#define __VIEWEMAIL_H__
+#ifndef __SUBJECT_H__
+#define __SUBJECT_H__
 
-#include <Contacts/Contact.h>
+#include <MAUtil/Vector.h>
 
-#include "ViewField.h"
+class Observer;
 
-class ViewEmail :
-	public ViewField
-{
+class Subject {
 	public:
-		/**
-		 * Constructor.
-		 */
-		ViewEmail(PIM::Contact* contact);
-
-		/**
-		 * Destructor.
-		 */
-		~ViewEmail();
+		void attach(Observer *obs);
+		void notify();
 
 	private:
-		/**
-		 * Inits the data used to display this field.
-		 */
-		void initData();
-
-		/**
-		 * Creates the view.
-		 */
-		void addBody();
+        MAUtil::Vector<Observer*> views;
 };
 
-#endif /* __VIEWEMAIL_H__ */
+#endif //__SUBJECT_H__

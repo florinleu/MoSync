@@ -15,11 +15,11 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditPhone.cpp
+ * @file EditEmail.cpp
  * @author Florin Leu
- * @date 08 Mar 2012
+ * @date 22 May 2012
  *
- * @brief Phone Edit Layout.
+ * @brief Email Edit Layout.
  *
  **/
 
@@ -29,7 +29,7 @@ MA 02110-1301, USA.
 
 #include "ContactsScreen.h"
 
-#include "EditPhone.h"
+#include "EditEmail.h"
 #include "EditDefines.h"
 
 #include "TypeDialog.h"
@@ -43,7 +43,7 @@ using namespace MAUtil;
  * Constructor.
  * @param contact The owner of this field.
  */
-EditPhone::EditPhone(Contact* contact):
+EditEmail::EditEmail(Contact* contact):
 	EditField(contact)
 {
 	initData();
@@ -55,7 +55,7 @@ EditPhone::EditPhone(Contact* contact):
 /**
  * Destructor.
  */
-EditPhone::~EditPhone()
+EditEmail::~EditEmail()
 {
 	DELETE(mDialog);
 	DELETE(mDeleteButton);
@@ -64,46 +64,46 @@ EditPhone::~EditPhone()
 /**
  * Inits the data used to display this field.
  */
-void EditPhone::initData()
+void EditEmail::initData()
 {
-	mTitleText = strdup(TXT_EDIT_PHONE_TITLE);
-	mDeleteButton = new Button*[mOwner->getPhonesCount()];
+	mTitleText = strdup(TXT_EDIT_EMAIL_TITLE);
+	mDeleteButton = new Button*[mOwner->getEmailsCount()];
 }
 
 /**
  * Creates the view.
  */
-void EditPhone::addBody()
+void EditEmail::addBody()
 {
 	const char* labels[] =
 	{
-		"number"
+		"address",
 	};
 
 	EditField::addBody();
 
-	for (int i=0; i<mOwner->getPhonesCount(); i++)
+	for (int i=0; i<mOwner->getEmailsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
 		sprintf(title, "%d.", i + 1);
 		addSubTitle(title, i);
-		addType(i, ContactsScreen::getPhoneTypeString(mOwner->getPhone(i)->getType(), mOwner->getPhone(i)->getLabel()),
-				mOwner->getPhone(i)->isPrimary());
+		addType(i, ContactsScreen::getEmailTypeString(mOwner->getEmail(i)->getType(), mOwner->getEmail(i)->getLabel()),
+				mOwner->getEmail(i)->isPrimary());
 		DELETE(title);
 
-		Phone* phone = mOwner->getPhone(i);
+		Email* email = mOwner->getEmail(i);
 
 		const char* texts[] =
 		{
-			wstrtostr(phone->getNumber()),
+			wstrtostr(email->getAddress()),
 		};
 
 		const int datas[] =
 		{
-			Phone::NUMBER | (i << 8),
+			Email::ADDRESS | (i << 8),
 		};
 
-		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_PHONE_FLAGS);
+		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_EMAIL_FLAGS);
 	}
 }
 
@@ -113,18 +113,18 @@ void EditPhone::addBody()
  * Only for iphone platform.
  * @param editBox The edit box object that generated the event.
  */
-void EditPhone::editBoxEditingDidEnd(EditBox* editBox)
+void EditEmail::editBoxEditingDidEnd(EditBox* editBox)
 {
 	int data = *(int*)(editBox->getData());
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d.", data);
 
-	Phone* phone = mOwner->getPhone(data >> 8);
+	Email* email = mOwner->getEmail(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case Phone::NUMBER:
-			phone->setNumber(text);
+		case Email::ADDRESS:
+			email->setAddress(text);
 			break;
 	}
 }
@@ -135,7 +135,7 @@ void EditPhone::editBoxEditingDidEnd(EditBox* editBox)
  * receiving this event.
  * @param editBox The edit box object that generated the event.
  */
-void EditPhone::editBoxReturn(EditBox* editBox)
+void EditEmail::editBoxReturn(EditBox* editBox)
 {
 	editBox->hideKeyboard();
 
@@ -144,12 +144,12 @@ void EditPhone::editBoxReturn(EditBox* editBox)
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d %S.", data, text);
 
-	Phone* phone = mOwner->getPhone(data >> 8);
+	Email* email = mOwner->getEmail(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case Phone::NUMBER:
-			phone->setNumber(text);
+		case Email::ADDRESS:
+			email->setAddress(text);
 			break;
 	}
 }
@@ -160,18 +160,18 @@ void EditPhone::editBoxReturn(EditBox* editBox)
  * @param checkBox The check box object that generated the event.
  * @param state True if the check box is checked, false otherwise.
  */
-void EditPhone::checkBoxStateChanged(CheckBox *checkBox, bool state)
+void EditEmail::checkBoxStateChanged(CheckBox *checkBox, bool state)
 {
 	int data = *(int*)(checkBox->getData());
-	Phone* phone = mOwner->getPhone(data);
-	phone->setPrimary(state);
+	Email* email = mOwner->getEmail(data);
+	email->setPrimary(state);
 }
 
 /**
  * This method is called if the touch-up event was inside the bounds of the button.
  * @param button The button object that generated the event.
  */
-void EditPhone::buttonClicked(Widget* button)
+void EditEmail::buttonClicked(Widget* button)
 {
 	if (button == mTitle)
 	{
@@ -188,10 +188,10 @@ void EditPhone::buttonClicked(Widget* button)
 		}
 		else
 		{
-			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sPhoneTypes,
-					sizeof(ContactsScreen::sPhoneTypes)/sizeof(char*),
-					(int)mOwner->getPhone(data)->getType(),
-					mOwner->getPhone(data)->getLabel());
+			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sEmailTypes,
+					sizeof(ContactsScreen::sEmailTypes)/sizeof(char*),
+					(int)mOwner->getEmail(data)->getType(),
+					mOwner->getEmail(data)->getLabel());
 			TypeDialog::getInstance()->show();
 		}
 	}
@@ -203,25 +203,25 @@ void EditPhone::buttonClicked(Widget* button)
  * @param type The type to set.
  * @param label The label to set.
  */
-void EditPhone::update(int index, int type, String label)
+void EditEmail::update(int index, int type, String label)
 {
-	mOwner->getPhone(index)->setType((Phone::eTypes)type);
+	mOwner->getEmail(index)->setType((Email::eTypes)type);
 
-	if (type == Phone::CUSTOM)
+	if (type == Email::CUSTOM)
 	{
-		mOwner->getPhone(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
+		mOwner->getEmail(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 	}
 
-	mTypes[index]->setText(ContactsScreen::getPhoneTypeString(
-			mOwner->getPhone(index)->getType(), mOwner->getPhone(index)->getLabel()));
+	mTypes[index]->setText(ContactsScreen::getEmailTypeString(
+			mOwner->getEmail(index)->getType(), mOwner->getEmail(index)->getLabel()));
 }
 
 /**
- * Updates the phone.
+ * Updates the email.
  */
-void EditPhone::update()
+void EditEmail::update()
 {
-	mOwner->removePhone(mCurrentSubField);
+	mOwner->removeEmail(mCurrentSubField);
 	clearBody();
 	addBody();
 	addChild(mBody);

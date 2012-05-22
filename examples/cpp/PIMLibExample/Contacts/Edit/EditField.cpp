@@ -42,7 +42,8 @@ using namespace MAUtil;
  */
 EditField::EditField(Contact* contact):
 	mOwner(contact),
-	mOpened(false)
+	mOpened(false),
+	mCurrentSubField(0)
 {
 
 }
@@ -62,10 +63,12 @@ EditField::~EditField()
 /**
  * Ads subtitle for multivalue fields.
  * @param text		The subtitle text.
- * @param isPrimary
+ * @param index		The index of the subfield
  */
-void EditField::addSubTitle(const char* text)
+void EditField::addSubTitle(const char* text, const int index)
 {
+	HorizontalLayout* layout = new HorizontalLayout();
+
 	Label* titleBar = new Label();
 	titleBar->fillSpaceHorizontally();
 	titleBar->setBackgroundColor(EDIT_TITLE_COLOR);
@@ -73,7 +76,15 @@ void EditField::addSubTitle(const char* text)
 	titleBar->setFont(mTitleFont);
 	titleBar->setText(text);
 	titleBar->setTextHorizontalAlignment(MAW_ALIGNMENT_CENTER);
-	mBody->addChild(titleBar);
+	layout->addChild(titleBar);
+
+	mDeleteButton[index] = new Button();
+	mDeleteButton[index]->setText("Delete");
+	mDeleteButton[index]->setData(createData(index));
+	mDeleteButton[index]->addButtonListener(this);
+	layout->addChild(mDeleteButton[index]);
+
+	mBody->addChild(layout);
 }
 
 /**
@@ -205,6 +216,19 @@ void EditField::addTitle()
 void EditField::addBody()
 {
 	mBody = new VerticalLayout();
+}
+
+/**
+ * Clears the view.
+ */
+void EditField::clearBody()
+{
+	removeChild(mBody);
+	DELETE(mBody);
+//	for (int i=mBody->countChildWidgets() - 1; i>=0; i--)
+//	{
+//		mBody->removeChild(mBody->getChild(i));
+//	}
 }
 
 /**

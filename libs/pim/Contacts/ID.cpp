@@ -32,6 +32,14 @@ MA 02110-1301, USA.
 namespace PIM
 {
 	/**
+	 * Constructor.
+	 */
+	ID::ID():
+		mID(NULL)
+	{
+	}
+
+	/**
 	 * Destructor.
 	 */
 	ID::~ID()

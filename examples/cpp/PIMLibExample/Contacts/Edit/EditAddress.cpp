@@ -34,6 +34,7 @@ MA 02110-1301, USA.
 #include "EditDefines.h"
 
 #include "TypeDialog.h"
+#include "ConfirmDialog.h"
 
 using namespace PIM;
 using namespace NativeUI;
@@ -48,6 +49,8 @@ EditAddress::EditAddress(Contact* contact):
 {
 	initData();
 	createUI();
+
+	mDialog = new ConfirmDialog(this);
 }
 
 /**
@@ -55,7 +58,8 @@ EditAddress::EditAddress(Contact* contact):
  */
 EditAddress::~EditAddress()
 {
-
+	DELETE(mDialog);
+	DELETE(mDeleteButton);
 }
 
 /**
@@ -64,6 +68,7 @@ EditAddress::~EditAddress()
 void EditAddress::initData()
 {
 	mTitleText = strdup(TXT_EDIT_ADDRESS_TITLE);
+	mDeleteButton = new Button*[mOwner->getAddressesCount()];
 }
 
 /**
@@ -89,7 +94,7 @@ void EditAddress::addBody()
 	{
 		char* title = new char[BUFF_SIZE];
 		sprintf(title, "%d.", i + 1);
-		addSubTitle(title);
+		addSubTitle(title, i);
 		addType(i, ContactsScreen::getAddressTypeString(mOwner->getAddress(i)->getType(), mOwner->getAddress(i)->getLabel()),
 				mOwner->getAddress(i)->isPrimary());
 		DELETE(title);
@@ -236,13 +241,20 @@ void EditAddress::buttonClicked(Widget* button)
 	{
 		printf("EditAddress button clicked");
 		int data = *(int*)(button->getData());
-		printf("Address index = %d", data);
 
-		TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sAddressTypes,
-				sizeof(ContactsScreen::sAddressTypes)/sizeof(char*),
-				(int)mOwner->getAddress(data)->getType(),
-				mOwner->getAddress(data)->getLabel());
-		TypeDialog::getInstance()->show();
+		if (button == mDeleteButton[data])
+		{
+			mDialog->show();
+			mCurrentSubField = data;
+		}
+		else
+		{
+			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sAddressTypes,
+					sizeof(ContactsScreen::sAddressTypes)/sizeof(char*),
+					(int)mOwner->getAddress(data)->getType(),
+					mOwner->getAddress(data)->getLabel());
+			TypeDialog::getInstance()->show();
+		}
 	}
 }
 
@@ -267,4 +279,15 @@ void EditAddress::update(int index, int type, String label)
 
 	mTypes[index]->setText(ContactsScreen::getAddressTypeString(
 			mOwner->getAddress(index)->getType(), mOwner->getAddress(index)->getLabel()));
+}
+
+/**
+ * Updates the address.
+ */
+void EditAddress::update()
+{
+	mOwner->removeAddress(mCurrentSubField);
+	clearBody();
+	addBody();
+	addChild(mBody);
 }

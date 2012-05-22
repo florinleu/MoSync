@@ -16,7 +16,7 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file TypeDialog.h
+ * @file ConfirmDialog.cpp
  * @author Florin Leu
  * @date 09 May 2012
  *
@@ -39,9 +39,9 @@ using namespace NativeUI;
 /**
  * Constructor.
  */
-ConfirmDialog::ConfirmDialog(EditDelete* owner)
+ConfirmDialog::ConfirmDialog(Observer* owner)
 {
-	mOwner = owner;
+	attach(owner);
 	createUI();
 }
 
@@ -97,7 +97,7 @@ void ConfirmDialog::buttonClicked(Widget* button)
 {
 	if (button == mOKButton)
 	{
-		mOwner->update();
+		notify();
 	}
 	hide();
 }

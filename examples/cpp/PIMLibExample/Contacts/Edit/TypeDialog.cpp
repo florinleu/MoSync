@@ -180,7 +180,7 @@ void TypeDialog::buttonClicked(Widget* button)
 				mOwner->update(mOwnerIndex, i, mCustomLabel->getText());
 				break;
 			}
-		}		;
+		}
 		hide();
 	}
 }

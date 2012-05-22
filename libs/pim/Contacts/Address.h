@@ -87,9 +87,16 @@ namespace PIM
 			/**
 			 * Writes a contact's address.
 			 * @param args The values to write.
-			 * @index args The index of the address to write.
+			 * @param index The index of the address to write.
 			 */
 			void write(MA_PIM_ARGS& args, int index);
+
+			/**
+			 * Deletes a contact's address.
+			 * @param handle The handle of the contact.
+			 * @param index  The index of the address to delete.
+			 */
+			void remove(MAHandle handle, int index);
 
 			/**
 			 * Gets the contact's street.

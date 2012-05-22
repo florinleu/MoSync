@@ -85,6 +85,12 @@ namespace PIM
 			void write(MA_PIM_ARGS& args);
 
 			/**
+			 * Deletes a contact's name.
+			 * @param handle The handle of the contact.
+			 */
+			void remove(MAHandle handle);
+
+			/**
 			 * Gets the contact's display name.
 			 * @return The display name of the contact.
 			 */

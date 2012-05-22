@@ -29,8 +29,11 @@ MA 02110-1301, USA.
 
 #include "EditField.h"
 
+#include "Observer.h"
+
 class EditAddress:
-	public EditField
+	public EditField,
+	public Observer
 {
 	public:
 		/**
@@ -93,6 +96,11 @@ class EditAddress:
 		 * Creates the view.
 		 */
 		void addBody();
+
+		/**
+		 * Updates the address.
+		 */
+		void update();
 };
 
 #endif /* __EDITADDRESS_H__ */
