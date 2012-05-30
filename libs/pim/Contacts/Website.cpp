@@ -28,21 +28,34 @@ MA 02110-1301, USA.
 #include <mawstring.h>
 
 #include "Website.h"
-#include "Phone.h"
 #include "util.h"
 
 namespace PIM
 {
-	/*
-	 * Constructor
+	/**
+	 * Constructor.
 	 */
 	Website::Website():
+		mURL(NULL),
+		mLabel(NULL),
 		mIsPrimary(false)
 	{
+
 	}
 
-	/*
-	 * Read a complete website.
+	/**
+	 * Destructor.
+	 */
+	Website::~Website()
+	{
+		DELETE(mURL);
+		DELETE(mLabel);
+	}
+
+	/**
+	 * Reads a contact's website.
+	 * @param args The arguments needed to read the website.
+	 * @param index The index of the website to read.
 	 */
 	void Website::read(MA_PIM_ARGS& args, int index)
 	{
@@ -51,20 +64,51 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
-			readURL(args.buf);
+			DELETE(mURL);
+			wchar* src = (wchar*)args.buf;
+			mURL = wcsdup(src);
 
 			readType(args.item, index);
 			readLabel(args.item, index);
 		}
 	}
 
-	void Website::readURL(const MAAddress buffer)
+	/**
+	 * Writes a contact's website.
+	 * @param args The values to write.
+	 * @index args The index of the website to write.
+	 */
+	void Website::write(MA_PIM_ARGS& args, int index)
 	{
-		DELETE(mURL);
-		wchar* src = (wchar*)buffer;
-		mURL = wcsdup(src);
+		printf("@LIB: website write");
+
+		args.field = MA_PIM_FIELD_CONTACT_URL;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mURL, 0);
+		maPimItemSetValue(&args, index, getAttribute());
+
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mLabel, 0);
+		maPimItemSetLabel(&args, index);
 	}
 
+	/**
+	 * Deletes a contact's website.
+	 * @param handle The handle of the contact.
+	 * @param index  The index of the website to delete.
+	 */
+	void Website::remove(MAHandle handle, int index)
+	{
+		printf("@LIB: website delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_URL, index);
+	}
+
+	/**
+	 * Reads the type of the website.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this website.
+	 */
 	void Website::readType(const MAHandle handle, const int index)
 	{
 		int attribute = maPimItemGetAttributes(handle, MA_PIM_FIELD_CONTACT_URL, index);
@@ -80,32 +124,37 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_WEBSITE_HOMEPAGE:
-				mType = WEBSITE_HOMEPAGE;
+				mType = HOMEPAGE;
 				break;
 			case MA_PIM_ATTR_WEBSITE_BLOG:
-				mType = WEBSITE_BLOG;
+				mType = BLOG;
 				break;
 			case MA_PIM_ATTR_WEBSITE_PROFILE:
-				mType = WEBSITE_PROFILE;
+				mType = PROFILE;
 				break;
 			case MA_PIM_ATTR_WEBSITE_HOME:
-				mType = WEBSITE_HOME;
+				mType = HOME;
 				break;
 			case MA_PIM_ATTR_WEBSITE_WORK:
-				mType = WEBSITE_WORK;
+				mType = WORK;
 				break;
 			case MA_PIM_ATTR_WEBSITE_FTP:
-				mType = WEBSITE_FTP;
+				mType = FTP;
 				break;
 			case MA_PIM_ATTR_WEBSITE_CUSTOM:
-				mType = WEBSITE_CUSTOM;
+				mType = CUSTOM;
 				break;
 			default:
-				mType = WEBSITE_OTHER;
+				mType = OTHER;
 				break;
 		}
 	}
 
+	/**
+	 * Reads the label of the website.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this website.
+	 */
 	void Website::readLabel(const MAHandle handle, const int index)
 	{
 		MA_PIM_ARGS args;
@@ -117,65 +166,124 @@ namespace PIM
 		args.buf = buf;
 		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
+
 		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
 		mLabel = wcsdup(src);
 	}
 
-	/*
-	 * Getter for website URL.
+	/**
+	 * Gets the contact's website url.
+	 * @return The url of the contact.
 	 */
-	const wchar* Website::getURL() const
+	const wchar* const Website::getURL() const
 	{
 		return mURL;
 	}
 
-	/*
-	 * Setter for website URL.
+	/**
+	 * Sets the contact's website url.
+	 * @param url The value to set.
 	 */
-	void Website::setURL(wchar* url)
+	void Website::setURL(const wchar* const url)
 	{
-		mURL = url;
+		DELETE(mURL);
+		mURL = wcsdup(url);
 	}
 
-	/*
-	 * Getter for type.
+	/**
+	 * Gets the website type.
+	 * @return The type of the website.
 	 */
-	const eWebsiteTypes& Website::getType() const
+	const Website::eTypes& Website::getType() const
 	{
 		return mType;
 	}
 
-	/*
-	 * Setter for type.
+	/**
+	 * Sets the website type.
+	 * @param type The value to set.
 	 */
-	void Website::setType(const eWebsiteTypes& type)
+	void Website::setType(const Website::eTypes& type)
 	{
 		mType = type;
 	}
 
-	/*
-	 * Getter for label.
+	/**
+	 * Gets the website label.
+	 * @return The label of the website.
 	 */
-	const wchar* Website::getLabel() const
+	const wchar* const Website::getLabel() const
 	{
 		return mLabel;
 	}
 
-	/*
-	 * Setter for label.
+	/**
+	 * Sets the website label.
+	 * @param label The value to set.
 	 */
-	void Website::setLabel(wchar* label)
+	void Website::setLabel(const wchar* const label)
 	{
-		mLabel = label;
+		DELETE(mLabel);
+		mLabel = wcsdup(label);
 	}
 
-	/*
-	 * Returns true if this is set as the primary website.
+	/**
+	 * Checks if this is or not a primary website.
+	 * @return True if this is a primary website.
 	 */
 	const bool Website::isPrimary() const
 	{
 		return mIsPrimary;
+	}
+
+	/**
+	 * Sets this as a primary website.
+	 * @param primary true if this is a primary website.
+	 */
+	void Website::setPrimary(const bool primary)
+	{
+		mIsPrimary = primary;
+	}
+
+	/**
+	 * Computes the website attribute.
+	 * @return The website attribute.
+	 */
+	const int Website::getAttribute() const
+	{
+		int attribute = 0;
+		switch (mType)
+		{
+			case HOMEPAGE:
+				attribute = MA_PIM_ATTR_WEBSITE_HOMEPAGE;
+				break;
+			case BLOG:
+				attribute = MA_PIM_ATTR_WEBSITE_BLOG;
+				break;
+			case PROFILE:
+				attribute = MA_PIM_ATTR_WEBSITE_PROFILE;
+				break;
+			case HOME:
+				attribute = MA_PIM_ATTR_WEBSITE_HOME;
+				break;
+			case WORK:
+				attribute = MA_PIM_ATTR_WEBSITE_WORK;
+				break;
+			case FTP:
+				attribute = MA_PIM_ATTR_WEBSITE_FTP;
+				break;
+			case CUSTOM:
+				attribute = MA_PIM_ATTR_EMAIL_CUSTOM;
+				break;
+			default:
+				attribute = MA_PIM_ATTR_EMAIL_OTHER;
+				break;
+		}
+
+		attribute |= (mIsPrimary ? MA_PIM_ATTRPREFERRED : 0);
+
+		return attribute;
 	}
 
 } //PIM

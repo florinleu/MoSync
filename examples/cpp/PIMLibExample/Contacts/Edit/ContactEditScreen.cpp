@@ -46,6 +46,7 @@ MA 02110-1301, USA.
 #include "EditAddress.h"
 #include "EditPhone.h"
 #include "EditEmail.h"
+#include "EditWebsite.h"
 #include "EditDelete.h"
 #include "EditDefines.h"
 
@@ -87,8 +88,8 @@ void ContactEditScreen::createUI()
 
 	addEmail();
 
-//	addWebsite();
-//
+	addWebsite();
+
 //	addInstantMessaging();
 //
 //	addNote();
@@ -224,51 +225,52 @@ void ContactEditScreen::addEmail()
 
 void ContactEditScreen::addWebsite()
 {
-	const char* labels[] =
-	{
-		"url",
-	};
+	EditWebsite* website = new EditWebsite(mContact);
 
-	for (int i=0; i<mContact->getWebsitesCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getWebsiteTypeString(mContact->getWebsite(i)->getType()));
-		if (mContact->getWebsite(i)->getType() == WEBSITE_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getWebsite(i)->getLabel());
-		}
-		const char* datas[] =
-		{
-			wstrtostr(mContact->getWebsite(i)->getURL())
-		};
+	mLayout->addChild(website);
 
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getWebsite(i)->isPrimary());
-
-		DELETE(title);
-	}
-
-	if (mContact->getWebsitesCount() > 0)
-	{
-		addSpacer();
-	}
+	addSpacer();
 }
-
-const char* ContactEditScreen::getWebsiteTypeString(PIM::eWebsiteTypes type)
-{
-	const char* websiteType[] =
-	{
-		"Homepage",
-		"Blog",
-		"Profile",
-		"Home",
-		"Work",
-		"FTP",
-		"Other",
-		"Custom"
-	};
-
-	return websiteType[type];
-}
+//	for (int i=0; i<mContact->getWebsitesCount(); i++)
+//	{
+//		char* title = new char[BUFF_SIZE];
+//		sprintf(title, "%d. %s", i + 1, getWebsiteTypeString(mContact->getWebsite(i)->getType()));
+//		if (mContact->getWebsite(i)->getType() == WEBSITE_CUSTOM)
+//		{
+//			sprintf(title, "%s (%S)", title, mContact->getWebsite(i)->getLabel());
+//		}
+//		const char* datas[] =
+//		{
+//			wstrtostr(mContact->getWebsite(i)->getURL())
+//		};
+//
+//		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getWebsite(i)->isPrimary());
+//
+//		DELETE(title);
+//	}
+//
+//	if (mContact->getWebsitesCount() > 0)
+//	{
+//		addSpacer();
+//	}
+//}
+//
+//const char* ContactEditScreen::getWebsiteTypeString(PIM::eWebsiteTypes type)
+//{
+//	const char* websiteType[] =
+//	{
+//		"Homepage",
+//		"Blog",
+//		"Profile",
+//		"Home",
+//		"Work",
+//		"FTP",
+//		"Other",
+//		"Custom"
+//	};
+//
+//	return websiteType[type];
+//}
 
 void ContactEditScreen::addInstantMessaging()
 {

@@ -174,11 +174,10 @@ namespace PIM
 
 	/**
 	 * Sets the contact's e-mail address.
-	 * @param number The value to set.
+	 * @param address The value to set.
 	 */
 	void Email::setAddress(const wchar* const address)
 	{
-		printf("@LIB email setAddress: %S", address);
 		DELETE(mAddress);
 		mAddress = wcsdup(address);
 	}
@@ -212,7 +211,7 @@ namespace PIM
 
 	/**
 	 * Sets the e-mail label.
-	 * @param state The value to set.
+	 * @param label The value to set.
 	 */
 	void Email::setLabel(const wchar* const label)
 	{

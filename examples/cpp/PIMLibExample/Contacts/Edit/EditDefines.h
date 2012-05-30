@@ -55,5 +55,6 @@ MA 02110-1301, USA.
 #define EDIT_ADDRESS_FLAGS				0x7F
 #define EDIT_PHONE_FLAGS				0x1
 #define EDIT_EMAIL_FLAGS				0x1
+#define EDIT_WEBSITE_FLAGS				0x1
 
 #endif //__EDITDEFINES_H__

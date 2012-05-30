@@ -250,3 +250,33 @@ const char* ContactsScreen::getEmailTypeString(Email::eTypes type, const wchar* 
 
 	return sEmailTypes[type];
 }
+
+/**
+ * Available website types.
+ */
+const char* ContactsScreen::sWebsiteTypes[Website::CUSTOM + 1] =
+{
+	"Homepage",
+	"Blog",
+	"Profile",
+	"Home",
+	"Work",
+	"FTP",
+	"Other",
+	"Custom"
+};
+
+/**
+ * Gets the name of the website type.
+ * @param type	The website type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getWebsiteTypeString(Website::eTypes type, const wchar* label)
+{
+	if (type == Website::CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sWebsiteTypes[type];
+}

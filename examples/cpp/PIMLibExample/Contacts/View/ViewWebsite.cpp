@@ -28,6 +28,7 @@ MA 02110-1301, USA.
 
 #include "ViewWebsite.h"
 #include "ViewDefines.h"
+#include "ContactsScreen.h"
 
 using namespace PIM;
 using namespace NativeUI;
@@ -73,11 +74,10 @@ void ViewWebsite::addBody()
 	for (int i=0; i<mOwner->getWebsitesCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getWebsiteTypeString(mOwner->getWebsite(i)->getType()));
-		if (mOwner->getWebsite(i)->getType() == WEBSITE_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mOwner->getWebsite(i)->getLabel());
-		}
+		sprintf(title, "%d. %s", i + 1,
+				ContactsScreen::getWebsiteTypeString(
+					mOwner->getWebsite(i)->getType(),
+					mOwner->getWebsite(i)->getLabel()));
 		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
 		DELETE(title);
 
@@ -88,26 +88,4 @@ void ViewWebsite::addBody()
 
 		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
 	}
-}
-
-/**
- * Gets the name of the website type.
- * @param type	The website type.
- * @return 		The type name.
- */
-const char* ViewWebsite::getWebsiteTypeString(eWebsiteTypes type)
-{
-	const char* websiteType[] =
-	{
-		"Homepage",
-		"Blog",
-		"Profile",
-		"Home",
-		"Work",
-		"FTP",
-		"Other",
-		"Custom"
-	};
-
-	return websiteType[type];
 }

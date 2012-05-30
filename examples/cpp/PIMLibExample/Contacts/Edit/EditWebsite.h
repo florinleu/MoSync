@@ -16,22 +16,22 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditEmail.h
+ * @file EditWebsite.h
  * @author Florin Leu
- * @date 22 May 2012
+ * @date 30 May 2012
  *
- * @brief Email Edit Layout.
+ * @brief Website Edit Layout.
  *
  **/
 
-#ifndef __EDITEMAIL_H__
-#define __EDITEMAIL_H__
+#ifndef __EDITWEBSITE_H__
+#define __EDITWEBSITE_H__
 
 #include "EditField.h"
 
 #include "Observer.h"
 
-class EditEmail:
+class EditWebsite:
 	public EditField,
 	public Observer
 {
@@ -40,12 +40,12 @@ class EditEmail:
 		 * Constructor.
 		 * @param contact The owner of this field.
 		 */
-		EditEmail(PIM::Contact* contact);
+		EditWebsite(PIM::Contact* contact);
 
 		/**
 		 * Destructor.
 		 */
-		~EditEmail();
+		~EditWebsite();
 
 	protected:
         /**
@@ -98,9 +98,9 @@ class EditEmail:
 		void addBody();
 
 		/**
-		 * Updates the email.
+		 * Updates the website.
 		 */
 		void update();
 };
 
-#endif //__EDITEMAIL_H__
+#endif //__EDITWEBSITE_H__

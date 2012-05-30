@@ -107,6 +107,7 @@ namespace PIM
 			const int getWebsitesCount() const;
 			Website* getWebsite(int index) const;
 			void setWebsite(Website* website, int index);
+			void removeWebsite(int index);
 
 			const int getInstantMessagingsCount() const;
 			InstantMessaging* getInstantMessaging(int index) const;
@@ -156,6 +157,7 @@ namespace PIM
 			void writeAddresses(MA_PIM_ARGS args);
 			void writePhones(MA_PIM_ARGS args);
 			void writeEmails(MA_PIM_ARGS args);
+			void writeWebsites(MA_PIM_ARGS args);
 
 			/**
 			 * Finds a contact by it's id.

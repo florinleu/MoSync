@@ -55,13 +55,6 @@ class ViewWebsite :
 		 * Creates the view.
 		 */
 		void addBody();
-
-		/**
-		 * Gets the name of the website type.
-		 * @param type	The website type.
-		 * @return 		The type name.
-		 */
-		const char* getWebsiteTypeString(PIM::eWebsiteTypes type);
 };
 
 #endif /* __VIEWWEBSITE_H__ */

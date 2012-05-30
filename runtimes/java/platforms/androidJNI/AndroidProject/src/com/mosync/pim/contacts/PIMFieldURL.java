@@ -32,7 +32,7 @@ public class PIMFieldURL extends PIMFieldContacts {
 		mStrType = Website.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING;
 
-		mNames = new String[] { Website.URL, Website.TYPE, Website.LABEL,
+		mNames = new String[] { Website._ID, Website.URL, Website.TYPE, Website.LABEL,
 				Website.IS_PRIMARY };
 	}
 
@@ -115,7 +115,7 @@ public class PIMFieldURL extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[0];
+		return val[1];
 	}
 
 	int getDataSize(String val) {
@@ -129,7 +129,7 @@ public class PIMFieldURL extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[0] = data;
+		val[1] = data;
 		mValues.set(index, val);
 	}
 
@@ -159,8 +159,8 @@ public class PIMFieldURL extends PIMFieldContacts {
 		DebugPrint("COUNT = " + mValues.size());
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
-			DebugPrint("###Email " + i);
-			DebugPrint(mNames[0] + ": " + val[0]);
+			DebugPrint("###Website " + i);
+			DebugPrint(mNames[1] + ": " + val[1]);
 		}
 		DebugPrint("***************************");
 	}

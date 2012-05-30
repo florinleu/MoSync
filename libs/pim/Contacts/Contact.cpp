@@ -154,6 +154,11 @@ namespace PIM
 			writeEmails(args);
 		}
 
+		if (MATCH_FLAGS(flag, RF_WEBSITE))
+		{
+			writeWebsites(args);
+		}
+
 		maPimItemClose(mHandle);
 
 		return 0;
@@ -203,10 +208,6 @@ namespace PIM
 	void Contact::readAddresses(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_ADDR);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			Address* address = new Address();
@@ -218,10 +219,6 @@ namespace PIM
 	void Contact::readPhones(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_TEL);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			Phone* phone = new Phone();
@@ -233,10 +230,6 @@ namespace PIM
 	void Contact::readEmails(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EMAIL);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			Email* email = new Email();
@@ -248,10 +241,6 @@ namespace PIM
 	void Contact::readWebsites(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_URL);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			Website* website = new Website();
@@ -263,10 +252,6 @@ namespace PIM
 	void Contact::readInstantMessagings(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_IM);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			InstantMessaging* instantMessaging = new InstantMessaging();
@@ -287,10 +272,6 @@ namespace PIM
 	void Contact::readOrganizations(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_ORG);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			Organization* organization = new Organization();
@@ -302,10 +283,6 @@ namespace PIM
 	void Contact::readSocialProfiles(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_SOCIAL_PROFILE);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			SocialProfile* socialProfile = new SocialProfile();
@@ -317,10 +294,6 @@ namespace PIM
 	void Contact::readEvents(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_EVENT);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			Event* event = new Event();
@@ -332,10 +305,6 @@ namespace PIM
 	void Contact::readRelations(MA_PIM_ARGS args)
 	{
 		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_RELATION);
-		if (countValues < 0)
-		{
-			return;
-		}
 		for (int i=0; i<countValues; i++)
 		{
 			Relation* relation = new Relation();
@@ -424,10 +393,6 @@ namespace PIM
 	void Contact::writeAddresses(MA_PIM_ARGS args)
 	{
 		int count = mAddresses.size();
-		if (count < 0)
-		{
-			return;
-		}
 		for (int i=0; i<count; i++)
 		{
 			mAddresses[i]->write(args, i);
@@ -437,10 +402,6 @@ namespace PIM
 	void Contact::writePhones(MA_PIM_ARGS args)
 	{
 		int count = mPhones.size();
-		if (count < 0)
-		{
-			return;
-		}
 		for (int i=0; i<count; i++)
 		{
 			mPhones[i]->write(args, i);
@@ -450,13 +411,18 @@ namespace PIM
 	void Contact::writeEmails(MA_PIM_ARGS args)
 	{
 		int count = mEmails.size();
-		if (count < 0)
-		{
-			return;
-		}
 		for (int i=0; i<count; i++)
 		{
 			mEmails[i]->write(args, i);
+		}
+	}
+
+	void Contact::writeWebsites(MA_PIM_ARGS args)
+	{
+		int count = mWebsites.size();
+		for (int i=0; i<count; i++)
+		{
+			mWebsites[i]->write(args, i);
 		}
 	}
 
@@ -669,6 +635,26 @@ namespace PIM
 	void Contact::setWebsite(Website* website, int index)
 	{
 		mWebsites[index] = website;
+	}
+
+	/*
+	 * Delete the given website.
+	 */
+	void Contact::removeWebsite(int index)
+	{
+		if (index < mWebsites.size())
+		{
+			MA_PIM_ARGS args;
+			if (getHandle(getID(), args))
+			{
+				Website* website = mWebsites[index];
+				website->remove(mHandle, index);
+				mWebsites.remove(index);
+				DELETE(website);
+
+				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*

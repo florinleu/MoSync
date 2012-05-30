@@ -74,7 +74,10 @@ void ViewEmail::addBody()
 	for (int i=0; i<mOwner->getEmailsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, ContactsScreen::getEmailTypeString(mOwner->getEmail(i)->getType(), mOwner->getEmail(i)->getLabel()));
+		sprintf(title, "%d. %s", i + 1,
+				ContactsScreen::getEmailTypeString(
+					mOwner->getEmail(i)->getType(),
+					mOwner->getEmail(i)->getLabel()));
 		addSubTitle(title, mOwner->getEmail(i)->isPrimary());
 		DELETE(title);
 

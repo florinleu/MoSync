@@ -52,7 +52,6 @@ class ContactEditScreen : public NativeUI::Screen
 		void addPhone();
 		void addEmail();
 		void addWebsite();
-		const char* getWebsiteTypeString(PIM::eWebsiteTypes type);
 		void addInstantMessaging();
 		const char* getInstantMessagingProtocolString(PIM::eInstantMessagingProtocols protocol);
 		const char* getInstantMessagingTypeString(PIM::eInstantMessagingTypes type);

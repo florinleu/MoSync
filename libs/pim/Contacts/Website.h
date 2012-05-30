@@ -31,59 +31,143 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-
-	enum eWebsiteTypes
-	{
-		//The constant describes a homepage website.
-		WEBSITE_HOMEPAGE = 0,
-		//The constant describes a blog website.
-		WEBSITE_BLOG,
-		//The constant describes a profile website.
-		WEBSITE_PROFILE,
-		//The constant describes a home website.
-		WEBSITE_HOME,
-		//The constant describes a work website.
-		WEBSITE_WORK,
-		//The constant describes a FTP website.
-		WEBSITE_FTP,
-		//The constant describes a different website type.
-		WEBSITE_OTHER,
-		//The constant describes a custom website type.
-		//The field's label can be set.
-		WEBSITE_CUSTOM,
-	};
-
 	class Website
 	{
 		public:
+			enum eTypes
+			{
+				//The constant describes a homepage website.
+				HOMEPAGE = 0,
+				//The constant describes a blog website.
+				BLOG,
+				//The constant describes a profile website.
+				PROFILE,
+				//The constant describes a home website.
+				HOME,
+				//The constant describes a work website.
+				WORK,
+				//The constant describes a FTP website.
+				FTP,
+				//The constant describes a different website type.
+				OTHER,
+				//The constant describes a custom website type.
+				//The field's label can be set.
+				CUSTOM,
+			};
+
+			enum eSubFields
+			{
+				//The constant describes a website url.
+				URL = 0,
+			};
+
+			/**
+			 * Constructor.
+			 */
 			Website();
 
+			/**
+			 * Destructor.
+			 */
+			~Website();
+
+			/**
+			 * Reads a contact's website.
+			 * @param args The arguments needed to read the website.
+			 * @param index The index of the website to read.
+			 */
 			void read(MA_PIM_ARGS& args, int index);
 
-			const wchar* getURL() const;
-			void setURL(wchar* url);
+			/**
+			 * Writes a contact's website.
+			 * @param args The values to write.
+			 * @index args The index of the website to write.
+			 */
+			void write(MA_PIM_ARGS& args, int index);
 
-			const eWebsiteTypes& getType() const;
-			void setType(const eWebsiteTypes& type);
+			/**
+			 * Deletes a contact's website.
+			 * @param handle The handle of the contact.
+			 * @param index  The index of the website to delete.
+			 */
+			void remove(MAHandle handle, int index);
 
-			const wchar* getLabel() const;
-			void setLabel(wchar* label);
+			/**
+			 * Gets the contact's website url.
+			 * @return The url of the contact.
+			 */
+			const wchar* const getURL() const;
 
+			/**
+			 * Sets the contact's website url.
+			 * @param url The value to set.
+			 */
+			void setURL(const wchar* const url);
+
+			/**
+			 * Gets the website type.
+			 * @return The type of the website.
+			 */
+			const eTypes& getType() const;
+
+			/**
+			 * Sets the website type.
+			 * @param type The value to set.
+			 */
+			void setType(const eTypes& type);
+
+			/**
+			 * Gets the website label.
+			 * @return The label of the website.
+			 */
+			const wchar* const getLabel() const;
+
+			/**
+			 * Sets the website label.
+			 * @param state The value to set.
+			 */
+			void setLabel(const wchar* const label);
+
+			/**
+			 * Checks if this is or not a primary website.
+			 * @return True if this is a primary website.
+			 */
 			const bool isPrimary() const;
 
-		private:
-			void readURL(const MAAddress buffer);
+			/**
+			 * Sets this as a primary website.
+			 * @param primary true if this is a primary website.
+			 */
+			void setPrimary(const bool primary);
 
+		private:
+			/**
+			 * Reads the type of the website.
+			 * @param handle The handle of the contact.
+			 * @param index The index of this website.
+			 */
 			void readType(const MAHandle handle, const int index);
+
+			/**
+			 * Reads the label of the website.
+			 * @param handle The handle of the contact.
+			 * @param index The index of this website.
+			 */
 			void readLabel(const MAHandle handle, const int index);
+
+			/**
+			 * Computes the website attribute.
+			 * @return The website attribute.
+			 */
+			const int getAttribute() const;
 
 		private:
 			//The website URL.
 			wchar* mURL;
 
 			//The type of data.
-			eWebsiteTypes mType;
-			//The user defined label
+			eTypes mType;
+			//The user defined label.
 			wchar* mLabel;
 			//Shows if this is a primary website or not.
 			bool mIsPrimary;
