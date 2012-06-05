@@ -82,6 +82,8 @@ void EditWebsite::addBody()
 
 	EditField::addBody();
 
+	printf("##########################################Add websites");
+
 	for (int i=0; i<mOwner->getWebsitesCount(); i++) //fleu TODO int count =
 	{
 		char* title = new char[BUFF_SIZE];
@@ -163,6 +165,7 @@ void EditWebsite::editBoxReturn(EditBox* editBox)
 void EditWebsite::checkBoxStateChanged(CheckBox *checkBox, bool state)
 {
 	int data = *(int*)(checkBox->getData());
+	printf("Check box %d changed %d.", data, state);
 	Website* website = mOwner->getWebsite(data);
 	website->setPrimary(state);
 }

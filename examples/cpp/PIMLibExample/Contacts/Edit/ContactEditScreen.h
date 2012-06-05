@@ -53,8 +53,7 @@ class ContactEditScreen : public NativeUI::Screen
 		void addEmail();
 		void addWebsite();
 		void addInstantMessaging();
-		const char* getInstantMessagingProtocolString(PIM::eInstantMessagingProtocols protocol);
-		const char* getInstantMessagingTypeString(PIM::eInstantMessagingTypes type);
+		const char* getInstantMessagingProtocolString(PIM::InstantMessaging::eProtocols protocol);
 		void addNote();
 		void addOrganization();
 		const char* getOrganizationTypeString(PIM::eOrganizationTypes type);

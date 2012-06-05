@@ -64,7 +64,6 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
-			DELETE(mNumber);
 			wchar* src = (wchar*)args.buf;
 			mNumber = wcsdup(src);
 
@@ -206,7 +205,6 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
 
-		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
 		mLabel = wcsdup(src);
 	}

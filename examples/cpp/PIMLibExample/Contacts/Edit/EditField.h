@@ -203,16 +203,16 @@ class EditField :
 		 */
 		int mCurrentSubField;
 
+		/**
+		 * The font used for labels.
+		 */
+		MAHandle mLabelFont;
+
 	private:
 		/**
 		 * The font used for title.
 		 */
 		MAHandle mTitleFont;
-
-		/**
-		 * The font used for labels.
-		 */
-		MAHandle mLabelFont;
 
 		/**
 		 * The font used for datas.

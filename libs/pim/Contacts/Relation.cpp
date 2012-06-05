@@ -61,7 +61,6 @@ namespace PIM
 
 	void Relation::readName(const MAAddress buffer)
 	{
-		DELETE(mName);
 		wchar* src = (wchar*)buffer;
 		mName = wcsdup(src);
 	}
@@ -139,7 +138,7 @@ namespace PIM
 		args.buf = buf;
 		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
-		DELETE(mLabel);
+
 		wchar* src = (wchar*)args.buf;
 		mLabel = wcsdup(src);
 	}

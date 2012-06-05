@@ -47,7 +47,6 @@ namespace PIM
 
 	void Note::readText(const MAAddress buffer)
 	{
-		DELETE(mText);
 		wchar* src = (wchar*)buffer;
 		mText = wcsdup(src);
 	}

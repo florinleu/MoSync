@@ -280,3 +280,61 @@ const char* ContactsScreen::getWebsiteTypeString(Website::eTypes type, const wch
 
 	return sWebsiteTypes[type];
 }
+
+/**
+ * Available IM protocols.
+ */
+const char* ContactsScreen::sIMProtocols[10] =
+{
+	MA_PIM_CONTACT_IM_PROTOCOL_AIM,
+	MA_PIM_CONTACT_IM_PROTOCOL_MSN,
+	MA_PIM_CONTACT_IM_PROTOCOL_YAHOO,
+	MA_PIM_CONTACT_IM_PROTOCOL_SKYPE,
+	MA_PIM_CONTACT_IM_PROTOCOL_QQ,
+	MA_PIM_CONTACT_IM_PROTOCOL_GOOGLE_TALK,
+	MA_PIM_CONTACT_IM_PROTOCOL_ICQ,
+	MA_PIM_CONTACT_IM_PROTOCOL_JABBER,
+	MA_PIM_CONTACT_IM_PROTOCOL_NETMEETING,
+	MA_PIM_CONTACT_IM_PROTOCOL_CUSTOM
+};
+
+/**
+ * Gets the name of the IM protocol.
+ * @param protocol	The IM protocol.
+ * @return 		The protocol name.
+ */
+const char* ContactsScreen::getIMProtocolString(InstantMessaging::eProtocols protocol, const wchar* label)
+{
+	if (protocol == InstantMessaging::PROTOCOL_CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sIMProtocols[protocol];
+}
+
+/**
+ * Available IM types.
+ */
+const char* ContactsScreen::sIMTypes[InstantMessaging::CUSTOM + 1] =
+{
+	"Home",
+	"Work",
+	"Other",
+	"Custom"
+};
+
+/**
+ * Gets the name of the IM type.
+ * @param type	The IM type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getIMTypeString(InstantMessaging::eTypes type, const wchar* label)
+{
+	if (type == InstantMessaging::CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sIMTypes[type];
+}

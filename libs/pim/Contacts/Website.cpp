@@ -64,7 +64,6 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
-			DELETE(mURL);
 			wchar* src = (wchar*)args.buf;
 			mURL = wcsdup(src);
 
@@ -167,7 +166,6 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
 
-		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
 		mLabel = wcsdup(src);
 	}
@@ -274,10 +272,10 @@ namespace PIM
 				attribute = MA_PIM_ATTR_WEBSITE_FTP;
 				break;
 			case CUSTOM:
-				attribute = MA_PIM_ATTR_EMAIL_CUSTOM;
+				attribute = MA_PIM_ATTR_WEBSITE_CUSTOM;
 				break;
 			default:
-				attribute = MA_PIM_ATTR_EMAIL_OTHER;
+				attribute = MA_PIM_ATTR_WEBSITE_OTHER;
 				break;
 		}
 

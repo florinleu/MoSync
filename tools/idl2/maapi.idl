@@ -3648,6 +3648,8 @@ group PIMAPI "PIM API" {
 			PROTOCOL = 1;
 			/// #MA_PIM_TYPE_STRING.
 			PROTOCOL_LABEL = 2;
+			/// Subfields number.
+			COUNT = 3;
 		}
 
 		constset int MA_PIM_CONTACT_CLASS_ {

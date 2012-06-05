@@ -55,20 +55,6 @@ class ViewInstantMessaging :
 		 * Creates the view.
 		 */
 		void addBody();
-
-		/**
-		 * Gets the name of the instant messaging protocol.
-		 * @param protocol 	The instant messaging protocol.
-		 * @return			The protocol name.
-		 */
-		const char* getInstantMessagingProtocolString(PIM::eInstantMessagingProtocols protocol);
-
-		/**
-		 * Gets the name of the instant messaging type.
-		 * @param type	The instant messaging type.
-		 * @return 		The type name.
-		 */
-		const char* getInstantMessagingTypeString(PIM::eInstantMessagingTypes type);
 };
 
 #endif /* __VIEWINSTANTMESSAGING_H__ */

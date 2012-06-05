@@ -34,7 +34,7 @@ import com.mosync.pim.*;
 public class PIMFieldIM extends PIMFieldContacts {
 
 	Map<Integer, String> mProtocols;
-	final static int PROTOCOL_INDEX = 1;
+	final static int PROTOCOL_INDEX = 2;
 
 	/**
 	 * Constructor
@@ -44,7 +44,7 @@ public class PIMFieldIM extends PIMFieldContacts {
 		mStrType = Im.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING_ARRAY;
 
-		mNames = new String[] { Im.DATA, Im.PROTOCOL, Im.CUSTOM_PROTOCOL,
+		mNames = new String[] { Im._ID, Im.DATA, Im.PROTOCOL, Im.CUSTOM_PROTOCOL,
 				Im.TYPE, Im.LABEL, Im.IS_PRIMARY };
 	}
 
@@ -157,9 +157,9 @@ public class PIMFieldIM extends PIMFieldContacts {
 
 	String[] getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		String[] ret = new String[val.length - 3];
-		for (int i = 0; i < val.length - 3; i++) {
-			ret[i] = val[i];
+		String[] ret = new String[val.length - 4];
+		for (int i = 0; i < val.length - 4; i++) {
+			ret[i] = val[i + 1];
 		}
 		return ret;
 	}
@@ -183,7 +183,7 @@ public class PIMFieldIM extends PIMFieldContacts {
 	void setSpecificData(String[] data, int index) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < data.length; i++) {
-			val[i] = data[i];
+			val[i + 1] = data[i];
 		}
 		mValues.set(index, val);
 	}

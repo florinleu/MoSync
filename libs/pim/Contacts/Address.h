@@ -34,7 +34,7 @@ namespace PIM
 	class Address
 	{
 		public:
-			enum eTypes
+			enum eTypes //fleu TODO add TYPE_
 			{
 				//The constant describes a home address.
 				HOME = 0,
@@ -102,7 +102,7 @@ namespace PIM
 			 * Gets the contact's street.
 			 * @return The street of the contact.
 			 */
-			const wchar* const getStreet() const;
+			const wchar* const getStreet() const; //fleu TODO change char* to MAUtil::String and wchar* to MAUtil::WString
 
 			/**
 			 * Sets the contact's street.

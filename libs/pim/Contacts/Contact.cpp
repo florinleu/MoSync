@@ -159,6 +159,11 @@ namespace PIM
 			writeWebsites(args);
 		}
 
+		if (MATCH_FLAGS(flag, RF_INSTANTMESSAGING))
+		{
+			writeInstantMessagings(args);
+		}
+
 		maPimItemClose(mHandle);
 
 		return 0;
@@ -426,6 +431,15 @@ namespace PIM
 		}
 	}
 
+	void Contact::writeInstantMessagings(MA_PIM_ARGS args)
+	{
+		int count = mInstantMessagings.size();
+		for (int i=0; i<count; i++)
+		{
+			mInstantMessagings[i]->write(args, i);
+		}
+	}
+
 	/*
 	 * Getter for ID field.
 	 */
@@ -679,6 +693,26 @@ namespace PIM
 	void Contact::setInstantMessaging(InstantMessaging* instantMessaging, int index)
 	{
 		mInstantMessagings[index] = instantMessaging;
+	}
+
+	/*
+	 * Delete the given instant messaging.
+	 */
+	void Contact::removeInstantMessaging(int index)
+	{
+		if (index < mInstantMessagings.size())
+		{
+			MA_PIM_ARGS args;
+			if (getHandle(getID(), args))
+			{
+				InstantMessaging* im = mInstantMessagings[index];
+				im->remove(mHandle, index);
+				mInstantMessagings.remove(index);
+				DELETE(im);
+
+				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*

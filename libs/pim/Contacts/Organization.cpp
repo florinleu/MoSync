@@ -79,14 +79,12 @@ namespace PIM
 
 	void Organization::readName(const MAAddress buffer)
 	{
-		DELETE(mName);
 		wchar* src = (wchar*)buffer;
 		mName = wcsdup(src);
 	}
 
 	void Organization::readTitle(const MAAddress buffer)
 	{
-		DELETE(mTitle);
 		wchar* src = (wchar*)buffer;
 		mTitle = wcsdup(src);
 	}
@@ -154,7 +152,6 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		maPimItemGetLabel(&args, index);
 
-		DELETE(mLabel);
 		wchar* src = (wchar*)args.buf;
 		mLabel = wcsdup(src);
 	}

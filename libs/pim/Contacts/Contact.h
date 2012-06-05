@@ -72,7 +72,7 @@ namespace PIM
 
 	class Contact
 	{
-		public:
+		public: //fleu TODO public/protected/private
 			Contact();
 			~Contact();
 
@@ -112,6 +112,7 @@ namespace PIM
 			const int getInstantMessagingsCount() const;
 			InstantMessaging* getInstantMessaging(int index) const;
 			void setInstantMessaging(InstantMessaging* instantMessaging, int index);
+			void removeInstantMessaging(int index);
 
 			Note* getNote() const;
 			void setNote(Note* note);
@@ -158,6 +159,7 @@ namespace PIM
 			void writePhones(MA_PIM_ARGS args);
 			void writeEmails(MA_PIM_ARGS args);
 			void writeWebsites(MA_PIM_ARGS args);
+			void writeInstantMessagings(MA_PIM_ARGS args);
 
 			/**
 			 * Finds a contact by it's id.

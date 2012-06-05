@@ -47,6 +47,7 @@ MA 02110-1301, USA.
 #include "EditPhone.h"
 #include "EditEmail.h"
 #include "EditWebsite.h"
+#include "EditInstantMessaging.h"
 #include "EditDelete.h"
 #include "EditDefines.h"
 
@@ -80,18 +81,18 @@ void ContactEditScreen::createUI()
 
 	addID();
 
-	addName();
-
-	addAddress();
-
-	addPhone();
-
-	addEmail();
-
-	addWebsite();
-
-//	addInstantMessaging();
+//	addName();
 //
+//	addAddress();
+//
+//	addPhone();
+//
+//	addEmail();
+//
+//	addWebsite();
+//
+	addInstantMessaging();
+
 //	addNote();
 //
 //	addOrganization();
@@ -231,121 +232,51 @@ void ContactEditScreen::addWebsite()
 
 	addSpacer();
 }
-//	for (int i=0; i<mContact->getWebsitesCount(); i++)
-//	{
-//		char* title = new char[BUFF_SIZE];
-//		sprintf(title, "%d. %s", i + 1, getWebsiteTypeString(mContact->getWebsite(i)->getType()));
-//		if (mContact->getWebsite(i)->getType() == WEBSITE_CUSTOM)
-//		{
-//			sprintf(title, "%s (%S)", title, mContact->getWebsite(i)->getLabel());
-//		}
-//		const char* datas[] =
-//		{
-//			wstrtostr(mContact->getWebsite(i)->getURL())
-//		};
-//
-//		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getWebsite(i)->isPrimary());
-//
-//		DELETE(title);
-//	}
-//
-//	if (mContact->getWebsitesCount() > 0)
-//	{
-//		addSpacer();
-//	}
-//}
-//
-//const char* ContactEditScreen::getWebsiteTypeString(PIM::eWebsiteTypes type)
-//{
-//	const char* websiteType[] =
-//	{
-//		"Homepage",
-//		"Blog",
-//		"Profile",
-//		"Home",
-//		"Work",
-//		"FTP",
-//		"Other",
-//		"Custom"
-//	};
-//
-//	return websiteType[type];
-//}
 
 void ContactEditScreen::addInstantMessaging()
 {
-	const char* labels[] =
-	{
-		"username",
-		"protocol"
-	};
+	EditInstantMessaging* instantMessaging = new EditInstantMessaging(mContact);
 
-	for (int i=0; i<mContact->getInstantMessagingsCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getInstantMessagingTypeString(mContact->getInstantMessaging(i)->getType()));
-		if (mContact->getInstantMessaging(i)->getType() == INSTANTMESSAGING_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getInstantMessaging(i)->getLabel());
-		}
+	mLayout->addChild(instantMessaging);
 
-		char* protocol = new char[BUFF_SIZE];
-		sprintf(protocol, "%s", getInstantMessagingProtocolString(mContact->getInstantMessaging(i)->getProtocol()));
-
-		if (mContact->getInstantMessaging(i)->getProtocol() == PROTOCOL_CUSTOM)
-		{
-			sprintf(protocol, "%s (%S)", protocol, mContact->getInstantMessaging(i)->getProtocolLabel());
-		}
-
-		const char* datas[] =
-		{
-			wstrtostr(mContact->getInstantMessaging(i)->getUsername()),
-			protocol
-		};
-
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getInstantMessaging(i)->isPrimary());
-
-		DELETE(title);
-		DELETE(protocol);
-	}
-
-	if (mContact->getInstantMessagingsCount() > 0)
-	{
-		addSpacer();
-	}
+	addSpacer();
 }
 
-const char* ContactEditScreen::getInstantMessagingProtocolString(PIM::eInstantMessagingProtocols protocol)
-{
-	const char* instantMessagingProtocol[] =
-	{
-		"AIM",
-		"MSN",
-		"Yahoo",
-		"Skype",
-		"QQ",
-		"GoogleTalk",
-		"ICQ",
-		"Jabber",
-		"Netmeeting",
-		"Custom"
-	};
+//	const char* labels[] =
+//	{
+//		"username",
+//		"protocol"
+//	};
+//
+//	for (int i=0; i<mContact->getInstantMessagingsCount(); i++)
+//	{
+//		char* title = new char[BUFF_SIZE];
+//		sprintf(title, "%d. %s", i + 1, getInstantMessagingTypeString(mContact->getInstantMessaging(i)->getType()));
+//		if (mContact->getInstantMessaging(i)->getType() == INSTANTMESSAGING_CUSTOM)
+//		{
+//			sprintf(title, "%s (%S)", title, mContact->getInstantMessaging(i)->getLabel());
+//		}
+//
+//		char* protocol = new char[BUFF_SIZE];
+//		sprintf(protocol, "%s", getInstantMessagingProtocolString(mContact->getInstantMessaging(i)->getProtocol()));
+//
+//		if (mContact->getInstantMessaging(i)->getProtocol() == PROTOCOL_CUSTOM)
+//		{
+//			sprintf(protocol, "%s (%S)", protocol, mContact->getInstantMessaging(i)->getProtocolLabel());
+//		}
+//
+//		const char* datas[] =
+//		{
+//			wstrtostr(mContact->getInstantMessaging(i)->getUsername()),
+//			protocol
+//		};
+//
+//		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getInstantMessaging(i)->isPrimary());
+//
+//		DELETE(title);
+//		DELETE(protocol);
+//	}
 
-	return instantMessagingProtocol[protocol];
-}
-
-const char* ContactEditScreen::getInstantMessagingTypeString(PIM::eInstantMessagingTypes type)
-{
-	const char* instantMessagingType[] =
-	{
-		"Home",
-		"Work",
-		"Other",
-		"Custom"
-	};
-
-	return instantMessagingType[type];
-}
 
 void ContactEditScreen::addNote()
 {

@@ -95,11 +95,27 @@ class ContactsScreen :
 		 */
 		static const char* getWebsiteTypeString(PIM::Website::eTypes type, const wchar* label);
 
+		/**
+		 * Gets the name of the IM protocol.
+		 * @param protocol	The IM protocol.
+		 * @return 		The protocol name.
+		 */
+		static const char* getIMProtocolString(PIM::InstantMessaging::eProtocols protocol, const wchar* label);
+
+		/**
+		 * Gets the name of the IM type.
+		 * @param type	The IM type.
+		 * @return 		The type name.
+		 */
+		static const char* getIMTypeString(PIM::InstantMessaging::eTypes type, const wchar* label);
+
 	public:
 		static const char* sAddressTypes[PIM::Address::CUSTOM + 1];
 		static const char* sPhoneTypes[PIM::Phone::CUSTOM + 1];
 		static const char* sEmailTypes[PIM::Email::CUSTOM + 1];
 		static const char* sWebsiteTypes[PIM::Website::CUSTOM + 1];
+		static const char* sIMProtocols[10];
+		static const char* sIMTypes[PIM::InstantMessaging::CUSTOM + 1];
 
 	private:
 		NativeUI::VerticalLayout* mLayout;

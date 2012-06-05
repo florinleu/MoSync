@@ -28,6 +28,7 @@ MA 02110-1301, USA.
 
 #include "ViewInstantMessaging.h"
 #include "ViewDefines.h"
+#include "ContactsScreen.h"
 
 using namespace PIM;
 using namespace NativeUI;
@@ -74,21 +75,18 @@ void ViewInstantMessaging::addBody()
 	for (int i=0; i<mOwner->getInstantMessagingsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getInstantMessagingTypeString(mOwner->getInstantMessaging(i)->getType()));
-		if (mOwner->getInstantMessaging(i)->getType() == INSTANTMESSAGING_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mOwner->getInstantMessaging(i)->getLabel());
-		}
+		sprintf(title, "%d. %s", i + 1,
+				ContactsScreen::getIMTypeString(
+						mOwner->getInstantMessaging(i)->getType(),
+						mOwner->getInstantMessaging(i)->getLabel()));
 		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
 		DELETE(title);
 
 		char* protocol = new char[BUFF_SIZE];
-		sprintf(protocol, "%s", getInstantMessagingProtocolString(mOwner->getInstantMessaging(i)->getProtocol()));
-
-		if (mOwner->getInstantMessaging(i)->getProtocol() == PROTOCOL_CUSTOM)
-		{
-			sprintf(protocol, "%s (%S)", protocol, mOwner->getInstantMessaging(i)->getProtocolLabel());
-		}
+		sprintf(protocol, "%s",
+				ContactsScreen::getIMProtocolString(
+						mOwner->getInstantMessaging(i)->getProtocol(),
+						mOwner->getInstantMessaging(i)->getProtocolLabel()));
 
 		const char* datas[] =
 		{
@@ -99,46 +97,4 @@ void ViewInstantMessaging::addBody()
 		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
 		DELETE(protocol);
 	}
-}
-
-/**
- * Gets the name of the instant messaging protocol.
- * @param protocol 	The instant messaging protocol.
- * @return			The protocol name.
- */
-const char* ViewInstantMessaging::getInstantMessagingProtocolString(eInstantMessagingProtocols protocol)
-{
-	const char* instantMessagingProtocol[] =
-	{
-		"AIM",
-		"MSN",
-		"Yahoo",
-		"Skype",
-		"QQ",
-		"GoogleTalk",
-		"ICQ",
-		"Jabber",
-		"Netmeeting",
-		"Custom"
-	};
-
-	return instantMessagingProtocol[protocol];
-}
-
-/**
- * Gets the name of the instant messaging type.
- * @param type	The instant messaging type.
- * @return 		The type name.
- */
-const char* ViewInstantMessaging::getInstantMessagingTypeString(eInstantMessagingTypes type)
-{
-	const char* instantMessagingType[] =
-	{
-		"Home",
-		"Work",
-		"Other",
-		"Custom"
-	};
-
-	return instantMessagingType[type];
 }
