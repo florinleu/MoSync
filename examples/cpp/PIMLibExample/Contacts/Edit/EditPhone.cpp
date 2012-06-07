@@ -207,7 +207,7 @@ void EditPhone::update(int index, int type, String label)
 {
 	mOwner->getPhone(index)->setType((Phone::eTypes)type);
 
-	if (type == Phone::CUSTOM)
+	if (type == Phone::TYPE_CUSTOM)
 	{
 		mOwner->getPhone(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 	}

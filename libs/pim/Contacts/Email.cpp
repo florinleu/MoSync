@@ -123,19 +123,19 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_EMAIL_HOME:
-				mType = HOME;
+				mType = TYPE_HOME;
 				break;
 			case MA_PIM_ATTR_EMAIL_WORK:
-				mType = WORK;
+				mType = TYPE_WORK;
 				break;
 			case MA_PIM_ATTR_EMAIL_MOBILE:
-				mType = MOBILE;
+				mType = TYPE_MOBILE;
 				break;
 			case MA_PIM_ATTR_EMAIL_CUSTOM:
-				mType = CUSTOM;
+				mType = TYPE_CUSTOM;
 				break;
 			default:
-				mType = OTHER;
+				mType = TYPE_OTHER;
 				break;
 		}
 	}
@@ -244,16 +244,16 @@ namespace PIM
 		int attribute = 0;
 		switch (mType)
 		{
-			case HOME:
+			case TYPE_HOME:
 				attribute = MA_PIM_ATTR_EMAIL_HOME;
 				break;
-			case WORK:
+			case TYPE_WORK:
 				attribute = MA_PIM_ATTR_EMAIL_WORK;
 				break;
-			case MOBILE:
+			case TYPE_MOBILE:
 				attribute = MA_PIM_ATTR_EMAIL_MOBILE;
 				break;
-			case CUSTOM:
+			case TYPE_CUSTOM:
 				attribute = MA_PIM_ATTR_EMAIL_CUSTOM;
 				break;
 			default:

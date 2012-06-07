@@ -25,11 +25,10 @@ MA 02110-1301, USA.
  **/
 
 #include <mawstring.h>
+#include <conprint.h>
 
 #include "Name.h"
 #include "util.h"
-
-#include <conprint.h>
 
 namespace PIM
 {
@@ -117,7 +116,7 @@ namespace PIM
 	}
 
 	/**
-	 * Writes the contact's id.
+	 * Writes the contact's name.
 	 * @param args The values to write.
 	 */
 	void Name::write(MA_PIM_ARGS& args)

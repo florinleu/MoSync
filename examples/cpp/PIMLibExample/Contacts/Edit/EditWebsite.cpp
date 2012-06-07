@@ -210,7 +210,7 @@ void EditWebsite::update(int index, int type, String label)
 {
 	mOwner->getWebsite(index)->setType((Website::eTypes)type);
 
-	if (type == Website::CUSTOM)
+	if (type == Website::TYPE_CUSTOM)
 	{
 		mOwner->getWebsite(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 	}

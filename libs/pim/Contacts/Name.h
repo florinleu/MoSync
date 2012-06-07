@@ -79,7 +79,7 @@ namespace PIM
 			bool read(MA_PIM_ARGS& args);
 
 			/**
-			 * Writes the contact's id.
+			 * Writes the contact's name.
 			 * @param args The values to write.
 			 */
 			void write(MA_PIM_ARGS& args);

@@ -37,22 +37,22 @@ namespace PIM
 			enum eTypes
 			{
 				//The constant describes a homepage website.
-				HOMEPAGE = 0,
+				TYPE_HOMEPAGE = 0,
 				//The constant describes a blog website.
-				BLOG,
+				TYPE_BLOG,
 				//The constant describes a profile website.
-				PROFILE,
+				TYPE_PROFILE,
 				//The constant describes a home website.
-				HOME,
+				TYPE_HOME,
 				//The constant describes a work website.
-				WORK,
+				TYPE_WORK,
 				//The constant describes a FTP website.
-				FTP,
+				TYPE_FTP,
 				//The constant describes a different website type.
-				OTHER,
+				TYPE_OTHER,
 				//The constant describes a custom website type.
 				//The field's label can be set.
-				CUSTOM,
+				TYPE_CUSTOM
 			};
 
 			enum eSubFields
@@ -61,6 +61,7 @@ namespace PIM
 				URL = 0,
 			};
 
+		public:
 			/**
 			 * Constructor.
 			 */

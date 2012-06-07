@@ -48,6 +48,8 @@ MA 02110-1301, USA.
 #include "EditEmail.h"
 #include "EditWebsite.h"
 #include "EditInstantMessaging.h"
+#include "EditNote.h"
+#include "EditOrganization.h"
 #include "EditDelete.h"
 #include "EditDefines.h"
 
@@ -91,11 +93,11 @@ void ContactEditScreen::createUI()
 //
 //	addWebsite();
 //
-	addInstantMessaging();
-
-//	addNote();
+//	addInstantMessaging();
 //
-//	addOrganization();
+//	addNote();
+
+	addOrganization();
 //
 //	addSocialProfile();
 //
@@ -117,57 +119,6 @@ void ContactEditScreen::addNavigationBar()
 	mLayout->addChild(navigationBar);
 
 	addSpacer();
-}
-
-bool ContactEditScreen::addField(const char* title, const char** labels, const char** datas, const int size, const bool primary)
-{
-	bool display = false;
-	for (int i=0; i<size; i++)
-	{
-		if ( (datas[i] != NULL) && (strlen(datas[i]) > 0) )
-		{
-			display = true;
-		}
-	}
-
-	if (!display)
-	{
-		return false;
-	}
-
-	Label* titleBar = new Label();
-	titleBar->fillSpaceHorizontally();
-	//titleBar->setBackgroundColor(primary?EDIT_TITLE_SPECIAL_COLOR:EDIT_TITLE_COLOR);
-	titleBar->setFontColor(EDIT_TITLE_TEXT_COLOR);
-	titleBar->setText(title);
-	titleBar->setTextHorizontalAlignment(MAW_ALIGNMENT_CENTER);
-	mLayout->addChild(titleBar);
-	for (int i=0; i<size; i++)
-	{
-		if ( (datas[i] != NULL) && (strlen(datas[i]) > 0) )
-		{
-			HorizontalLayout* layout = new HorizontalLayout();
-			layout->wrapContentVertically();
-			layout->setChildVerticalAlignment(MAW_ALIGNMENT_CENTER);
-
-			Label* label = new Label();
-			label->setWidth(EDIT_LABEL_WIDTH);
-			label->setBackgroundColor(EDIT_LABEL_COLOR);
-			label->setText(labels[i]);
-			label->setTextHorizontalAlignment(MAW_ALIGNMENT_CENTER);
-			layout->addChild(label);
-
-			EditBox* data = new EditBox();
-			data->fillSpaceHorizontally();
-			data->setText(datas[i]);
-			data->setEnabled(false);
-			layout->addChild(data);
-
-			mLayout->addChild(layout);
-		}
-	}
-
-	return true;
 }
 
 void ContactEditScreen::addPhoto()
@@ -242,115 +193,22 @@ void ContactEditScreen::addInstantMessaging()
 	addSpacer();
 }
 
-//	const char* labels[] =
-//	{
-//		"username",
-//		"protocol"
-//	};
-//
-//	for (int i=0; i<mContact->getInstantMessagingsCount(); i++)
-//	{
-//		char* title = new char[BUFF_SIZE];
-//		sprintf(title, "%d. %s", i + 1, getInstantMessagingTypeString(mContact->getInstantMessaging(i)->getType()));
-//		if (mContact->getInstantMessaging(i)->getType() == INSTANTMESSAGING_CUSTOM)
-//		{
-//			sprintf(title, "%s (%S)", title, mContact->getInstantMessaging(i)->getLabel());
-//		}
-//
-//		char* protocol = new char[BUFF_SIZE];
-//		sprintf(protocol, "%s", getInstantMessagingProtocolString(mContact->getInstantMessaging(i)->getProtocol()));
-//
-//		if (mContact->getInstantMessaging(i)->getProtocol() == PROTOCOL_CUSTOM)
-//		{
-//			sprintf(protocol, "%s (%S)", protocol, mContact->getInstantMessaging(i)->getProtocolLabel());
-//		}
-//
-//		const char* datas[] =
-//		{
-//			wstrtostr(mContact->getInstantMessaging(i)->getUsername()),
-//			protocol
-//		};
-//
-//		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getInstantMessaging(i)->isPrimary());
-//
-//		DELETE(title);
-//		DELETE(protocol);
-//	}
-
-
 void ContactEditScreen::addNote()
 {
-	const char* title = "Note";
+	EditNote* note = new EditNote(mContact);
 
-	const char* labels[] =
-	{
-		"text"
-	};
+	mLayout->addChild(note);
 
-	const char* datas[] =
-	{
-		wstrtostr(mContact->getNote()->getText()),
-	};
-
-	if (addField(title, labels, datas, sizeof(labels)/sizeof(char*)))
-	{
-		addSpacer();
-	}
+	addSpacer();
 }
 
 void ContactEditScreen::addOrganization()
 {
-	const char* labels[] =
-	{
-		"name",
-		"title",
-		"department",
-		"location",
-		"job description",
-		"phonetic name",
-		"symbol"
-	};
+	EditOrganization* organization = new EditOrganization(mContact);
 
-	for (int i=0; i<mContact->getOrganizationsCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getOrganizationTypeString(mContact->getOrganization(i)->getType()));
-		if (mContact->getOrganization(i)->getType() == ORGANIZATION_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getOrganization(i)->getLabel());
-		}
-		const char* datas[] =
-		{
-			wstrtostr(mContact->getOrganization(i)->getName()),
-			wstrtostr(mContact->getOrganization(i)->getTitle()),
-			wstrtostr(mContact->getOrganization(i)->getDepartment()),
-			wstrtostr(mContact->getOrganization(i)->getLocation()),
-			wstrtostr(mContact->getOrganization(i)->getJobDescription()),
-			wstrtostr(mContact->getOrganization(i)->getPhoneticName()),
-			wstrtostr(mContact->getOrganization(i)->getSymbol())
-		};
+	mLayout->addChild(organization);
 
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getOrganization(i)->isPrimary());
-
-		DELETE(title);
-	}
-
-	if (mContact->getOrganizationsCount())
-	{
-		addSpacer();
-	}
-}
-
-const char* ContactEditScreen::getOrganizationTypeString(PIM::eOrganizationTypes type)
-{
-	const char* organizationType[] =
-	{
-		"Work",
-		"Other",
-		"Custom"
-	};
-
-	return organizationType[type];
+	addSpacer();
 }
 
 void ContactEditScreen::addSocialProfile()
@@ -527,6 +385,57 @@ const char* ContactEditScreen::getRelationTypeString(PIM::eRelationTypes type)
 	};
 
 	return relationType[type];
+}
+
+bool ContactEditScreen::addField(const char* title, const char** labels, const char** datas, const int size, const bool primary)
+{
+	bool display = false;
+	for (int i=0; i<size; i++)
+	{
+		if ( (datas[i] != NULL) && (strlen(datas[i]) > 0) )
+		{
+			display = true;
+		}
+	}
+
+	if (!display)
+	{
+		return false;
+	}
+
+	Label* titleBar = new Label();
+	titleBar->fillSpaceHorizontally();
+	//titleBar->setBackgroundColor(primary?EDIT_TITLE_SPECIAL_COLOR:EDIT_TITLE_COLOR);
+	titleBar->setFontColor(EDIT_TITLE_TEXT_COLOR);
+	titleBar->setText(title);
+	titleBar->setTextHorizontalAlignment(MAW_ALIGNMENT_CENTER);
+	mLayout->addChild(titleBar);
+	for (int i=0; i<size; i++)
+	{
+		if ( (datas[i] != NULL) && (strlen(datas[i]) > 0) )
+		{
+			HorizontalLayout* layout = new HorizontalLayout();
+			layout->wrapContentVertically();
+			layout->setChildVerticalAlignment(MAW_ALIGNMENT_CENTER);
+
+			Label* label = new Label();
+			label->setWidth(EDIT_LABEL_WIDTH);
+			label->setBackgroundColor(EDIT_LABEL_COLOR);
+			label->setText(labels[i]);
+			label->setTextHorizontalAlignment(MAW_ALIGNMENT_CENTER);
+			layout->addChild(label);
+
+			EditBox* data = new EditBox();
+			data->fillSpaceHorizontally();
+			data->setText(datas[i]);
+			data->setEnabled(false);
+			layout->addChild(data);
+
+			mLayout->addChild(layout);
+		}
+	}
+
+	return true;
 }
 
 void ContactEditScreen::addDeleteButton()

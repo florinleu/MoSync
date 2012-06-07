@@ -16,36 +16,44 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditPhone.h
+ * @file EditNote.h
  * @author Florin Leu
- * @date 09 May 2012
+ * @date 06 Jun 2012
  *
- * @brief Phone Edit Layout.
+ * @brief Note Edit Layout.
  *
  **/
 
-#ifndef __EDITPHONE_H__
-#define __EDITPHONE_H__
+#ifndef __EDITNOTE_H__
+#define __EDITNOTE_H__
 
+#include <NativeUI/EditBox.h>
 #include "EditField.h"
-#include "Observer.h"
 
-class EditPhone:
-	public EditField,
-	public Observer
+class EditNote :
+	public EditField
 {
 	public:
 		/**
 		 * Constructor.
 		 * @param contact The owner of this field.
 		 */
-		EditPhone(PIM::Contact* contact);
+		EditNote(PIM::Contact* contact);
 
 		/**
 		 * Destructor.
 		 */
-		~EditPhone();
+		~EditNote();
 
+		/**
+		 * Inits the data used to display this field.
+		 */
+		void initData();
+
+		/**
+		 * Creates the view.
+		 */
+		void addBody();
 	protected:
         /**
          * This method is called when an edit box loses focus.
@@ -63,43 +71,8 @@ class EditPhone:
          */
         void editBoxReturn(NativeUI::EditBox* editBox);
 
-        /**
-         * This method is called when the state of the check box was changed
-         * by the user.
-         * @param checkBox The check box object that generated the event.
-         * @param state True if the check box is checked, false otherwise.
-         */
-        void checkBoxStateChanged(NativeUI::CheckBox *checkBox, bool state);
-
-        /**
-         * This method is called if the touch-up event was inside the bounds of the button.
-         * @param button The button object that generated the event.
-         */
-        void buttonClicked(Widget* button);
-
-        /**
-         * Updates the type and custom label for the field.
-         * @param index The index of the subfield.
-         * @param type The type to set.
-         * @param label The label to set.
-         */
-        void update(int index, int type, MAUtil::String label);
-
 	private:
-		/**
-		 * Inits the data used to display this field.
-		 */
-		void initData();
-
-		/**
-		 * Creates the view.
-		 */
-		void addBody();
-
-		/**
-		 * Updates the phone.
-		 */
-		void update();
+        PIM::Note* mNote;
 };
 
-#endif /* __EDITPHONE_H__ */
+#endif // __EDITNOTE_H__

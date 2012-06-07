@@ -37,14 +37,14 @@ namespace PIM
 			enum eTypes
 			{
 				//The constant describes a home IM address.
-				HOME,
+				TYPE_HOME,
 				//The constant describes a work IM address.
-				WORK,
+				TYPE_WORK,
 				//The constant describes a different IM address type.
-				OTHER,
+				TYPE_OTHER,
 				//The constant describes a custom IM address type.
 				//The field's label can be set.
-				CUSTOM
+				TYPE_CUSTOM
 			};
 
 			enum eProtocols
@@ -79,6 +79,7 @@ namespace PIM
 				PROTOCOL
 			};
 
+		public:
 			/**
 			 * Constructor.
 			 */

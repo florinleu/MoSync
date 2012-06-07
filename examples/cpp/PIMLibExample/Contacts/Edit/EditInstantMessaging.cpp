@@ -276,7 +276,7 @@ void EditInstantMessaging::update(int index, int type, String label)
 	{
 		mOwner->getInstantMessaging(index)->setType((InstantMessaging::eTypes)type);
 
-		if (type == InstantMessaging::CUSTOM)
+		if (type == InstantMessaging::TYPE_CUSTOM)
 		{
 			wchar* tmp = strtowstr(label.c_str());
 			printf("size %d, string %S", wcslen(tmp), tmp);

@@ -82,7 +82,11 @@ void ViewAddress::addBody()
 	for (int i=0; i<mOwner->getAddressesCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, ContactsScreen::getAddressTypeString(mOwner->getAddress(i)->getType(), mOwner->getAddress(i)->getLabel()));
+		sprintf(title, "%d. %s", i + 1,
+			ContactsScreen::getAddressTypeString(
+				mOwner->getAddress(i)->getType(),
+				mOwner->getAddress(i)->getLabel()
+			));
 		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
 		DELETE(title);
 

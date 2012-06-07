@@ -164,6 +164,16 @@ namespace PIM
 			writeInstantMessagings(args);
 		}
 
+		if (MATCH_FLAGS(flag, RF_NOTE))
+		{
+			writeNote(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_ORGANIZATION))
+		{
+			writeOrganizations(args);
+		}
+
 		maPimItemClose(mHandle);
 
 		return 0;
@@ -437,6 +447,20 @@ namespace PIM
 		for (int i=0; i<count; i++)
 		{
 			mInstantMessagings[i]->write(args, i);
+		}
+	}
+
+	void Contact::writeNote(MA_PIM_ARGS args)
+	{
+		mNote->write(args);
+	}
+
+	void Contact::writeOrganizations(MA_PIM_ARGS args)
+	{
+		int count = mOrganizations.size();
+		for (int i=0; i<count; i++)
+		{
+			mOrganizations[i]->write(args, i);
 		}
 	}
 
@@ -753,6 +777,26 @@ namespace PIM
 	void Contact::setOrganization(Organization* organization, int index)
 	{
 		mOrganizations[index] = organization;
+	}
+
+	/*
+	 * Delete the given organization.
+	 */
+	void Contact::removeOrganization(int index)
+	{
+		if (index < mOrganizations.size())
+		{
+			MA_PIM_ARGS args;
+			if (getHandle(getID(), args))
+			{
+				Organization* im = mOrganizations[index];
+				im->remove(mHandle, index);
+				mOrganizations.remove(index);
+				DELETE(im);
+
+				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*

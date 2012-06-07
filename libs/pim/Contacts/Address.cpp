@@ -159,16 +159,16 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_ADDR_HOME:
-				mType = HOME;
+				mType = TYPE_HOME;
 				break;
 			case MA_PIM_ATTR_ADDR_WORK:
-				mType = WORK;
+				mType = TYPE_WORK;
 				break;
 			case MA_PIM_ATTR_ADDR_CUSTOM:
-				mType = CUSTOM;
+				mType = TYPE_CUSTOM;
 				break;
 			default:
-				mType = OTHER;
+				mType = TYPE_OTHER;
 				break;
 		}
 	}
@@ -400,13 +400,13 @@ namespace PIM
 		int attribute = 0;
 		switch (mType)
 		{
-			case HOME:
+			case TYPE_HOME:
 				attribute = MA_PIM_ATTR_ADDR_HOME;
 				break;
-			case WORK:
+			case TYPE_WORK:
 				attribute = MA_PIM_ATTR_ADDR_WORK;
 				break;
-			case CUSTOM:
+			case TYPE_CUSTOM:
 				attribute = MA_PIM_ATTR_ADDR_CUSTOM;
 				break;
 			default:

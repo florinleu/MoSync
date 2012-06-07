@@ -37,48 +37,48 @@ namespace PIM
 			enum eTypes
 			{
 				//The constant describes a home phone number.
-				HOME = 0,
+				TYPE_HOME = 0,
 				//The constant describes a mobile phone number.
-				MOBILE,
+				TYPE_MOBILE,
 				//The constant describes a home fax phone number.
-				HOME_FAX,
+				TYPE_HOME_FAX,
 				//The constant describes a work fax phone number.
-				WORK_FAX,
+				TYPE_WORK_FAX,
 				//The constant describes a pager phone number.
-				PAGER,
+				TYPE_PAGER,
 				//The constant describes an iPhone phone number.
-				IPHONE,
+				TYPE_IPHONE,
 				//The constant describes a work phone number.
-				WORK,
+				TYPE_WORK,
 				//The constant describes a callback phone number.
-				CALLBACK,
+				TYPE_CALLBACK,
 				//The constant describes a car phone number.
-				CAR,
+				TYPE_CAR,
 				//The constant describes a company main phone number.
-				COMPANY_MAIN,
+				TYPE_COMPANY_MAIN,
 				//The constant describes a ISDN phone number.
-				ISDN,
+				TYPE_ISDN,
 				//The constant describes a other fax type phone number.
-				OTHER_FAX,
+				TYPE_OTHER_FAX,
 				//The constant describes a radio phone number.
-				RADIO,
+				TYPE_RADIO,
 				//The constant describes a telex phone number.
-				TELEX,
+				TYPE_TELEX,
 				//The constant describes a TTY TDD phone number.
-				TTY_TDD,
+				TYPE_TTY_TDD,
 				//The constant describes a work mobile phone number.
-				WORK_MOBILE,
+				TYPE_WORK_MOBILE,
 				//The constant describes a work pager phone number.
-				WORK_PAGER,
+				TYPE_WORK_PAGER,
 				//The constant describes an assistant phone number.
-				ASSISTANT,
+				TYPE_ASSISTANT,
 				//The constant describes a MMS phone number.
-				MMS,
+				TYPE_MMS,
 				//The constant describes a different phone number type.
-				OTHER,
+				TYPE_OTHER,
 				//The constant describes a custom phone number type.
 				//The field's label can be set.
-				CUSTOM,
+				TYPE_CUSTOM
 			};
 
 			enum eSubFields
@@ -87,6 +87,7 @@ namespace PIM
 				NUMBER = 0,
 			};
 
+		public:
 			/**
 			 * Constructor.
 			 */
@@ -186,6 +187,7 @@ namespace PIM
 			 * @return The phone attribute.
 			 */
 			const int getAttribute() const;
+
 		private:
 			//The phone number.
 			wchar* mNumber;

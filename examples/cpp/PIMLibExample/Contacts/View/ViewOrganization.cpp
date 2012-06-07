@@ -28,6 +28,7 @@ MA 02110-1301, USA.
 
 #include "ViewOrganization.h"
 #include "ViewDefines.h"
+#include "ContactsScreen.h"
 
 using namespace PIM;
 using namespace NativeUI;
@@ -79,12 +80,12 @@ void ViewOrganization::addBody()
 	for (int i=0; i<mOwner->getOrganizationsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getOrganizationTypeString(mOwner->getOrganization(i)->getType()));
-		if (mOwner->getOrganization(i)->getType() == ORGANIZATION_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mOwner->getOrganization(i)->getLabel());
-		}
-		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
+		sprintf(title, "%d. %s", i + 1,
+			ContactsScreen::getOrganizationTypeString(
+				mOwner->getOrganization(i)->getType(),
+				mOwner->getOrganization(i)->getLabel()
+			));
+		addSubTitle(title, mOwner->getOrganization(i)->isPrimary());
 		DELETE(title);
 
 		const char* datas[] =
@@ -100,21 +101,4 @@ void ViewOrganization::addBody()
 
 		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
 	}
-}
-
-/**
- * Gets the name of the organization type.
- * @param type	The organization type.
- * @return 		The type name.
- */
-const char* ViewOrganization::getOrganizationTypeString(eOrganizationTypes type)
-{
-	const char* organizationType[] =
-	{
-		"Work",
-		"Other",
-		"Custom"
-	};
-
-	return organizationType[type];
 }

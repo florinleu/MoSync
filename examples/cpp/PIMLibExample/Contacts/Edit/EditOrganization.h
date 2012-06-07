@@ -16,21 +16,22 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditPhone.h
+ * @file EditOrganization.h
  * @author Florin Leu
- * @date 09 May 2012
+ * @date 06 Jun 2012
  *
- * @brief Phone Edit Layout.
+ * @brief Organization Edit Layout.
  *
  **/
 
-#ifndef __EDITPHONE_H__
-#define __EDITPHONE_H__
+#ifndef __EDITORGANIZATION_H__
+#define __EDITORGANIZATION_H__
 
 #include "EditField.h"
+
 #include "Observer.h"
 
-class EditPhone:
+class EditOrganization:
 	public EditField,
 	public Observer
 {
@@ -39,12 +40,12 @@ class EditPhone:
 		 * Constructor.
 		 * @param contact The owner of this field.
 		 */
-		EditPhone(PIM::Contact* contact);
+		EditOrganization(PIM::Contact* contact);
 
 		/**
 		 * Destructor.
 		 */
-		~EditPhone();
+		~EditOrganization();
 
 	protected:
         /**
@@ -97,9 +98,9 @@ class EditPhone:
 		void addBody();
 
 		/**
-		 * Updates the phone.
+		 * Updates the organization.
 		 */
 		void update();
 };
 
-#endif /* __EDITPHONE_H__ */
+#endif /* __EDITORGANIZATION_H__ */

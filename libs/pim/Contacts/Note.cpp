@@ -32,7 +32,27 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
+	/**
+	 * Constructor.
+	 */
+	Note::Note():
+		mText(NULL)
+	{
+	}
 
+	/**
+	 * Destructor.
+	 */
+	Note::~Note()
+	{
+		DELETE(mText);
+	}
+
+	/**
+	 * Reads the contact's name.
+	 * @param args The arguments needed to read the name.
+	 * @return true on success.
+	 */
 	bool Note::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: note read");
@@ -40,31 +60,55 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		CHECK_RESULT(maPimItemGetValue(&args, 0));
 
-		readText(args.buf);
+		wchar* src = (wchar*)args.buf;
+		mText = wcsdup(src);
 
 		return true;
 	}
 
-	void Note::readText(const MAAddress buffer)
+	/**
+	 * Writes the contact's note.
+	 * @param args The values to write.
+	 */
+	void Note::write(MA_PIM_ARGS& args)
 	{
-		wchar* src = (wchar*)buffer;
-		mText = wcsdup(src);
+		printf("@LIB: note write");
+
+		args.field = MA_PIM_FIELD_CONTACT_NOTE;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mText, 0);
+		maPimItemSetValue(&args, 0, 0);
+
 	}
 
-	/*
-	 * Getter for text.
+	/**
+	 * Deletes a contact's name.
+	 * @param handle The handle of the contact.
 	 */
-	const wchar* Note::getText() const
+	void Note::remove(MAHandle handle)
+	{
+		printf("@LIB: note delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_NOTE, 0);
+	}
+
+	/**
+	 * Gets the contact's note text.
+	 * @return The note text of the contact.
+	 */
+	const wchar* const Note::getText() const
 	{
 		return mText;
 	}
 
-	/*
-	 * Setter for text.
+	/**
+	 * Sets the contact's note text.
+	 * @param text The value to set.
 	 */
-	void Note::setText(wchar* text)
+	void Note::setText(const wchar* const text)
 	{
-		mText = text;
+		DELETE(mText);
+		mText = wcsdup(text);
 	}
 
 } //PIM

@@ -157,7 +157,7 @@ void ContactsScreen::stackScreenScreenPopped(StackScreen* stackScreen, Screen* f
 /**
  * Available address types.
  */
-const char* ContactsScreen::sAddressTypes[Address::CUSTOM + 1] =
+const char* ContactsScreen::sAddressTypes[Address::TYPE_CUSTOM + 1] =
 {
 	"Home",
 	"Work",
@@ -172,7 +172,7 @@ const char* ContactsScreen::sAddressTypes[Address::CUSTOM + 1] =
  */
 const char* ContactsScreen::getAddressTypeString(Address::eTypes type, const wchar* label)
 {
-	if (type == Address::CUSTOM)
+	if (type == Address::TYPE_CUSTOM)
 	{
 		return wstrtostr(label);
 	}
@@ -183,7 +183,7 @@ const char* ContactsScreen::getAddressTypeString(Address::eTypes type, const wch
 /**
  * Available phone types.
  */
-const char* ContactsScreen::sPhoneTypes[Phone::CUSTOM + 1] =
+const char* ContactsScreen::sPhoneTypes[Phone::TYPE_CUSTOM + 1] =
 {
 	"Home",
 	"Mobile",
@@ -216,7 +216,7 @@ const char* ContactsScreen::sPhoneTypes[Phone::CUSTOM + 1] =
 const char* ContactsScreen::getPhoneTypeString(Phone::eTypes type, const wchar* label)
 {
 	printf("getPhoneTypeString %d %S", type, label);
-	if (type == Phone::CUSTOM)
+	if (type == Phone::TYPE_CUSTOM)
 	{
 		printf("return label");
 		return wstrtostr(label);
@@ -227,7 +227,7 @@ const char* ContactsScreen::getPhoneTypeString(Phone::eTypes type, const wchar* 
 /**
  * Available e-mail types.
  */
-const char* ContactsScreen::sEmailTypes[Email::CUSTOM + 1] =
+const char* ContactsScreen::sEmailTypes[Email::TYPE_CUSTOM + 1] =
 {
 	"Home",
 	"Work",
@@ -243,7 +243,7 @@ const char* ContactsScreen::sEmailTypes[Email::CUSTOM + 1] =
  */
 const char* ContactsScreen::getEmailTypeString(Email::eTypes type, const wchar* label)
 {
-	if (type == Email::CUSTOM)
+	if (type == Email::TYPE_CUSTOM)
 	{
 		return wstrtostr(label);
 	}
@@ -254,7 +254,7 @@ const char* ContactsScreen::getEmailTypeString(Email::eTypes type, const wchar* 
 /**
  * Available website types.
  */
-const char* ContactsScreen::sWebsiteTypes[Website::CUSTOM + 1] =
+const char* ContactsScreen::sWebsiteTypes[Website::TYPE_CUSTOM + 1] =
 {
 	"Homepage",
 	"Blog",
@@ -273,7 +273,7 @@ const char* ContactsScreen::sWebsiteTypes[Website::CUSTOM + 1] =
  */
 const char* ContactsScreen::getWebsiteTypeString(Website::eTypes type, const wchar* label)
 {
-	if (type == Website::CUSTOM)
+	if (type == Website::TYPE_CUSTOM)
 	{
 		return wstrtostr(label);
 	}
@@ -316,7 +316,7 @@ const char* ContactsScreen::getIMProtocolString(InstantMessaging::eProtocols pro
 /**
  * Available IM types.
  */
-const char* ContactsScreen::sIMTypes[InstantMessaging::CUSTOM + 1] =
+const char* ContactsScreen::sIMTypes[InstantMessaging::TYPE_CUSTOM + 1] =
 {
 	"Home",
 	"Work",
@@ -331,10 +331,35 @@ const char* ContactsScreen::sIMTypes[InstantMessaging::CUSTOM + 1] =
  */
 const char* ContactsScreen::getIMTypeString(InstantMessaging::eTypes type, const wchar* label)
 {
-	if (type == InstantMessaging::CUSTOM)
+	if (type == InstantMessaging::TYPE_CUSTOM)
 	{
 		return wstrtostr(label);
 	}
 
 	return sIMTypes[type];
+}
+
+/**
+ * Available organization types.
+ */
+const char* ContactsScreen::sOrganizationTypes[Organization::TYPE_CUSTOM + 1] =
+{
+	"Work",
+	"Other",
+	"Custom"
+};
+
+/**
+ * Gets the name of the organization type.
+ * @param type	The organization type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getOrganizationTypeString(Organization::eTypes type, const wchar* label)
+{
+	if (type == Organization::TYPE_CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sOrganizationTypes[type];
 }

@@ -123,28 +123,28 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_WEBSITE_HOMEPAGE:
-				mType = HOMEPAGE;
+				mType = TYPE_HOMEPAGE;
 				break;
 			case MA_PIM_ATTR_WEBSITE_BLOG:
-				mType = BLOG;
+				mType = TYPE_BLOG;
 				break;
 			case MA_PIM_ATTR_WEBSITE_PROFILE:
-				mType = PROFILE;
+				mType = TYPE_PROFILE;
 				break;
 			case MA_PIM_ATTR_WEBSITE_HOME:
-				mType = HOME;
+				mType = TYPE_HOME;
 				break;
 			case MA_PIM_ATTR_WEBSITE_WORK:
-				mType = WORK;
+				mType = TYPE_WORK;
 				break;
 			case MA_PIM_ATTR_WEBSITE_FTP:
-				mType = FTP;
+				mType = TYPE_FTP;
 				break;
 			case MA_PIM_ATTR_WEBSITE_CUSTOM:
-				mType = CUSTOM;
+				mType = TYPE_CUSTOM;
 				break;
 			default:
-				mType = OTHER;
+				mType = TYPE_OTHER;
 				break;
 		}
 	}
@@ -253,25 +253,25 @@ namespace PIM
 		int attribute = 0;
 		switch (mType)
 		{
-			case HOMEPAGE:
+			case TYPE_HOMEPAGE:
 				attribute = MA_PIM_ATTR_WEBSITE_HOMEPAGE;
 				break;
-			case BLOG:
+			case TYPE_BLOG:
 				attribute = MA_PIM_ATTR_WEBSITE_BLOG;
 				break;
-			case PROFILE:
+			case TYPE_PROFILE:
 				attribute = MA_PIM_ATTR_WEBSITE_PROFILE;
 				break;
-			case HOME:
+			case TYPE_HOME:
 				attribute = MA_PIM_ATTR_WEBSITE_HOME;
 				break;
-			case WORK:
+			case TYPE_WORK:
 				attribute = MA_PIM_ATTR_WEBSITE_WORK;
 				break;
-			case FTP:
+			case TYPE_FTP:
 				attribute = MA_PIM_ATTR_WEBSITE_FTP;
 				break;
-			case CUSTOM:
+			case TYPE_CUSTOM:
 				attribute = MA_PIM_ATTR_WEBSITE_CUSTOM;
 				break;
 			default:

@@ -34,17 +34,17 @@ namespace PIM
 	class Address
 	{
 		public:
-			enum eTypes //fleu TODO add TYPE_
+			enum eTypes
 			{
 				//The constant describes a home address.
-				HOME = 0,
+				TYPE_HOME = 0,
 				//The constant describes a work address.
-				WORK,
+				TYPE_WORK,
 				//The constant describes a different address type.
-				OTHER,
+				TYPE_OTHER,
 				//The constant describes a custom address type.
 				//The field's label can be set.
-				CUSTOM,
+				TYPE_CUSTOM
 			};
 
 			enum eSubFields
@@ -66,6 +66,7 @@ namespace PIM
 				//The constant describes a formatted address.
 				FORMATTED_ADDRESS
 			};
+
 		public:
 			/**
 			 * Constructor.

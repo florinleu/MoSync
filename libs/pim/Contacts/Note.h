@@ -31,17 +31,56 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-
 	class Note
 	{
 		public:
+			enum eSubFields
+			{
+				//The constant describes a note.
+				TEXT = 0,
+			};
+
+		public:
+			/**
+			 * Constructor.
+			 */
+			Note();
+
+			/**
+			 * Destructor.
+			 */
+			~Note();
+
+			/**
+			 * Reads the contact's note.
+			 * @param args The arguments needed to read the note.
+			 * @return true on success.
+			 */
 			bool read(MA_PIM_ARGS& args);
 
-			const wchar* getText() const;
-			void setText(wchar* text);
+			/**
+			 * Writes the contact's note.
+			 * @param args The values to write.
+			 */
+			void write(MA_PIM_ARGS& args);
 
-		private:
-			void readText(const MAAddress buffer);
+			/**
+			 * Deletes a contact's note.
+			 * @param handle The handle of the contact.
+			 */
+			void remove(MAHandle handle);
+
+			/**
+			 * Gets the contact's note text.
+			 * @return The note text of the contact.
+			 */
+			const wchar* const getText() const;
+
+			/**
+			 * Sets the contact's note text.
+			 * @param text The value to set.
+			 */
+			void setText(const wchar* const text);
 
 		private:
 			//The note text.

@@ -515,6 +515,7 @@ public abstract class PIMField {
 		boolean canBuild = false;
 		for (int i = 1; i < names.length; i++) {
 			if ((values[i] != null) && (!names[i].equals(DUMMY))) {
+				DebugPrint(names[i] + ": " + values[i]);
 				builder = builder.withValue(names[i], values[i]);
 				canBuild = true;
 			}

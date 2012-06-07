@@ -55,13 +55,6 @@ class ViewOrganization :
 		 * Creates the view.
 		 */
 		void addBody();
-
-		/**
-		 * Gets the name of the organization type.
-		 * @param type	The organization type.
-		 * @return 		The type name.
-		 */
-		const char* getOrganizationTypeString(PIM::eOrganizationTypes type);
 };
 
 #endif /* __VIEWORGANIZATION_H__ */

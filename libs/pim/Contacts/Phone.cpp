@@ -123,67 +123,67 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_PHONE_HOME:
-				mType = HOME;
+				mType = TYPE_HOME;
 				break;
 			case MA_PIM_ATTR_PHONE_MOBILE:
-				mType = MOBILE;
+				mType = TYPE_MOBILE;
 				break;
 			case MA_PIM_ATTR_PHONE_HOME_FAX:
-				mType = HOME_FAX;
+				mType = TYPE_HOME_FAX;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK_FAX:
-				mType = WORK_FAX;
+				mType = TYPE_WORK_FAX;
 				break;
 			case MA_PIM_ATTR_PHONE_PAGER:
-				mType = PAGER;
+				mType = TYPE_PAGER;
 				break;
 			case MA_PIM_ATTR_PHONE_IPHONE:
-				mType = IPHONE;
+				mType = TYPE_IPHONE;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK:
-				mType = WORK;
+				mType = TYPE_WORK;
 				break;
 			case MA_PIM_ATTR_PHONE_CALLBACK:
-				mType = CALLBACK;
+				mType = TYPE_CALLBACK;
 				break;
 			case MA_PIM_ATTR_PHONE_CAR:
-				mType = CAR;
+				mType = TYPE_CAR;
 				break;
 			case MA_PIM_ATTR_PHONE_COMPANY_MAIN:
-				mType = COMPANY_MAIN;
+				mType = TYPE_COMPANY_MAIN;
 				break;
 			case MA_PIM_ATTR_PHONE_ISDN:
-				mType = ISDN;
+				mType = TYPE_ISDN;
 				break;
 			case MA_PIM_ATTR_PHONE_OTHER_FAX:
-				mType = OTHER_FAX;
+				mType = TYPE_OTHER_FAX;
 				break;
 			case MA_PIM_ATTR_PHONE_RADIO:
-				mType = RADIO;
+				mType = TYPE_RADIO;
 				break;
 			case MA_PIM_ATTR_PHONE_TELEX:
-				mType = TELEX;
+				mType = TYPE_TELEX;
 				break;
 			case MA_PIM_ATTR_PHONE_TTY_TDD:
-				mType = TTY_TDD;
+				mType = TYPE_TTY_TDD;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK_MOBILE:
-				mType = WORK_MOBILE;
+				mType = TYPE_WORK_MOBILE;
 				break;
 			case MA_PIM_ATTR_PHONE_WORK_PAGER:
-				mType = WORK_PAGER;
+				mType = TYPE_WORK_PAGER;
 				break;
 			case MA_PIM_ATTR_PHONE_ASSISTANT:
-				mType = ASSISTANT;
+				mType = TYPE_ASSISTANT;
 				break;
 			case MA_PIM_ATTR_PHONE_MMS:
-				mType = MMS;
+				mType = TYPE_MMS;
 				break;
 			case MA_PIM_ATTR_PHONE_CUSTOM:
-				mType = CUSTOM;
+				mType = TYPE_CUSTOM;
 				break;
 			default:
-				mType = OTHER;
+				mType = TYPE_OTHER;
 				break;
 		}
 	}
@@ -292,64 +292,64 @@ namespace PIM
 		int attribute = 0;
 		switch (mType)
 		{
-			case HOME:
+			case TYPE_HOME:
 				attribute = MA_PIM_ATTR_PHONE_HOME;
 				break;
-			case MOBILE:
+			case TYPE_MOBILE:
 				attribute = MA_PIM_ATTR_PHONE_MOBILE;
 				break;
-			case HOME_FAX:
+			case TYPE_HOME_FAX:
 				attribute = MA_PIM_ATTR_PHONE_HOME_FAX;
 				break;
-			case WORK_FAX:
+			case TYPE_WORK_FAX:
 				attribute = MA_PIM_ATTR_PHONE_WORK_FAX;
 				break;
-			case PAGER:
+			case TYPE_PAGER:
 				attribute = MA_PIM_ATTR_PHONE_PAGER;
 				break;
-			case IPHONE:
+			case TYPE_IPHONE:
 				attribute = MA_PIM_ATTR_PHONE_IPHONE;
 				break;
-			case WORK:
+			case TYPE_WORK:
 				attribute = MA_PIM_ATTR_PHONE_WORK;
 				break;
-			case CALLBACK:
+			case TYPE_CALLBACK:
 				attribute = MA_PIM_ATTR_PHONE_CALLBACK;
 				break;
-			case CAR:
+			case TYPE_CAR:
 				attribute = MA_PIM_ATTR_PHONE_CAR;
 				break;
-			case COMPANY_MAIN:
+			case TYPE_COMPANY_MAIN:
 				attribute = MA_PIM_ATTR_PHONE_COMPANY_MAIN;
 				break;
-			case ISDN:
+			case TYPE_ISDN:
 				attribute = MA_PIM_ATTR_PHONE_ISDN;
 				break;
-			case OTHER_FAX:
+			case TYPE_OTHER_FAX:
 				attribute = MA_PIM_ATTR_PHONE_OTHER_FAX;
 				break;
-			case RADIO:
+			case TYPE_RADIO:
 				attribute = MA_PIM_ATTR_PHONE_RADIO;
 				break;
-			case TELEX:
+			case TYPE_TELEX:
 				attribute = MA_PIM_ATTR_PHONE_TELEX;
 				break;
-			case TTY_TDD:
+			case TYPE_TTY_TDD:
 				attribute = MA_PIM_ATTR_PHONE_TTY_TDD;
 				break;
-			case WORK_MOBILE:
+			case TYPE_WORK_MOBILE:
 				attribute = MA_PIM_ATTR_PHONE_WORK_MOBILE;
 				break;
-			case WORK_PAGER:
+			case TYPE_WORK_PAGER:
 				attribute = MA_PIM_ATTR_PHONE_WORK_PAGER;
 				break;
-			case ASSISTANT:
+			case TYPE_ASSISTANT:
 				attribute = MA_PIM_ATTR_PHONE_ASSISTANT;
 				break;
-			case MMS:
+			case TYPE_MMS:
 				attribute = MA_PIM_ATTR_PHONE_MMS;
 				break;
-			case CUSTOM:
+			case TYPE_CUSTOM:
 				attribute = MA_PIM_ATTR_PHONE_CUSTOM;
 				break;
 			default:

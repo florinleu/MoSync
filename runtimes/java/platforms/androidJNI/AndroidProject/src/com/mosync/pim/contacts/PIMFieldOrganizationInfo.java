@@ -27,7 +27,7 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 		mStrType = Organization.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_STRING_ARRAY;
 
-		mNames = new String[] { Organization.DEPARTMENT,
+		mNames = new String[] { Organization._ID, Organization.DEPARTMENT,
 				Organization.JOB_DESCRIPTION, Organization.SYMBOL,
 				Organization.PHONETIC_NAME, Organization.OFFICE_LOCATION,
 				Organization.TYPE, Organization.LABEL, Organization.IS_PRIMARY };
@@ -105,9 +105,9 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 
 	String[] getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		String[] ret = new String[val.length - 3];
-		for (int i = 0; i < val.length - 3; i++) {
-			ret[i] = val[i];
+		String[] ret = new String[val.length - 4];
+		for (int i = 0; i < val.length - 4; i++) {
+			ret[i] = val[i + 1];
 		}
 		return ret;
 	}
@@ -131,7 +131,7 @@ public class PIMFieldOrganizationInfo extends PIMFieldContacts {
 	void setSpecificData(String[] data, int index) {
 		String[] val = mValues.get(index);
 		for (int i = 0; i < data.length; i++) {
-			val[i] = data[i];
+			val[i + 1] = data[i];
 		}
 		mValues.set(index, val);
 	}

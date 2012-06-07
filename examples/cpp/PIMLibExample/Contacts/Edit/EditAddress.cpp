@@ -269,7 +269,7 @@ void EditAddress::update(int index, int type, String label)
 	printf("Update type for the Address");
 	mOwner->getAddress(index)->setType((Address::eTypes)type);
 
-	if (type == Address::CUSTOM)
+	if (type == Address::TYPE_CUSTOM)
 	{
 		wchar* tmp = strtowstr(label.c_str());
 		printf("size %d, string %S", wcslen(tmp), tmp);

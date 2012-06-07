@@ -207,7 +207,7 @@ void EditEmail::update(int index, int type, String label)
 {
 	mOwner->getEmail(index)->setType((Email::eTypes)type);
 
-	if (type == Email::CUSTOM)
+	if (type == Email::TYPE_CUSTOM)
 	{
 		mOwner->getEmail(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 	}
