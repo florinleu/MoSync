@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2012 MoSync AB
+Copyright (C) 2011 MoSync AB
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License,
@@ -17,32 +17,49 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file Util.cpp
- * @author Bogdan Iusco
- *
- * Utility functions for the application.
+ * @file MainScreen.h
+ * @author emma
  */
 
-#include "Util.h"
+#ifndef MAINSCREEN_H_
+#define MAINSCREEN_H_
 
+#include <maapi.h>
+
+#include <MAUtil/util.h>
+
+// Include all the wrappers.
+#include <NativeUI/Widgets.h>
+
+#include "FirstScreen.h"
+#include "SecondScreen.h"
+#include "ThirdScreen.h"
+
+using namespace NativeUI;
+
+/**
+ * Class that creates a screen that displays all the contacts.
+ */
+class MainScreen:
+	public TabScreen
+{
+
+public:
+	/**
+	 * Constructor.
+	 */
+	MainScreen();
 
 	/**
-	 * Detects the current platform
-	 * @return platform_code specific for Android, iPhone OS or WindowsPhone
+	 * Destructor.
 	 */
-	int getPlatform()
-	{
-		char platform[BUF_MAX];
-		maGetSystemProperty("mosync.device.OS", platform, BUF_MAX);
+	~MainScreen();
 
-		if(strcmp(platform, "Android") == 0)
-		{
-			return ANDROID;
-		}
-		else
-		{
-			if(strcmp(platform, "iPhone OS") == 0)
-				return IOS;
-		}
-		return WINDOWSPHONE7;
-	}
+private:
+	FirstScreen* mFirstScreen;
+	SecondScreen* mSecondScreen;
+	ThirdScreen* mThirdScreen;
+};
+
+
+#endif /* MAINSCREEN_H_ */
