@@ -52,6 +52,7 @@ namespace PIM
 	Contact::~Contact()
 	{
 		cleanFields();
+		close();
 	}
 
 	void Contact::cleanFields(bool cleanID)
@@ -66,7 +67,7 @@ namespace PIM
 		DELETE_VECTOR(mEmails);
 		DELETE_VECTOR(mWebsites);
 		DELETE_VECTOR(mInstantMessagings);
-		DELETE(mNote);
+		DELETE_VECTOR(mNotes);
 		DELETE_VECTOR(mOrganizations);
 		DELETE_VECTOR(mSocialProfiles);
 		DELETE_VECTOR(mEvents);
@@ -76,11 +77,17 @@ namespace PIM
 		DELETE(mBuffer);
 	}
 
+	void Contact::close()
+	{
+		maPimItemClose(mHandle);  //fleu TODO check this in the runtime
+	}
+
 	/*
 	 * Read the Contact.
 	 */
 	int Contact::readNext(int flag)
 	{
+		close();
 		cleanFields();
 		//Get the contacts item handle.
 		mHandle = maPimListNext(mListHandle);
@@ -92,13 +99,10 @@ namespace PIM
 
 		MA_PIM_ARGS args;
 		initArgs(args);
-		args.item = mHandle;
 
 		readID(args);
 
 		readFields(args, flag);
-
-		maPimItemClose(mHandle);
 
 		return 0;
 	}
@@ -108,6 +112,8 @@ namespace PIM
 	 */
 	int Contact::find(int flag)
 	{
+		close();
+
 		cleanFields(false);
 
 		MA_PIM_ARGS args;
@@ -118,8 +124,6 @@ namespace PIM
 
 		readFields(args, flag);
 
-		maPimItemClose(mHandle); //fleu TODO check this in the runtime
-
 		return 0;
 	}
 
@@ -129,10 +133,11 @@ namespace PIM
 	int Contact::write(int flag)
 	{
 		MA_PIM_ARGS args;
-		if (!getHandle(getID(), args))
-		{
-			return -1;
-		}
+		initArgs(args);
+//		if (!getHandle(getID(), args))
+//		{
+//			return -1;
+//		}
 
 		if (MATCH_FLAGS(flag, RF_NAME))
 		{
@@ -174,7 +179,27 @@ namespace PIM
 			writeOrganizations(args);
 		}
 
-		maPimItemClose(mHandle);
+		if (MATCH_FLAGS(flag, RF_SOCIALPROFILE))
+		{
+			writeSocialProfile(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_EVENT))
+		{
+			writeEvent(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_RELATION))
+		{
+			writeRelation(args);
+		}
+
+		if (MATCH_FLAGS(flag, RF_PHOTO))
+		{
+			writePhoto(args);
+		}
+
+//		maPimItemClose(mHandle);
 
 		return 0;
 	}
@@ -184,11 +209,11 @@ namespace PIM
 	 */
 	int Contact::remove()
 	{
-		MA_PIM_ARGS args;
-		if (!getHandle(getID(), args))
-		{
-			return -1;
-		}
+//		MA_PIM_ARGS args;
+//		if (!getHandle(getID(), args)) //fleu TODO remove these getHandle
+//		{
+//			return -1;
+//		}
 
 		maPimItemRemove(mListHandle, mHandle);
 
@@ -200,6 +225,7 @@ namespace PIM
 		mBuffer = new char[PIM_BUF_SIZE];
 		args.buf = mBuffer;
 		args.bufSize = PIM_BUF_SIZE;
+		args.item = mHandle;
 	}
 
 	void Contact::readID(MA_PIM_ARGS args)
@@ -277,10 +303,12 @@ namespace PIM
 
 	void Contact::readNote(MA_PIM_ARGS args)
 	{
-		mNote = new Note();
-		if (!mNote->read(args))
+		int countValues = maPimItemFieldCount(mHandle, MA_PIM_FIELD_CONTACT_NOTE);
+		for (int i=0; i<countValues; i++)
 		{
-			DELETE(mNote);
+			Note* note = new Note();
+			note->read(args, i);
+			mNotes.add(note);
 		}
 	}
 
@@ -452,7 +480,11 @@ namespace PIM
 
 	void Contact::writeNote(MA_PIM_ARGS args)
 	{
-		mNote->write(args);
+		int count = mNotes.size();
+		for (int i=0; i<count; i++)
+		{
+			mNotes[i]->write(args, i);
+		}
 	}
 
 	void Contact::writeOrganizations(MA_PIM_ARGS args)
@@ -462,6 +494,38 @@ namespace PIM
 		{
 			mOrganizations[i]->write(args, i);
 		}
+	}
+
+	void Contact::writeSocialProfile(MA_PIM_ARGS args)
+	{
+		int count = mSocialProfiles.size();
+		for (int i=0; i<count; i++)
+		{
+			mSocialProfiles[i]->write(args, i);
+		}
+	}
+
+	void Contact::writeEvent(MA_PIM_ARGS args)
+	{
+		int count = mEvents.size();
+		for (int i=0; i<count; i++)
+		{
+			mEvents[i]->write(args, i);
+		}
+	}
+
+	void Contact::writeRelation(MA_PIM_ARGS args)
+	{
+		int count = mRelations.size();
+		for (int i=0; i<count; i++)
+		{
+			mRelations[i]->write(args, i);
+		}
+	}
+
+	void Contact::writePhoto(MA_PIM_ARGS args)
+	{
+		mPhoto->write(args);
 	}
 
 	/*
@@ -509,13 +573,13 @@ namespace PIM
 	 */
 	void Contact::removeName()
 	{
-		MA_PIM_ARGS args;
-		if (getHandle(getID(), args))
+//		MA_PIM_ARGS args;
+//		if (getHandle(getID(), args))
 		{
 			mName->remove(mHandle);
 			DELETE(mName);
 
-			maPimItemClose(mHandle);
+//			maPimItemClose(mHandle);
 		}
 	}
 
@@ -535,6 +599,19 @@ namespace PIM
 		return mAddresses[index];
 	}
 
+	/**
+	 * Ads a new address for this contact.
+	 */
+	void Contact::add(Address* address)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		address->add();
+		//address->write(args, mAddresses.size());
+
+		mAddresses.add(address);
+	}
+
 	/*
 	 * Setter for address field.
 	 */
@@ -550,15 +627,15 @@ namespace PIM
 	{
 		if (index < mAddresses.size())
 		{
-			MA_PIM_ARGS args;
-			if (getHandle(getID(), args))
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
 			{
 				Address* address = mAddresses[index];
 				address->remove(mHandle, index);
 				mAddresses.remove(index);
 				DELETE(address);
 
-				maPimItemClose(mHandle);
+//				maPimItemClose(mHandle);
 			}
 		}
 	}
@@ -579,6 +656,19 @@ namespace PIM
 		return mPhones[index];
 	}
 
+	/**
+	 * Ads a new phone for this contact.
+	 */
+	void Contact::add(Phone* phone)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		phone->add(args);
+		phone->write(args, mPhones.size());
+
+		mPhones.add(phone);
+	}
+
 	/*
 	 * Setter for phone field.
 	 */
@@ -594,15 +684,15 @@ namespace PIM
 	{
 		if (index < mPhones.size())
 		{
-			MA_PIM_ARGS args;
-			if (getHandle(getID(), args))
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
 			{
 				Phone* phone = mPhones[index];
 				phone->remove(mHandle, index);
 				mPhones.remove(index);
 				DELETE(phone);
 
-				maPimItemClose(mHandle);
+//				maPimItemClose(mHandle);
 			}
 		}
 	}
@@ -623,6 +713,18 @@ namespace PIM
 		return mEmails[index];
 	}
 
+	/**
+	 * Ads a new email for this contact.
+	 */
+	void Contact::add(Email* email)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		email->add(args);
+		email->write(args, mEmails.size());
+
+		mEmails.add(email);
+	}
 	/*
 	 * Setter for email field.
 	 */
@@ -638,15 +740,15 @@ namespace PIM
 	{
 		if (index < mEmails.size())
 		{
-			MA_PIM_ARGS args;
-			if (getHandle(getID(), args))
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
 			{
 				Email* email = mEmails[index];
 				email->remove(mHandle, index);
 				mEmails.remove(index);
 				DELETE(email);
 
-				maPimItemClose(mHandle);
+//				maPimItemClose(mHandle);
 			}
 		}
 	}
@@ -667,6 +769,19 @@ namespace PIM
 		return mWebsites[index];
 	}
 
+	/**
+	 * Ads a new website for this contact.
+	 */
+	void Contact::add(Website* website)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		website->add(args);
+		website->write(args, mWebsites.size());
+
+		mWebsites.add(website);
+	}
+
 	/*
 	 * Setter for website field.
 	 */
@@ -682,15 +797,15 @@ namespace PIM
 	{
 		if (index < mWebsites.size())
 		{
-			MA_PIM_ARGS args;
-			if (getHandle(getID(), args))
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
 			{
 				Website* website = mWebsites[index];
 				website->remove(mHandle, index);
 				mWebsites.remove(index);
 				DELETE(website);
 
-				maPimItemClose(mHandle);
+//				maPimItemClose(mHandle);
 			}
 		}
 	}
@@ -701,6 +816,19 @@ namespace PIM
 	const int Contact::getInstantMessagingsCount() const
 	{
 		return mInstantMessagings.size();
+	}
+
+	/**
+	 * Ads a new instant messaging for this contact.
+	 */
+	void Contact::add(InstantMessaging* instantMessaging)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		instantMessaging->add(args);
+		instantMessaging->write(args, mInstantMessagings.size());
+
+		mInstantMessagings.add(instantMessaging);
 	}
 
 	/*
@@ -726,33 +854,74 @@ namespace PIM
 	{
 		if (index < mInstantMessagings.size())
 		{
-			MA_PIM_ARGS args;
-			if (getHandle(getID(), args))
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
 			{
 				InstantMessaging* im = mInstantMessagings[index];
 				im->remove(mHandle, index);
 				mInstantMessagings.remove(index);
 				DELETE(im);
 
-				maPimItemClose(mHandle);
+//				maPimItemClose(mHandle);
 			}
 		}
 	}
 
 	/*
+	 * Getter for the number of notes.
+	 */
+	const int Contact::getNotesCount() const
+	{
+		return mNotes.size();
+	}
+
+	/*
 	 * Getter for note field.
 	 */
-	Note* Contact::getNote() const
+	Note* Contact::getNote(int index) const
 	{
-		return mNote;
+		return mNotes[index];
+	}
+
+	/**
+	 * Ads a new note for this contact.
+	 */
+	void Contact::add(Note* note)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		note->add(args);
+		note->write(args, mNotes.size());
+
+		mNotes.add(note);
 	}
 
 	/*
 	 * Setter for note field.
 	 */
-	void Contact::setNote(Note* note)
+	void Contact::setNote(Note* note, int index)
 	{
-		mNote = note;
+		mNotes[index] = note;
+	}
+
+	/*
+	 * Delete the given note.
+	 */
+	void Contact::removeNote(int index)
+	{
+		if (index < mNotes.size())
+		{
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
+			{
+				Note* note = mNotes[index];
+				note->remove(mHandle, index);
+				mNotes.remove(index);
+				DELETE(note);
+
+//				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*
@@ -771,6 +940,19 @@ namespace PIM
 		return mOrganizations[index];
 	}
 
+	/**
+	 * Ads a new organization for this contact.
+	 */
+	void Contact::add(Organization* organization)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		organization->add(args);
+		organization->write(args, mOrganizations.size());
+
+		mOrganizations.add(organization);
+	}
+
 	/*
 	 * Setter for organization field.
 	 */
@@ -786,15 +968,15 @@ namespace PIM
 	{
 		if (index < mOrganizations.size())
 		{
-			MA_PIM_ARGS args;
-			if (getHandle(getID(), args))
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
 			{
 				Organization* im = mOrganizations[index];
 				im->remove(mHandle, index);
 				mOrganizations.remove(index);
 				DELETE(im);
 
-				maPimItemClose(mHandle);
+//				maPimItemClose(mHandle);
 			}
 		}
 	}
@@ -815,12 +997,45 @@ namespace PIM
 		return mSocialProfiles[index];
 	}
 
+	/**
+	 * Ads a new social profile for this contact.
+	 */
+	void Contact::add(SocialProfile* socialProfile)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		socialProfile->add(args);
+		socialProfile->write(args, mSocialProfiles.size());
+
+		mSocialProfiles.add(socialProfile);
+	}
+
 	/*
 	 * Setter for social profile field.
 	 */
 	void Contact::setSocialProfile(SocialProfile* socialProfile, int index)
 	{
 		mSocialProfiles[index] = socialProfile;
+	}
+
+	/*
+	 * Delete the given social profile.
+	 */
+	void Contact::removeSocialProfile(int index)
+	{
+		if (index < mSocialProfiles.size())
+		{
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
+			{
+				SocialProfile* sp = mSocialProfiles[index];
+				sp->remove(mHandle, index);
+				mSocialProfiles.remove(index);
+				DELETE(sp);
+
+//				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*
@@ -839,12 +1054,45 @@ namespace PIM
 		return mEvents[index];
 	}
 
+	/**
+	 * Ads a new event for this contact.
+	 */
+	void Contact::add(Event* event)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		event->add(args);
+		event->write(args, mEvents.size());
+
+		mEvents.add(event);
+	}
+
 	/*
 	 * Setter for event field.
 	 */
 	void Contact::setEvent(Event* event, int index)
 	{
 		mEvents[index] = event;
+	}
+
+	/*
+	 * Delete the given event.
+	 */
+	void Contact::removeEvent(int index)
+	{
+		if (index < mEvents.size())
+		{
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
+			{
+				Event* event = mEvents[index];
+				event->remove(mHandle, index);
+				mEvents.remove(index);
+				DELETE(event);
+
+//				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*
@@ -863,12 +1111,45 @@ namespace PIM
 		return mRelations[index];
 	}
 
+	/**
+	 * Ads a new relation for this contact.
+	 */
+	void Contact::add(Relation* relation)
+	{
+		MA_PIM_ARGS args;
+		initArgs(args);
+		relation->add(args);
+		relation->write(args, mRelations.size());
+
+		mRelations.add(relation);
+	}
+
 	/*
 	 * Setter for relation field.
 	 */
 	void Contact::setRelation(Relation* relation, int index)
 	{
 		mRelations[index] = relation;
+	}
+
+	/*
+	 * Delete the given relation.
+	 */
+	void Contact::removeRelation(int index)
+	{
+		if (index < mRelations.size())
+		{
+//			MA_PIM_ARGS args;
+//			if (getHandle(getID(), args))
+			{
+				Relation* relation = mRelations[index];
+				relation->remove(mHandle, index);
+				mRelations.remove(index);
+				DELETE(relation);
+
+//				maPimItemClose(mHandle);
+			}
+		}
 	}
 
 	/*

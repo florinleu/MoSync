@@ -87,6 +87,12 @@ namespace PIM
 			void write(MA_PIM_ARGS& args, int index);
 
 			/**
+			 * Adds a new website to this contact.
+			 * @param args The values to add.
+			 */
+			void add(MA_PIM_ARGS& args);
+
+			/**
 			 * Deletes a contact's website.
 			 * @param handle The handle of the contact.
 			 * @param index  The index of the website to delete.

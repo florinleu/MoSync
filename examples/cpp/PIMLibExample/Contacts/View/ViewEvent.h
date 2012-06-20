@@ -55,13 +55,6 @@ class ViewEvent :
 		 * Creates the view.
 		 */
 		void addBody();
-
-		/**
-		 * Gets the name of the event type.
-		 * @param type	The event type.
-		 * @return 		The type name.
-		 */
-		const char* getEventTypeString(PIM::eEventTypes type);
 };
 
 #endif /* __VIEWEVENT_H__ */

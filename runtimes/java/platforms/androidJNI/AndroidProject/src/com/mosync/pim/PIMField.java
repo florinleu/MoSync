@@ -16,6 +16,7 @@ import java.util.Map;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
@@ -259,7 +260,6 @@ public abstract class PIMField {
 
 			// return PIMUtil.throwError(MA_PIM_ERR_FIELD_EMPTY,
 			// PIMError.PANIC_FIELD_EMPTY, PIMError.sStrFieldEmpty);
-
 		}
 
 		if ((index < 0) || (index >= length())) {
@@ -326,6 +326,7 @@ public abstract class PIMField {
 	 * Removes the value of the specified field.
 	 */
 	int removeValue(int index) {
+		DebugPrint("removeValue(" + index + ")");
 		if (isReadOnly()) {
 			return MA_PIM_ERR_FIELD_READ_ONLY;
 		}
@@ -344,8 +345,14 @@ public abstract class PIMField {
 			mDeletedValues.add(Long.parseLong(mValues.get(index)[0]));
 		}
 
-		mValues.remove(index);
-		mStates.remove(index);
+		try{
+			mValues.remove(index);
+			mStates.remove(index);
+		}
+		catch (IndexOutOfBoundsException e)
+		{
+			DebugPrint("Exception " + e.getMessage());
+		}
 
 		return MA_PIM_ERR_NONE;
 	}
@@ -417,7 +424,7 @@ public abstract class PIMField {
 
 	public void update(ContentResolver cr,
 			ArrayList<ContentProviderOperation> ops, String lookup) {
-		DebugPrint("Update + " + mStrType);
+		DebugPrint("Update: StrType = " + mStrType + "; Type = " + mType);
 		if (isReadOnly()) {
 			return;
 		}
@@ -426,7 +433,7 @@ public abstract class PIMField {
 		DebugPrint("Values = " + mValues.size());
 
 		for (int i = 0; i < mValues.size(); i++) {
-			DebugPrint("State " + i + ": " + mStates.get(i));
+			DebugPrint("State " + i + ": " + mStates.get(i) + "; ops.size = " + ops.size());
 			if (mStates.get(i) == State.ADDED) {
 				addToDisk(ops, lookup, mNames, mValues.get(i));
 			} else if (mStates.get(i) == State.UPDATED) {
@@ -453,52 +460,30 @@ public abstract class PIMField {
 
 		cursor.close();
 
-		// cursor = getContentResolver().query(
-		// RawContacts.CONTENT_URI,
-		// new String[] { RawContacts.ACCOUNT_TYPE,
-		// RawContacts.ACCOUNT_NAME },
-		// RawContacts.CONTACT_ID + "=?", new String[] { id }, null);
-		//
-		// String accountType = null;
-		// String accountName = null;
-		// if (cursor.moveToNext()) {
-		// accountType = cursor.getString(cursor
-		// .getColumnIndex(RawContacts.ACCOUNT_TYPE));
-		// accountName = cursor.getString(cursor
-		// .getColumnIndex(RawContacts.ACCOUNT_NAME));
-		// }
-		//
-		// DebugPrint("account type = " + accountType + "; accountName = "
-		// + accountName);
-		//
-		// cursor.close();
+		ContentValues contentValues = new ContentValues();
+		contentValues.put(Data.RAW_CONTACT_ID, id);
+		contentValues.put(Data.MIMETYPE, mStrType);
 
-		// int rawContactInsertIndex = ops.size();
+//		ContentProviderOperation.Builder builder = ContentProviderOperation
+//				.newInsert(Data.CONTENT_URI)
+//				.withValue(Data.RAW_CONTACT_ID, id)
+//				.withValue(Data.MIMETYPE, mStrType);
 
-		// ops.add(ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
-		// .withValue(RawContacts.ACCOUNT_TYPE, accountType)
-		// .withValue(RawContacts.ACCOUNT_NAME, accountName).build());
-
-		// ContentProviderOperation.Builder builder = ContentProviderOperation
-		// .newInsert(Data.CONTENT_URI).withValueBackReference(
-		// Data.RAW_CONTACT_ID, rawContactInsertIndex);
-		ContentProviderOperation.Builder builder = ContentProviderOperation
-				.newInsert(Data.CONTENT_URI).withValue(Data.RAW_CONTACT_ID, id)
-				.withValue(Data.MIMETYPE, mStrType);
-
-		builder = builder.withValue(Data.MIMETYPE, mStrType);
 		boolean canBuild = false;
 		for (int i = 1; i < names.length; i++) {
-			DebugPrint(names[i] + ": " + values[i]);
 			if ((values[i] != null) && (!names[i].equals(DUMMY))) {
-				builder = builder.withValue(names[i], values[i]);
+				//DebugPrint(names[i] + ": " + values[i]);
+				//builder = builder.withValue(names[i], values[i]);
+				contentValues.put(names[i], values[i]);
 				canBuild = true;
 			}
 		}
 
 		if (canBuild) {
 			DebugPrint("Operation ADD");
-			ops.add(builder.build());
+			ops.add(ContentProviderOperation.newInsert(
+		            Data.CONTENT_URI).withValues(contentValues).build());
+			//ops.add(builder.build());
 		}
 	}
 
@@ -529,7 +514,7 @@ public abstract class PIMField {
 
 	void deleteFromDisk(ArrayList<ContentProviderOperation> ops, String lookup,
 			long id) {
-		DebugPrint("DELETE");
+		DebugPrint("deleteFromDisk " + lookup + "; id = " + id);
 		ops.add(ContentProviderOperation
 				.newDelete(Data.CONTENT_URI)
 				.withSelection(

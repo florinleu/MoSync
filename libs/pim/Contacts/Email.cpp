@@ -40,7 +40,6 @@ namespace PIM
 		mLabel(NULL),
 		mIsPrimary(false)
 	{
-
 	}
 
 	/**
@@ -89,6 +88,15 @@ namespace PIM
 		memset(args.buf, 0, PIM_BUF_SIZE);
 		args.bufSize = writeWString(args.buf, mLabel, 0);
 		maPimItemSetLabel(&args, index);
+	}
+
+	/**
+	 * Adds a new e-mail to this contact.
+	 */
+	void Email::add(MA_PIM_ARGS& args)
+	{
+		args.field = MA_PIM_FIELD_CONTACT_EMAIL;
+		maPimItemAddValue(&args, MA_PIM_ATTR_EMAIL_HOME);
 	}
 
 	/**

@@ -15,11 +15,11 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditInstantMessaging.cpp
+ * @file EditSocialProfile.cpp
  * @author Florin Leu
- * @date 01 Jun 2012
+ * @date 07 Jun 2012
  *
- * @brief Instant Messaging Edit Layout.
+ * @brief Social Profile Edit Layout.
  *
  **/
 
@@ -33,7 +33,7 @@ MA 02110-1301, USA.
 
 #include "ContactsScreen.h"
 
-#include "EditInstantMessaging.h"
+#include "EditSocialProfile.h"
 #include "EditDefines.h"
 
 #include "TypeDialog.h"
@@ -47,9 +47,9 @@ using namespace MAUtil;
  * Constructor.
  * @param contact The owner of this field.
  */
-EditInstantMessaging::EditInstantMessaging(Contact* contact):
+EditSocialProfile::EditSocialProfile(Contact* contact):
 	EditField(contact),
-	bChooseProtocol(false)
+	bChooseService(false)
 {
 	initData();
 	createUI();
@@ -60,7 +60,7 @@ EditInstantMessaging::EditInstantMessaging(Contact* contact):
 /**
  * Destructor.
  */
-EditInstantMessaging::~EditInstantMessaging()
+EditSocialProfile::~EditSocialProfile()
 {
 	DELETE(mDialog);
 	DELETE(mDeleteButton);
@@ -69,18 +69,18 @@ EditInstantMessaging::~EditInstantMessaging()
 /**
  * Inits the data used to display this field.
  */
-void EditInstantMessaging::initData()
+void EditSocialProfile::initData()
 {
-	mTitleText = strdup(TXT_EDIT_IM_TITLE);
-	mDeleteButton = new Button*[mOwner->getInstantMessagingsCount()];
+	mTitleText = strdup(TXT_EDIT_SP_TITLE);
+	mDeleteButton = new Button*[mOwner->getSocialProfilesCount()];
 }
 
 /**
- * Ads protocol for instant messaging.
+ * Ads protocol for social profile.
  * @param index		The index of the field.
  * @param text		The type text.
  */
-void EditInstantMessaging::addProtocol(int index, const char* text)
+void EditSocialProfile::addService(int index, const char* text)
 {
 	HorizontalLayout* layoutType = new HorizontalLayout();
 	layoutType->wrapContentVertically();
@@ -89,7 +89,7 @@ void EditInstantMessaging::addProtocol(int index, const char* text)
 	Label* labelType = new Label();
 	labelType->setWidth(EDIT_LABEL_WIDTH);
 	labelType->setFont(mLabelFont);
-	labelType->setText("protocol");
+	labelType->setText("service");
 	labelType->setTextHorizontalAlignment(MAW_ALIGNMENT_LEFT);
 	labelType->setTextVerticalAlignment(MAW_ALIGNMENT_CENTER);
 	layoutType->addChild(labelType);
@@ -101,7 +101,7 @@ void EditInstantMessaging::addProtocol(int index, const char* text)
 	dataType->addButtonListener(this);
 	//dataType->setFont(mDataFont);
 	layoutType->addChild(dataType);
-	mProtocols.add(dataType);
+	mServices.add(dataType);
 
 	mBody->addChild(layoutType);
 }
@@ -109,39 +109,45 @@ void EditInstantMessaging::addProtocol(int index, const char* text)
 /**
  * Creates the view.
  */
-void EditInstantMessaging::addBody()
+void EditSocialProfile::addBody()
 {
 	const char* labels[] =
 	{
+		"url",
 		"username",
+		"user identifier",
 	};
 
 	EditField::addBody();
 
-	for (int i=0; i<mOwner->getInstantMessagingsCount(); i++)
+	for (int i=0; i<mOwner->getSocialProfilesCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
 		sprintf(title, "%d.", i + 1);
 		addSubTitle(title, i);
-		addType(i, ContactsScreen::getIMTypeString(mOwner->getInstantMessaging(i)->getType(), mOwner->getInstantMessaging(i)->getLabel()),
-				mOwner->getInstantMessaging(i)->isPrimary());
+		addType(i, ContactsScreen::getSPTypeString(mOwner->getSocialProfile(i)->getType(), mOwner->getSocialProfile(i)->getLabel()),
+				mOwner->getSocialProfile(i)->isPrimary());
 		DELETE(title);
 
-		InstantMessaging* im = mOwner->getInstantMessaging(i);
+		SocialProfile* sp = mOwner->getSocialProfile(i);
 
 		const char* texts[] =
 		{
-			wstrtostr(im->getUsername())
+			wstrtostr(sp->getURL()),
+			wstrtostr(sp->getUsername()),
+			wstrtostr(sp->getUserIdentifier())
 		};
 
 		const int datas[] =
 		{
-			InstantMessaging::USERNAME | (i << 8),
+			SocialProfile::URL | (i << 8),
+			SocialProfile::USERNAME | (i << 8),
+			SocialProfile::USER_IDENTIFIER | (i << 8),
 		};
 
-		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_IM_FLAGS);
+		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_SP_FLAGS);
 
-		addProtocol(i, ContactsScreen::getIMProtocolString(mOwner->getInstantMessaging(i)->getProtocol(), mOwner->getInstantMessaging(i)->getProtocolLabel()));
+		addService(i, ContactsScreen::getSPServiceString(mOwner->getSocialProfile(i)->getService(), mOwner->getSocialProfile(i)->getServiceLabel()));
 	}
 }
 
@@ -151,18 +157,24 @@ void EditInstantMessaging::addBody()
  * Only for iphone platform.
  * @param editBox The edit box object that generated the event.
  */
-void EditInstantMessaging::editBoxEditingDidEnd(EditBox* editBox)
+void EditSocialProfile::editBoxEditingDidEnd(EditBox* editBox)
 {
 	int data = *(int*)(editBox->getData());
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d.", data);
 
-	InstantMessaging* im = mOwner->getInstantMessaging(data >> 8);
+	SocialProfile* sp = mOwner->getSocialProfile(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case InstantMessaging::USERNAME:
-			im->setUsername(text);
+		case SocialProfile::URL:
+			sp->setURL(text);
+			break;
+		case SocialProfile::USERNAME:
+			sp->setUsername(text);
+			break;
+		case SocialProfile::USER_IDENTIFIER:
+			sp->setUserIdentifier(text);
 			break;
 	}
 }
@@ -173,7 +185,7 @@ void EditInstantMessaging::editBoxEditingDidEnd(EditBox* editBox)
  * receiving this event.
  * @param editBox The edit box object that generated the event.
  */
-void EditInstantMessaging::editBoxReturn(EditBox* editBox)
+void EditSocialProfile::editBoxReturn(EditBox* editBox)
 {
 	editBox->hideKeyboard();
 
@@ -182,12 +194,18 @@ void EditInstantMessaging::editBoxReturn(EditBox* editBox)
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d.", data);
 
-	InstantMessaging* im = mOwner->getInstantMessaging(data >> 8);
+	SocialProfile* sp = mOwner->getSocialProfile(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case InstantMessaging::USERNAME:
-			im->setUsername(text);
+		case SocialProfile::URL:
+			sp->setURL(text);
+			break;
+		case SocialProfile::USERNAME:
+			sp->setUsername(text);
+			break;
+		case SocialProfile::USER_IDENTIFIER:
+			sp->setUserIdentifier(text);
 			break;
 	}
 }
@@ -198,20 +216,20 @@ void EditInstantMessaging::editBoxReturn(EditBox* editBox)
  * @param checkBox The check box object that generated the event.
  * @param state True if the check box is checked, false otherwise.
  */
-void EditInstantMessaging::checkBoxStateChanged(CheckBox *checkBox, bool state)
+void EditSocialProfile::checkBoxStateChanged(CheckBox *checkBox, bool state)
 {
-	printf("EditInstantMessaging check box changed");
+	printf("EditSocialProfile check box changed");
 	int data = *(int*)(checkBox->getData());
-	printf("InstantMessaging index = %d", data);
-	InstantMessaging* im = mOwner->getInstantMessaging(data);
-	im->setPrimary(state);
+	printf("SocialProfile index = %d", data);
+	SocialProfile* sp = mOwner->getSocialProfile(data);
+	sp->setPrimary(state);
 }
 
 /**
  * This method is called if the touch-up event was inside the bounds of the button.
  * @param button The button object that generated the event.
  */
-void EditInstantMessaging::buttonClicked(Widget* button)
+void EditSocialProfile::buttonClicked(Widget* button)
 {
 	if (button == mTitle)
 	{
@@ -219,7 +237,7 @@ void EditInstantMessaging::buttonClicked(Widget* button)
 	}
 	else
 	{
-		printf("EditInstantMessaging button clicked");
+		printf("EditSocialProfile button clicked");
 		int data = *(int*)(button->getData());
 
 		if (button == mDeleteButton[data])
@@ -227,21 +245,21 @@ void EditInstantMessaging::buttonClicked(Widget* button)
 			mDialog->show();
 			mCurrentSubField = data;
 		}
-		else if (button == mProtocols[data])
+		else if (button == mServices[data])
 		{
-			bChooseProtocol = true;
-			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sIMProtocols,
-					sizeof(ContactsScreen::sIMProtocols)/sizeof(char*),
-					(int)mOwner->getInstantMessaging(data)->getProtocol(),
-					mOwner->getInstantMessaging(data)->getProtocolLabel());
+			bChooseService = true;
+			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sSPServices,
+					sizeof(ContactsScreen::sSPServices)/sizeof(char*),
+					(int)mOwner->getSocialProfile(data)->getService(),
+					mOwner->getSocialProfile(data)->getServiceLabel());
 			TypeDialog::getInstance()->show();
 		}
 		else
 		{
-			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sIMTypes,
-					sizeof(ContactsScreen::sIMTypes)/sizeof(char*),
-					(int)mOwner->getInstantMessaging(data)->getType(),
-					mOwner->getInstantMessaging(data)->getLabel());
+			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sSPTypes,
+					sizeof(ContactsScreen::sSPTypes)/sizeof(char*),
+					(int)mOwner->getSocialProfile(data)->getType(),
+					mOwner->getSocialProfile(data)->getLabel());
 			TypeDialog::getInstance()->show();
 		}
 	}
@@ -253,49 +271,49 @@ void EditInstantMessaging::buttonClicked(Widget* button)
  * @param type The type to set.
  * @param label The label to set.
  */
-void EditInstantMessaging::update(int index, int type, String label)
+void EditSocialProfile::update(int index, int type, String label)
 {
-	printf("Update type for the InstantMessaging");
+	printf("Update type for the SocialProfile");
 
-	if (bChooseProtocol)
+	if (bChooseService)
 	{
-		mOwner->getInstantMessaging(index)->setProtocol((InstantMessaging::eProtocols)type);
+		mOwner->getSocialProfile(index)->setService((SocialProfile::eServices)type);
 
-		if (type == InstantMessaging::PROTOCOL_CUSTOM)
+		if (type == SocialProfile::SERVICE_CUSTOM)
 		{
 			wchar* tmp = strtowstr(label.c_str());
 			printf("size %d, string %S", wcslen(tmp), tmp);
-			printf("Update protocol label for the InstantMessaging");
-			mOwner->getInstantMessaging(index)->setProtocolLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
+			printf("Update service label for the SocialProfile");
+			mOwner->getSocialProfile(index)->setServiceLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 		}
 
-		mProtocols[index]->setText(ContactsScreen::getIMProtocolString(
-				mOwner->getInstantMessaging(index)->getProtocol(), mOwner->getInstantMessaging(index)->getProtocolLabel()));
+		mServices[index]->setText(ContactsScreen::getSPServiceString(
+				mOwner->getSocialProfile(index)->getService(), mOwner->getSocialProfile(index)->getServiceLabel()));
 	}
 	else
 	{
-		mOwner->getInstantMessaging(index)->setType((InstantMessaging::eTypes)type);
+		mOwner->getSocialProfile(index)->setType((SocialProfile::eTypes)type);
 
-		if (type == InstantMessaging::TYPE_CUSTOM)
+		if (type == SocialProfile::TYPE_CUSTOM)
 		{
 			wchar* tmp = strtowstr(label.c_str());
 			printf("size %d, string %S", wcslen(tmp), tmp);
-			printf("Update label for the InstantMessaging");
-			mOwner->getInstantMessaging(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
+			printf("Update label for the SocialProfile");
+			mOwner->getSocialProfile(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 		}
 
-		mTypes[index]->setText(ContactsScreen::getIMTypeString(
-				mOwner->getInstantMessaging(index)->getType(), mOwner->getInstantMessaging(index)->getLabel()));
+		mTypes[index]->setText(ContactsScreen::getSPTypeString(
+				mOwner->getSocialProfile(index)->getType(), mOwner->getSocialProfile(index)->getLabel()));
 	}
-	bChooseProtocol = false;
+	bChooseService = false;
 }
 
 /**
- * Updates the instant messaging.
+ * Updates the address.
  */
-void EditInstantMessaging::update()
+void EditSocialProfile::update()
 {
-	mOwner->removeInstantMessaging(mCurrentSubField);
+	mOwner->removeSocialProfile(mCurrentSubField);
 	clearBody();
 	addBody();
 	addChild(mBody);

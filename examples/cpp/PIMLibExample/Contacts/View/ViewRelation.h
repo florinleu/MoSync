@@ -55,13 +55,6 @@ class ViewRelation :
 		 * Creates the view.
 		 */
 		void addBody();
-
-		/**
-		 * Gets the name of the relation type.
-		 * @param type	The relation type.
-		 * @return 		The type name.
-		 */
-		const char* getRelationTypeString(PIM::eRelationTypes type);
 };
 
 #endif /* __VIEWRELATION_H__ */

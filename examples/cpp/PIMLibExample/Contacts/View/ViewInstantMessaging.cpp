@@ -79,7 +79,7 @@ void ViewInstantMessaging::addBody()
 				ContactsScreen::getIMTypeString(
 						mOwner->getInstantMessaging(i)->getType(),
 						mOwner->getInstantMessaging(i)->getLabel()));
-		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
+		addSubTitle(title, mOwner->getInstantMessaging(i)->isPrimary());
 		DELETE(title);
 
 		char* protocol = new char[BUFF_SIZE];

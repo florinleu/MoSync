@@ -26,24 +26,36 @@ MA 02110-1301, USA.
 
 #include <conprint.h>
 #include <mawstring.h>
-#include "Relation.h"
 
+#include "Relation.h"
 #include "util.h"
 
 namespace PIM
 {
-
-	/*
-	 * Constructor
+	/**
+	 * Constructor.
 	 */
 	Relation::Relation():
+		mName(NULL),
+		mLabel(NULL),
 		mIsPrimary(false)
 	{
 
 	}
 
-	/*
-	 * Read a complete relation.
+	/**
+	 * Destructor.
+	 */
+	Relation::~Relation()
+	{
+		DELETE(mName);
+		DELETE(mLabel);
+	}
+
+	/**
+	 * Reads a contact's relation.
+	 * @param args The arguments needed to read the relation.
+	 * @param index The index of the relation to read.
 	 */
 	void Relation::read(MA_PIM_ARGS& args, int index)
 	{
@@ -52,19 +64,59 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
-			readName(args.buf);
+			wchar* src = (wchar*)args.buf;
+			mName = wcsdup(src);
 
 			readType(args.item, index);
 			readLabel(args.item, index);
 		}
 	}
 
-	void Relation::readName(const MAAddress buffer)
+	/**
+	 * Writes a contact's relation.
+	 * @param args The values to write.
+	 * @index args The index of the relation to write.
+	 */
+	void Relation::write(MA_PIM_ARGS& args, int index)
 	{
-		wchar* src = (wchar*)buffer;
-		mName = wcsdup(src);
+		printf("@LIB: relation write");
+
+		args.field = MA_PIM_FIELD_CONTACT_RELATION;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mName, 0);
+		maPimItemSetValue(&args, index, getAttribute());
+
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mLabel, 0);
+		maPimItemSetLabel(&args, index);
 	}
 
+	/**
+	 * Adds a new relation to this contact.
+	 */
+	void Relation::add(MA_PIM_ARGS& args)
+	{
+		args.field = MA_PIM_FIELD_CONTACT_RELATION;
+		maPimItemAddValue(&args, MA_PIM_ATTR_RELATION_MOTHER);
+	}
+
+	/**
+	 * Deletes a contact's relation.
+	 * @param handle The handle of the contact.
+	 * @param index  The index of the relation to delete.
+	 */
+	void Relation::remove(MAHandle handle, int index)
+	{
+		printf("@LIB: relation delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_RELATION, index);
+	}
+
+	/**
+	 * Reads the type of the relation.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this relation.
+	 */
 	void Relation::readType(const MAHandle handle, const int index)
 	{
 		int attribute = maPimItemGetAttributes(handle, MA_PIM_FIELD_CONTACT_RELATION, index);
@@ -80,53 +132,58 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_RELATION_MOTHER:
-				mType = RELATION_MOTHER;
+				mType = TYPE_MOTHER;
 				break;
 			case MA_PIM_ATTR_RELATION_FATHER:
-				mType = RELATION_FATHER;
+				mType = TYPE_FATHER;
 				break;
 			case MA_PIM_ATTR_RELATION_PARENT:
-				mType = RELATION_PARENT;
+				mType = TYPE_PARENT;
 				break;
 			case MA_PIM_ATTR_RELATION_SISTER:
-				mType = RELATION_SISTER;
+				mType = TYPE_SISTER;
 				break;
 			case MA_PIM_ATTR_RELATION_BROTHER:
-				mType = RELATION_BROTHER;
+				mType = TYPE_BROTHER;
 				break;
 			case MA_PIM_ATTR_RELATION_CHILD:
-				mType = RELATION_CHILD;
+				mType = TYPE_CHILD;
 				break;
 			case MA_PIM_ATTR_RELATION_FRIEND:
-				mType = RELATION_FRIEND;
+				mType = TYPE_FRIEND;
 				break;
 			case MA_PIM_ATTR_RELATION_SPOUSE:
-				mType = RELATION_SPOUSE;
+				mType = TYPE_SPOUSE;
 				break;
 			case MA_PIM_ATTR_RELATION_PARTNER:
-				mType = RELATION_PARTNER;
+				mType = TYPE_PARTNER;
 				break;
 			case MA_PIM_ATTR_RELATION_MANAGER:
-				mType = RELATION_MANAGER;
+				mType = TYPE_MANAGER;
 				break;
 			case MA_PIM_ATTR_RELATION_ASSISTANT:
-				mType = RELATION_ASSISTANT;
+				mType = TYPE_ASSISTANT;
 				break;
 			case MA_PIM_ATTR_RELATION_DOMESTIC_PARTNER:
-				mType = RELATION_DOMESTIC_PARTNER;
+				mType = TYPE_DOMESTIC_PARTNER;
 				break;
 			case MA_PIM_ATTR_RELATION_REFERRED_BY:
-				mType = RELATION_REFERRED_BY;
+				mType = TYPE_REFERRED_BY;
 				break;
 			case MA_PIM_ATTR_RELATION_RELATIVE:
-				mType = RELATION_RELATIVE;
+				mType = TYPE_RELATIVE;
 				break;
 			default:
-				mType = RELATION_CUSTOM;
+				mType = TYPE_CUSTOM;
 				break;
 		}
 	}
 
+	/**
+	 * Reads the label of the relation.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this relation.
+	 */
 	void Relation::readLabel(const MAHandle handle, const int index)
 	{
 		MA_PIM_ARGS args;
@@ -143,59 +200,139 @@ namespace PIM
 		mLabel = wcsdup(src);
 	}
 
-	/*
-	 * Getter for name.
+	/**
+	 * Gets the contact's relation name.
+	 * @return The relation name of the contact.
 	 */
-	const wchar* Relation::getName() const
+	const wchar* const Relation::getName() const
 	{
 		return mName;
 	}
 
-	/*
-	 * Setter for name.
+	/**
+	 * Sets the contact's relation name.
+	 * @param name The value to set.
 	 */
-	void Relation::setName(wchar* name)
+	void Relation::setName(const wchar* const name)
 	{
-		mName = name;
+		DELETE(mName);
+		mName = wcsdup(name);
 	}
 
-	/*
-	 * Getter for type.
+	/**
+	 * Gets the relation type.
+	 * @return The type of the relation.
 	 */
-	const eRelationTypes& Relation::getType() const
+	const Relation::eTypes& Relation::getType() const
 	{
 		return mType;
 	}
 
-	/*
-	 * Setter for type.
+	/**
+	 * Sets the relation type.
+	 * @param type The value to set.
 	 */
-	void Relation::setType(const eRelationTypes& type)
+	void Relation::setType(const Relation::eTypes& type)
 	{
 		mType = type;
 	}
 
-	/*
-	 * Getter for label.
+	/**
+	 * Gets the relation label.
+	 * @return The label of the relation.
 	 */
-	const wchar* Relation::getLabel() const
+	const wchar* const Relation::getLabel() const
 	{
 		return mLabel;
 	}
 
-	/*
-	 * Setter for label.
+	/**
+	 * Sets the relation label.
+	 * @param label The value to set.
 	 */
-	void Relation::setLabel(wchar* label)
+	void Relation::setLabel(const wchar* const label)
 	{
-		mLabel = label;
+		DELETE(mLabel);
+		mLabel = wcsdup(label);
 	}
 
-	/*
-	 * Returns true if this is set as the primary relation.
+	/**
+	 * Checks if this is or not a primary relation.
+	 * @return True if this is a primary relation.
 	 */
 	const bool Relation::isPrimary() const
 	{
 		return mIsPrimary;
 	}
+
+	/**
+	 * Sets this as a primary relation.
+	 * @param primary true if this is a primary relation.
+	 */
+	void Relation::setPrimary(const bool primary)
+	{
+		mIsPrimary = primary;
+	}
+
+	/**
+	 * Computes the relation attribute.
+	 * @return The relation attribute.
+	 */
+	const int Relation::getAttribute() const
+	{
+		int attribute = 0;
+		switch (mType)
+		{
+			case TYPE_MOTHER:
+				attribute = MA_PIM_ATTR_RELATION_MOTHER;
+				break;
+			case TYPE_FATHER:
+				attribute = MA_PIM_ATTR_RELATION_FATHER;
+				break;
+			case TYPE_PARENT:
+				attribute = MA_PIM_ATTR_RELATION_PARENT;
+				break;
+			case TYPE_SISTER:
+				attribute = MA_PIM_ATTR_RELATION_SISTER;
+				break;
+			case TYPE_BROTHER:
+				attribute = MA_PIM_ATTR_RELATION_BROTHER;
+				break;
+			case TYPE_CHILD:
+				attribute = MA_PIM_ATTR_RELATION_CHILD;
+				break;
+			case TYPE_FRIEND:
+				attribute = MA_PIM_ATTR_RELATION_FRIEND;
+				break;
+			case TYPE_SPOUSE:
+				attribute = MA_PIM_ATTR_RELATION_SPOUSE;
+				break;
+			case TYPE_PARTNER:
+				attribute = MA_PIM_ATTR_RELATION_PARTNER;
+				break;
+			case TYPE_MANAGER:
+				attribute = MA_PIM_ATTR_RELATION_MANAGER;
+				break;
+			case TYPE_ASSISTANT:
+				attribute = MA_PIM_ATTR_RELATION_ASSISTANT;
+				break;
+			case TYPE_DOMESTIC_PARTNER:
+				attribute = MA_PIM_ATTR_RELATION_DOMESTIC_PARTNER;
+				break;
+			case TYPE_REFERRED_BY:
+				attribute = MA_PIM_ATTR_RELATION_REFERRED_BY;
+				break;
+			case TYPE_RELATIVE:
+				attribute = MA_PIM_ATTR_RELATION_RELATIVE;
+				break;
+			default:
+				attribute = MA_PIM_ATTR_RELATION_CUSTOM;
+				break;
+		}
+
+		attribute |= (mIsPrimary ? MA_PIM_ATTRPREFERRED : 0);
+
+		return attribute;
+	}
+
 } //PIM

@@ -24,9 +24,10 @@ MA 02110-1301, USA.
  *
  **/
 
+#include <util.h>
+
 #include "ViewNote.h"
 #include "ViewDefines.h"
-#include <util.h>
 
 using namespace PIM;
 
@@ -46,7 +47,6 @@ ViewNote::ViewNote(Contact* contact):
  */
 ViewNote::~ViewNote()
 {
-
 }
 
 /**
@@ -67,11 +67,20 @@ void ViewNote::addBody()
 		"text"
 	};
 
-	const char* datas[] =
-	{
-		wstrtostr(mOwner->getNote()->getText()),
-	};
-
 	ViewField::addBody();
-	addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
+
+	for (int i=0; i<mOwner->getPhonesCount(); i++)
+	{
+		char* title = new char[BUFF_SIZE];
+		sprintf(title, "%d.", i + 1);
+		addSubTitle(title, false);
+		DELETE(title);
+
+		const char* datas[] =
+		{
+			wstrtostr(mOwner->getNote(i)->getText())
+		};
+
+		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
+	}
 }

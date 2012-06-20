@@ -31,74 +31,165 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-
-	enum eRelationTypes
-	{
-		/// The constant describes a mother relation.
-		RELATION_MOTHER = 0,
-		/// The constant describes a father relation.
-		RELATION_FATHER,
-		/// The constant describes a parent relation.
-		RELATION_PARENT,
-		/// The constant describes a sister relation.
-		RELATION_SISTER,
-		/// The constant describes a brother relation.
-		RELATION_BROTHER,
-		/// The constant describes a child relation.
-		RELATION_CHILD,
-		/// The constant describes a friend relation.
-		RELATION_FRIEND,
-		/// The constant describes a spouse relation.
-		RELATION_SPOUSE,
-		/// The constant describes a partner relation.
-		RELATION_PARTNER,
-		/// The constant describes a manager relation.
-		RELATION_MANAGER,
-		/// The constant describes a assistant relation.
-		RELATION_ASSISTANT,
-		/// The constant describes a domestic partner relation.
-		RELATION_DOMESTIC_PARTNER,
-		/// The constant describes a referred by relation.
-		RELATION_REFERRED_BY,
-		/// The constant describes a relative relation.
-		RELATION_RELATIVE,
-		/// The constant describes a custom relation type.
-		RELATION_CUSTOM
-	};
-
 	class Relation
 	{
 		public:
+			enum eTypes
+			{
+				/// The constant describes a mother relation.
+				TYPE_MOTHER = 0,
+				/// The constant describes a father relation.
+				TYPE_FATHER,
+				/// The constant describes a parent relation.
+				TYPE_PARENT,
+				/// The constant describes a sister relation.
+				TYPE_SISTER,
+				/// The constant describes a brother relation.
+				TYPE_BROTHER,
+				/// The constant describes a child relation.
+				TYPE_CHILD,
+				/// The constant describes a friend relation.
+				TYPE_FRIEND,
+				/// The constant describes a spouse relation.
+				TYPE_SPOUSE,
+				/// The constant describes a partner relation.
+				TYPE_PARTNER,
+				/// The constant describes a manager relation.
+				TYPE_MANAGER,
+				/// The constant describes a assistant relation.
+				TYPE_ASSISTANT,
+				/// The constant describes a domestic partner relation.
+				TYPE_DOMESTIC_PARTNER,
+				/// The constant describes a referred by relation.
+				TYPE_REFERRED_BY,
+				/// The constant describes a relative relation.
+				TYPE_RELATIVE,
+				/// The constant describes a custom relation type.
+				TYPE_CUSTOM
+			};
+
+			enum eSubFields
+			{
+				//The constant describes a relation name.
+				NAME = 0,
+			};
+
+		public:
+			/**
+			 * Constructor.
+			 */
 			Relation();
 
+			/**
+			 * Destructor.
+			 */
+			~Relation();
+
+			/**
+			 * Reads a contact's relation.
+			 * @param args The arguments needed to read the relation.
+			 * @param index The index of the relation to read.
+			 */
 			void read(MA_PIM_ARGS& args, int index);
 
-			const wchar* getName() const;
-			void setName(wchar* name);
+			/**
+			 * Writes a contact's relation.
+			 * @param args The values to write.
+			 * @index args The index of the relation to write.
+			 */
+			void write(MA_PIM_ARGS& args, int index);
 
-			const eRelationTypes& getType() const;
-			void setType(const eRelationTypes& type);
+			/**
+			 * Adds a new relation to this contact.
+			 * @param args The values to add.
+			 */
+			void add(MA_PIM_ARGS& args);
 
-			const wchar* getLabel() const;
-			void setLabel(wchar* label);
+			/**
+			 * Deletes a contact's relation.
+			 * @param handle The handle of the contact.
+			 * @param index  The index of the relation to delete.
+			 */
+			void remove(MAHandle handle, int index);
 
+			/**
+			 * Gets the contact's relation name.
+			 * @return The relation name of the contact.
+			 */
+			const wchar* const getName() const;
+
+			/**
+			 * Sets the contact's relation name.
+			 * @param name The value to set.
+			 */
+			void setName(const wchar* const name);
+
+			/**
+			 * Gets the relation type.
+			 * @return The type of the relation.
+			 */
+			const eTypes& getType() const;
+
+			/**
+			 * Sets the relation type.
+			 * @param type The value to set.
+			 */
+			void setType(const eTypes& type);
+
+			/**
+			 * Gets the relation label.
+			 * @return The label of the relation.
+			 */
+			const wchar* const getLabel() const;
+
+			/**
+			 * Sets the relation label.
+			 * @param state The value to set.
+			 */
+			void setLabel(const wchar* const label);
+
+			/**
+			 * Checks if this is or not a primary relation.
+			 * @return True if this is a primary relation.
+			 */
 			const bool isPrimary() const;
 
-		private:
-			void readName(const MAAddress buffer);
+			/**
+			 * Sets this as a primary relation.
+			 * @param primary true if this is a primary relation.
+			 */
+			void setPrimary(const bool primary);
 
+		private:
+			/**
+			 * Reads the type of the relation.
+			 * @param handle The handle of the contact.
+			 * @param index The index of this relation.
+			 */
 			void readType(const MAHandle handle, const int index);
+
+			/**
+			 * Reads the label of the relation.
+			 * @param handle The handle of the contact.
+			 * @param index The index of this relation.
+			 */
 			void readLabel(const MAHandle handle, const int index);
 
+			/**
+			 * Computes the relation attribute.
+			 * @return The relation attribute.
+			 */
+			const int getAttribute() const;
+
 		private:
-			//The name of the relative.
+			//The name of the relation.
 			wchar* mName;
 
 			//The type of data.
-			eRelationTypes mType;
-			//The user defined label
+			eTypes mType;
+			//The user defined label.
 			wchar* mLabel;
-			//Shows if this is a primary phone number or not.
+			//Shows if this is a primary relation or not.
 			bool mIsPrimary;
 	};
 

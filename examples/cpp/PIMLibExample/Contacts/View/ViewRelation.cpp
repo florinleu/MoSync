@@ -28,6 +28,7 @@ MA 02110-1301, USA.
 
 #include "ViewRelation.h"
 #include "ViewDefines.h"
+#include "ContactsScreen.h"
 
 using namespace PIM;
 using namespace NativeUI;
@@ -73,12 +74,11 @@ void ViewRelation::addBody()
 	for (int i=0; i<mOwner->getRelationsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getRelationTypeString(mOwner->getRelation(i)->getType()));
-		if (mOwner->getRelation(i)->getType() == RELATION_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mOwner->getRelation(i)->getLabel());
-		}
-		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
+		sprintf(title, "%d. %s", i + 1,
+				ContactsScreen::getRelationTypeString(
+					mOwner->getRelation(i)->getType(),
+					mOwner->getRelation(i)->getLabel()));
+		addSubTitle(title, mOwner->getRelation(i)->isPrimary());
 		DELETE(title);
 
 		const char* datas[] =
@@ -88,33 +88,4 @@ void ViewRelation::addBody()
 
 		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
 	}
-}
-
-/**
- * Gets the name of the relation type.
- * @param type	The relation type.
- * @return 		The type name.
- */
-const char* ViewRelation::getRelationTypeString(PIM::eRelationTypes type)
-{
-	const char* relationType[] =
-	{
-		"Mother",
-		"Father",
-		"Parent",
-		"Sister",
-		"Brother",
-		"Child",
-		"Friend",
-		"Spouse",
-		"Partner",
-		"Manager",
-		"Assistant",
-		"Domestic partner",
-		"Referred by",
-		"Relative",
-		"Custom"
-	};
-
-	return relationType[type];
 }

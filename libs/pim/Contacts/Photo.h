@@ -34,16 +34,59 @@ namespace PIM
 	class Photo
 	{
 		public:
+			enum eSubFields
+			{
+				//The constant describes a note.
+				HANDLE = 0,
+			};
+
+		public:
+			/**
+			 * Constructor.
+			 */
 			Photo();
+
+			/**
+			 * Destructor.
+			 */
+			~Photo();
+
+			/**
+			 * Reads the contact's photo.
+			 * @param args The arguments needed to read the photo.
+			 * @return true on success.
+			 */
 			bool read(MA_PIM_ARGS& args);
 
+			/**
+			 * Writes the contact's photo.
+			 * @param args The values to write.
+			 */
+			void write(MA_PIM_ARGS& args);
+
+			/**
+			 * Deletes a contact's photo.
+			 * @param handle The handle of the contact.
+			 */
+			void remove(MAHandle handle);
+
+			/**
+			 * Gets the contact's photo handle.
+			 * @return The photo handle of the contact.
+			 */
 			const MAHandle& getHandle() const;
+
+			/**
+			 * Sets the contact's photo handle.
+			 * @param handle The value to set.
+			 */
 			void setHandle(const MAHandle& handle);
 
-			void setURL(wchar* url);
-
-		private:
-			void readHandle(const MAAddress buffer);
+			/**
+			 * Sets the contact's photo url.
+			 * @param url The value to set.
+			 */
+			void setURL(const wchar* const url);
 
 		private:
 			//The photo handle.

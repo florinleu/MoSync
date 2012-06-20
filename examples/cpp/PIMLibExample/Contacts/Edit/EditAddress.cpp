@@ -127,6 +127,58 @@ void EditAddress::addBody()
 
 		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_ADDRESS_FLAGS);
 	}
+
+	addInsertButton();
+}
+
+/**
+ * Ads a new subfield to this field.
+ */
+void EditAddress::addNewSubField()
+{
+	Address* a = new Address();
+	mOwner->add(a);
+
+	mBody->removeChild(mAddButton);
+
+	const char* labels[] =
+	{
+		"street",
+		"city",
+		"state",
+		"postal code",
+		"country",
+		"neighborhood",
+		"po box",
+		"formatted address"
+	};
+
+	int i = mOwner->getAddressesCount() - 1;
+
+	char* title = new char[BUFF_SIZE];
+	sprintf(title, "%d.", i + 1);
+	addSubTitle(title, i);
+	addType(i, ContactsScreen::getAddressTypeString(Address::TYPE_HOME, L""),
+			false);
+	DELETE(title);
+
+	Address* address = mOwner->getAddress(i);
+
+	const int datas[] =
+	{
+		Address::STREET | (i << 8),
+		Address::CITY | (i << 8),
+		Address::STATE | (i << 8),
+		Address::POSTAL_CODE | (i << 8),
+		Address::COUNTRY | (i << 8),
+		Address::NEIGHBORHOOD | (i << 8),
+		Address::PO_BOX | (i << 8),
+		Address::FORMATTED_ADDRESS | (i << 8)
+	};
+
+	addSubFields(labels, NULL, datas, sizeof(labels)/sizeof(char*), EDIT_ADDRESS_FLAGS);
+
+	mBody->addChild(mAddButton);
 }
 
 /**
@@ -236,6 +288,10 @@ void EditAddress::buttonClicked(Widget* button)
 	if (button == mTitle)
 	{
 		EditField::buttonClicked(button);
+	}
+	else if (button == mAddButton)
+	{
+		addNewSubField();
 	}
 	else
 	{

@@ -93,6 +93,12 @@ namespace PIM
 			void write(MA_PIM_ARGS& args, int index);
 
 			/**
+			 * Adds a new address to this contact.
+			 * @param args The values to add.
+			 */
+			void add();
+
+			/**
 			 * Deletes a contact's address.
 			 * @param handle The handle of the contact.
 			 * @param index  The index of the address to delete.
@@ -272,6 +278,8 @@ namespace PIM
 			wchar* mLabel;
 			//Shows if this is a primary address or not.
 			bool mIsPrimary;
+
+			bool mIsNew;
 	};
 
 } //PIM

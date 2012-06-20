@@ -46,7 +46,7 @@ namespace PIM
 				TYPE_OTHER,
 				//The constant describes a custom e-mail address type.
 				//The field's label can be set.
-				TYPE_CUSTOM,
+				TYPE_CUSTOM
 			};
 
 			enum eSubFields
@@ -79,6 +79,12 @@ namespace PIM
 			 * @index args The index of the e-mail to write.
 			 */
 			void write(MA_PIM_ARGS& args, int index);
+
+			/**
+			 * Adds a new e-mail to this contact.
+			 * @param args The values to add.
+			 */
+			void add(MA_PIM_ARGS& args);
 
 			/**
 			 * Deletes a contact's e-mail.

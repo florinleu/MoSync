@@ -24,63 +24,99 @@ MA 02110-1301, USA.
  *
  **/
 
-#include <conprint.h>
 #include <mawstring.h>
-#include <mastdlib.h>
+#include <conprint.h>
 
 #include "Photo.h"
 #include "util.h"
 
 namespace PIM
 {
-	/*
+	/**
 	 * Constructor.
 	 */
 	Photo::Photo():
 		mHandle(-1),
 		mURL(NULL)
 	{
-
 	}
 
+	/**
+	 * Destructor.
+	 */
+	Photo::~Photo()
+	{
+		DELETE(mURL);
+	}
+
+	/**
+	 * Reads the contact's photo.
+	 * @param args The arguments needed to read the photo.
+	 * @return true on success.
+	 */
 	bool Photo::read(MA_PIM_ARGS& args)
 	{
 		printf("@LIB: photo read");
 		args.field = MA_PIM_FIELD_CONTACT_PHOTO;
 		args.bufSize = PIM_BUF_SIZE;
 		CHECK_RESULT(maPimItemGetValue(&args, 0));
-		readHandle(args.buf);
+		mHandle = *(int*)args.buf;
 
 		return true;
 	}
 
-	void Photo::readHandle(const MAAddress buffer)
+	/**
+	 * Writes the contact's photo.
+	 * @param args The values to write.
+	 */
+	void Photo::write(MA_PIM_ARGS& args)
 	{
-		mHandle = *(int*)buffer;
+		printf("@LIB: photo write");
+
+		args.field = MA_PIM_FIELD_CONTACT_PHOTO;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeInt(args.buf, mHandle, 0);
+		maPimItemSetValue(&args, 0, 0);
+
 	}
 
-	/*
-	 * Getter for photo handle.
+	/**
+	 * Deletes a contact's photo.
+	 * @param handle The handle of the contact.
+	 */
+	void Photo::remove(MAHandle handle)
+	{
+		printf("@LIB: note delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_PHOTO, 0);
+	}
+
+	/**
+	 * Gets the contact's photo handle.
+	 * @return The photo handle of the contact.
 	 */
 	const MAHandle& Photo::getHandle() const
 	{
 		return mHandle;
 	}
 
-	/*
-	 * Setter for photo handle.
+	/**
+	 * Sets the contact's photo handle.
+	 * @param handle The value to set.
 	 */
 	void Photo::setHandle(const MAHandle& handle)
 	{
 		mHandle = handle;
 	}
 
-	/*
-	 * Setter for photo URL.
+	/**
+	 * Sets the contact's photo url.
+	 * @param url The value to set.
 	 */
-	void Photo::setURL(wchar* url)
+	void Photo::setURL(const wchar* const url)
 	{
-		mURL = url;
+		DELETE(mURL);
+		mURL = wcsdup(url);
 	}
 
 } //PIM

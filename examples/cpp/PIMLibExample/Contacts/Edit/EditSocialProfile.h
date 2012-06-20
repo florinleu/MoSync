@@ -16,22 +16,22 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditAddress.h
+ * @file EditSocialProfile.h
  * @author Florin Leu
- * @date 08 Mar 2012
+ * @date 07 Jun 2012
  *
- * @brief Address Edit Layout.
+ * @brief Social Profile Edit Layout.
  *
  **/
 
-#ifndef __EDITADDRESS_H__
-#define __EDITADDRESS_H__
+#ifndef __EDITSOCIALPROFILE_H__
+#define __EDITSOCIALPROFILE_H__
 
 #include "EditField.h"
 
 #include "Observer.h"
 
-class EditAddress:
+class EditSocialProfile:
 	public EditField,
 	public Observer
 {
@@ -40,12 +40,12 @@ class EditAddress:
 		 * Constructor.
 		 * @param contact The owner of this field.
 		 */
-		EditAddress(PIM::Contact* contact);
+		EditSocialProfile(PIM::Contact* contact);
 
 		/**
 		 * Destructor.
 		 */
-		~EditAddress();
+		~EditSocialProfile();
 
 	protected:
         /**
@@ -93,19 +93,31 @@ class EditAddress:
 		void initData();
 
 		/**
+		 * Ads service for social profile.
+		 * @param index		The index of the field.
+		 * @param text		The type text.
+		 */
+		void addService(int index, const char* text);
+
+		/**
 		 * Creates the view.
 		 */
 		void addBody();
 
 		/**
-		 * Ads a new subfield to this field.
-		 */
-		void addNewSubField();
-
-		/**
-		 * Updates the address.
+		 * Updates the social profile.
 		 */
 		void update();
+
+		/**
+		 * Button widget for service.
+		 */
+		MAUtil::Vector<NativeUI::Button*> mServices;
+
+		/**
+		 * True if choose service dialog is opened.
+		 */
+		bool bChooseService;
 };
 
-#endif /* __EDITADDRESS_H__ */
+#endif // __EDITSOCIALPROFILE_H__

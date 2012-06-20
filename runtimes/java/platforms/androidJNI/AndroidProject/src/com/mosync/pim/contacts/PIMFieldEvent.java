@@ -37,7 +37,7 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		mStrType = Event.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_DATE;
 
-		mNames = new String[] { Event.START_DATE, Event.TYPE, Event.LABEL,
+		mNames = new String[] { Event._ID, Event.START_DATE, Event.TYPE, Event.LABEL,
 				Event.IS_PRIMARY };
 	}
 
@@ -56,9 +56,9 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		} else {
 			for (int i = 0; i < mValues.size(); i++) {
 				val = mValues.get(i);
-				if (val[0] != null) {
-					val[0] = Integer
-							.toString((int) (getUtcTimeInMillis(val[0]) / 1000));
+				if (val[1] != null) {
+					val[1] = Integer
+							.toString((int) (getUtcTimeInMillis(val[1]) / 1000));
 					mValues.set(i, val);
 				}
 			}
@@ -175,7 +175,7 @@ public class PIMFieldEvent extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[0];
+		return val[1];
 	}
 
 	int getDataSize(String val) {
@@ -189,7 +189,7 @@ public class PIMFieldEvent extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[0] = data;
+		val[1] = data;
 		mValues.set(index, val);
 	}
 
@@ -200,8 +200,8 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		} else {
 			for (int i = 0; i < mValues.size(); i++) {
 				val = mValues.get(i);
-				if (val[0] != null) {
-					val[0] = getUtcTime(Long.parseLong(val[0]) * 1000);
+				if (val[1] != null) {
+					val[1] = getUtcTime(Long.parseLong(val[1]) * 1000);
 					mValues.set(i, val);
 				}
 			}
@@ -228,7 +228,7 @@ public class PIMFieldEvent extends PIMFieldContacts {
 		for (int i = 0; i < mValues.size(); i++) {
 			String[] val = mValues.get(i);
 			DebugPrint("###Event " + i);
-			DebugPrint(mNames[0] + ": " + val[0]);
+			DebugPrint(mNames[1] + ": " + val[1]);
 		}
 		DebugPrint("***************************");
 	}

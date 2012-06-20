@@ -184,11 +184,22 @@ public class PIMFieldPhoto extends PIMFieldContacts {
 	}
 
 	protected void addToDisk(ArrayList<ContentProviderOperation> ops,
-			int rawContactInsertIndex, String[] names, String[] values) {
+			String lookup, String[] names, String[] values) {
+		DebugPrint("Photo.addToDisk " + lookup + "; data type: " + mStrType);
+
+		Cursor cursor = getContentResolver().query(Data.CONTENT_URI,
+				new String[] { Data.RAW_CONTACT_ID }, Data.LOOKUP_KEY + "=?",
+				new String[] { lookup }, null);
+		String id = null;
+		if (cursor.moveToNext()) {
+			id = cursor.getString(cursor.getColumnIndex(Data.RAW_CONTACT_ID));
+		}
+
+		cursor.close();
+
 		ContentProviderOperation.Builder builder = ContentProviderOperation
 				.newInsert(Data.CONTENT_URI)
-				.withValueBackReference(Data.RAW_CONTACT_ID,
-						rawContactInsertIndex)
+				.withValue(Data.RAW_CONTACT_ID, id)
 				.withValue(Data.MIMETYPE, mStrType);
 
 		for (int i = 0; i < names.length; i++) {

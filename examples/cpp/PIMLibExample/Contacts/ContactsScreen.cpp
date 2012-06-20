@@ -147,6 +147,7 @@ void ContactsScreen::stackScreenScreenPopped(StackScreen* stackScreen, Screen* f
 	if (fromScreen == mEditScreen)
 	{
 		mEditScreen->writeData();
+		DELETE(mEditScreen);
 	}
 	if (toScreen == this)
 	{
@@ -362,4 +363,122 @@ const char* ContactsScreen::getOrganizationTypeString(Organization::eTypes type,
 	}
 
 	return sOrganizationTypes[type];
+}
+
+/**
+ * Available social profile services.
+ */
+const char* ContactsScreen::sSPServices[7] =
+{
+	MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_TWITTER,
+	MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_GAMECENTER,
+	MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_FACEBOOK,
+	MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_MYSPACE,
+	MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_LINKEDIN,
+	MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_FLICKR,
+	MA_PIM_CONTACT_SOCIAL_PROFILE_SERVICE_CUSTOM,
+};
+
+/**
+ * Gets the name of the social profile service.
+ * @param protocol	The social profile service.
+ * @return 		The service name.
+ */
+const char* ContactsScreen::getSPServiceString(SocialProfile::eServices service, const wchar* label)
+{
+	if (service == SocialProfile::SERVICE_CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sSPServices[service];
+}
+
+/**
+ * Available social profile types.
+ */
+const char* ContactsScreen::sSPTypes[SocialProfile::TYPE_CUSTOM + 1] =
+{
+	"Home",
+	"Work",
+	"Other",
+	"Custom"
+};
+
+/**
+ * Gets the name of the social profile type.
+ * @param type	The social profile type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getSPTypeString(SocialProfile::eTypes type, const wchar* label)
+{
+	if (type == SocialProfile::TYPE_CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sSPTypes[type];
+}
+
+/**
+ * Available event types.
+ */
+const char* ContactsScreen::sEventTypes[Event::TYPE_CUSTOM + 1] =
+{
+	"Birthday",
+	"Anniversary",
+	"Other",
+	"Custom"
+};
+
+/**
+ * Gets the name of the event type.
+ * @param type	The event type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getEventTypeString(Event::eTypes type, const wchar* label)
+{
+	if (type == Event::TYPE_CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sEventTypes[type];
+}
+
+/**
+ * Available relation types.
+ */
+const char* ContactsScreen::sRelationTypes[Relation::TYPE_CUSTOM + 1] =
+{
+	"Mother",
+	"Father",
+	"Parent",
+	"Sister",
+	"Brother",
+	"Child",
+	"Friend",
+	"Spouse",
+	"Partner",
+	"Manager",
+	"Assistant",
+	"Domestic partner",
+	"Referred by",
+	"Relative",
+	"Custom"
+};
+
+/**
+ * Gets the name of the relation type.
+ * @param type	The relation type.
+ * @return 		The type name.
+ */
+const char* ContactsScreen::getRelationTypeString(Relation::eTypes type, const wchar* label)
+{
+	if (type == Relation::TYPE_CUSTOM)
+	{
+		return wstrtostr(label);
+	}
+
+	return sRelationTypes[type];
 }

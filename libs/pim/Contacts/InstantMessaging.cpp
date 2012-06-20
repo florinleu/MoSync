@@ -32,7 +32,7 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-	/*
+	/**
 	 * Constructor
 	 */
 	InstantMessaging::InstantMessaging():
@@ -103,6 +103,15 @@ namespace PIM
 	}
 
 	/**
+	 * Adds a new IM to this contact.
+	 */
+	void InstantMessaging::add(MA_PIM_ARGS& args)
+	{
+		args.field = MA_PIM_FIELD_CONTACT_IM;
+		maPimItemAddValue(&args, MA_PIM_ATTR_IM_HOME);
+	}
+
+	/**
 	 * Deletes a contact's IM.
 	 * @param handle The handle of the contact.
 	 * @param index  The index of the IM to delete.
@@ -116,15 +125,14 @@ namespace PIM
 
 	/**
 	 * Reads the protocol of the IM.
-	 * @param handle The handle of the contact.
-	 * @param index The index of this IM.
+	 * @param buffer The buffer to read from.
 	 */
 	void InstantMessaging::readProtocol(const MAAddress buffer)
 	{
 		wchar* wstrProtocol = getWCharArrayFromBuf(buffer, MA_PIM_CONTACT_IM_PROTOCOL);
 		char* strProtocol = wstrtostr(wstrProtocol);
 
-		if (strcmp(strProtocol, MA_PIM_CONTACT_IM_PROTOCOL_AIM) == 0)
+		if (strcmp(strProtocol, MA_PIM_CONTACT_IM_PROTOCOL_AIM) == 0)// fleu TODO try to create a map here
 		{
 			mProtocol = PROTOCOL_AIM;
 		}
@@ -171,8 +179,7 @@ namespace PIM
 
 	/**
 	 * Reads the protocol label of the IM.
-	 * @param handle The handle of the contact.
-	 * @param index The index of this IM.
+	 * @param buffer The buffer to read from.
 	 */
 	void InstantMessaging::readProtocolLabel(const MAAddress buffer)
 	{
@@ -349,7 +356,7 @@ namespace PIM
 	 * Gets the protocol string according to mProtocol.
 	 * @return The protocol name.
 	 */
-	wchar* InstantMessaging::getProtocolName() const
+	wchar* InstantMessaging::getProtocolName() const // fleu TODO try to create a map here
 	{
 		const char* str = NULL;
 		switch (mProtocol)
@@ -390,8 +397,8 @@ namespace PIM
 	}
 
 	/**
-	 * Computes the website attribute.
-	 * @return The website attribute.
+	 * Computes the IM attribute.
+	 * @return The IM	 attribute.
 	 */
 	const int InstantMessaging::getAttribute() const
 	{

@@ -44,7 +44,6 @@ class ContactEditScreen : public NativeUI::Screen
 
 		void createUI();
 		void addNavigationBar();
-		bool addField(const char* title, const char** labels, const char** datas, const int size, const bool primary = false);
 		void addPhoto();
 		void addID();
 		void addName();
@@ -56,12 +55,8 @@ class ContactEditScreen : public NativeUI::Screen
 		void addNote();
 		void addOrganization();
 		void addSocialProfile();
-		const char* getSocialProfileServiceString(PIM::eSocialProfileServices service);
-		const char* getSocialProfileTypeString(PIM::eSocialProfileTypes type);
 		void addEvent();
-		const char* getEventTypeString(PIM::eEventTypes type);
 		void addRelation();
-		const char* getRelationTypeString(PIM::eRelationTypes type);
 		void addDeleteButton();
 		void addSpacer();
 

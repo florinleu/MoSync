@@ -33,18 +33,28 @@ MA 02110-1301, USA.
 
 namespace PIM
 {
-
-	/*
-	 * Constructor
+	/**
+	 * Constructor.
 	 */
 	Event::Event():
+		mLabel(NULL),
 		mIsPrimary(false)
 	{
 
 	}
 
-	/*
-	 * Read a complete event.
+	/**
+	 * Destructor.
+	 */
+	Event::~Event()
+	{
+		DELETE(mLabel);
+	}
+
+	/**
+	 * Reads a contact's event.
+	 * @param args The arguments needed to read the event.
+	 * @param index The index of the event to read.
 	 */
 	void Event::read(MA_PIM_ARGS& args, int index)
 	{
@@ -53,18 +63,58 @@ namespace PIM
 		args.bufSize = PIM_BUF_SIZE;
 		if (maPimItemGetValue(&args, index) >= 0)
 		{
-			readDate(args.buf);
+			mDate = *(int*)args.buf;
 
 			readType(args.item, index);
 			readLabel(args.item, index);
 		}
 	}
 
-	void Event::readDate(const MAAddress buffer)
+	/**
+	 * Writes a contact's event.
+	 * @param args The values to write.
+	 * @index args The index of the event to write.
+	 */
+	void Event::write(MA_PIM_ARGS& args, int index)
 	{
-		mDate = *(int*)buffer;
+		printf("@LIB: event write");
+
+		args.field = MA_PIM_FIELD_CONTACT_EVENT;
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeInt(args.buf, mDate, 0);
+		maPimItemSetValue(&args, index, getAttribute());
+
+		memset(args.buf, 0, PIM_BUF_SIZE);
+		args.bufSize = writeWString(args.buf, mLabel, 0);
+		maPimItemSetLabel(&args, index);
 	}
 
+	/**
+	 * Adds a new event to this contact.
+	 */
+	void Event::add(MA_PIM_ARGS& args)
+	{
+		args.field = MA_PIM_FIELD_CONTACT_EVENT;
+		maPimItemAddValue(&args, MA_PIM_ATTR_EVENT_BIRTHDAY);
+	}
+
+	/**
+	 * Deletes a contact's event.
+	 * @param handle The handle of the contact.
+	 * @param index  The index of the event to delete.
+	 */
+	void Event::remove(MAHandle handle, int index)
+	{
+		printf("@LIB: event delete");
+
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_EVENT, index);
+	}
+
+	/**
+	 * Reads the type of the event.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this event.
+	 */
 	void Event::readType(const MAHandle handle, const int index)
 	{
 		int attribute = maPimItemGetAttributes(handle, MA_PIM_FIELD_CONTACT_EVENT, index);
@@ -80,20 +130,25 @@ namespace PIM
 		switch (attribute)
 		{
 			case MA_PIM_ATTR_EVENT_BIRTHDAY:
-				mType = EVENT_BIRTHDAY;
+				mType = TYPE_BIRTHDAY;
 				break;
 			case MA_PIM_ATTR_EVENT_ANNIVERSARY:
-				mType = EVENT_ANNIVERSARY;
+				mType = TYPE_ANNIVERSARY;
 				break;
 			case MA_PIM_ATTR_EVENT_CUSTOM:
-				mType = EVENT_CUSTOM;
+				mType = TYPE_CUSTOM;
 				break;
 			default:
-				mType = EVENT_OTHER;
+				mType = TYPE_OTHER;
 				break;
 		}
 	}
 
+	/**
+	 * Reads the label of the event.
+	 * @param handle The handle of the contact.
+	 * @param index The index of this event.
+	 */
 	void Event::readLabel(const MAHandle handle, const int index)
 	{
 		MA_PIM_ARGS args;
@@ -110,60 +165,105 @@ namespace PIM
 		mLabel = wcsdup(src);
 	}
 
-	/*
-	 * Getter for date.
+	/**
+	 * Gets the contact's event date.
+	 * @return The date of the contact.
 	 */
 	const time_t& Event::getDate() const
 	{
 		return mDate;
 	}
 
-	/*
-	 * Setter for dDate.
+	/**
+	 * Sets the contact's event date.
+	 * @param date The value to set.
 	 */
 	void Event::setDate(const time_t& date)
 	{
 		mDate = date;
 	}
 
-	/*
-	 * Getter for type.
+	/**
+	 * Gets the event type.
+	 * @return The type of the event.
 	 */
-	const eEventTypes& Event::getType() const
+	const Event::eTypes& Event::getType() const
 	{
 		return mType;
 	}
 
-	/*
-	 * Setter for type.
+	/**
+	 * Sets the event type.
+	 * @param type The value to set.
 	 */
-	void Event::setType(const eEventTypes& type)
+	void Event::setType(const Event::eTypes& type)
 	{
 		mType = type;
 	}
 
-	/*
-	 * Getter for label.
+	/**
+	 * Gets the event label.
+	 * @return The label of the event.
 	 */
-	const wchar* Event::getLabel() const
+	const wchar* const Event::getLabel() const
 	{
 		return mLabel;
 	}
 
-	/*
-	 * Setter for label.
+	/**
+	 * Sets the event label.
+	 * @param label The value to set.
 	 */
-	void Event::setLabel(wchar* label)
+	void Event::setLabel(const wchar* const label)
 	{
-		mLabel = label;
+		DELETE(mLabel);
+		mLabel = wcsdup(label);
 	}
 
-	/*
-	 * Returns true if this is set as the primary phone.
+	/**
+	 * Checks if this is or not a primary event.
+	 * @return True if this is a primary event.
 	 */
 	const bool Event::isPrimary() const
 	{
 		return mIsPrimary;
+	}
+
+	/**
+	 * Sets this as a primary event.
+	 * @param primary true if this is a primary event.
+	 */
+	void Event::setPrimary(const bool primary)
+	{
+		mIsPrimary = primary;
+	}
+
+	/**
+	 * Computes the event attribute.
+	 * @return The event attribute.
+	 */
+	const int Event::getAttribute() const
+	{
+		int attribute = 0;
+		switch (mType)
+		{
+			case TYPE_BIRTHDAY:
+				attribute = MA_PIM_ATTR_EVENT_BIRTHDAY;
+				break;
+			case TYPE_ANNIVERSARY:
+				attribute = MA_PIM_ATTR_EVENT_ANNIVERSARY;
+				break;
+			case TYPE_CUSTOM:
+				attribute = MA_PIM_ATTR_EVENT_CUSTOM;
+				break;
+			default:
+				attribute = MA_PIM_ATTR_EVENT_OTHER;
+				break;
+		}
+
+		attribute |= (mIsPrimary ? MA_PIM_ATTRPREFERRED : 0);
+
+		return attribute;
 	}
 
 } //PIM

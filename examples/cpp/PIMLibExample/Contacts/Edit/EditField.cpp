@@ -31,6 +31,7 @@ MA 02110-1301, USA.
 
 #include "EditField.h"
 #include "EditDefines.h"
+#include "MAHeaders.h"
 
 using namespace NativeUI;
 using namespace PIM;
@@ -54,6 +55,7 @@ EditField::EditField(Contact* contact):
 EditField::~EditField()
 {
 	mTitle->removeButtonListener(this);
+	printf("removeChild 2");
 	removeChild(mBody);
 	DELETE(mBody);
 
@@ -161,7 +163,7 @@ void EditField::addSubFields(const char** labels, const char** texts, const int*
 		Label* label = new Label();
 		label->setWidth(EDIT_LABEL_WIDTH);
 		label->fillSpaceVertically();
-		label->setBackgroundColor(EDIT_LABEL_COLOR);
+		//label->setBackgroundColor(EDIT_LABEL_COLOR);
 		label->setFont(mLabelFont);
 		label->setText(labels[i]);
 		label->setTextHorizontalAlignment(MAW_ALIGNMENT_LEFT);
@@ -183,7 +185,7 @@ void EditField::addSubFields(const char** labels, const char** texts, const int*
 		data->setData(createData(datas[i]));
 		data->addEditBoxListener(this);
 
-		if ( (texts[i] != NULL) && (strlen(texts[i]) > 0) )
+		if ( (texts != NULL) && (texts[i] != NULL) && (strlen(texts[i]) > 0) )
 		{
 			data->setText(texts[i]);
 		}
@@ -192,9 +194,39 @@ void EditField::addSubFields(const char** labels, const char** texts, const int*
 			data->setPlaceholder(labels[i]);
 		}
 
-		addSubFieldsSpacer();
+		//addSubFieldsSpacer();
 	}
+	addFieldsSpacer();
 }
+
+/**
+ * Ads the button for inserting a new subfield.
+ */
+void EditField::addInsertButton()
+{
+//	HorizontalLayout* layout = new HorizontalLayout();
+//	layout->wrapContentVertically();
+//	layout->setChildVerticalAlignment(MAW_ALIGNMENT_CENTER);
+//	layout->setChildHorizontalAlignment(MAW_ALIGNMENT_CENTER);
+
+	mAddButton = new ImageButton();
+	mAddButton->setWidth(PIMMoblet::sScreenWidth / 5);
+	mAddButton->setHeight(PIMMoblet::sScreenWidth / 5);
+	mAddButton->setBackgroundImage(RES_PLUS_SIGN);
+	mAddButton->addButtonListener(this);
+	//layout->addChild(mAddButton);
+	mBody->addChild(mAddButton);
+
+	//mBody->addChild(layout);
+}
+
+///**
+// * Removes the button for inserting a new subfield.
+// */
+//void EditField::removeInsertButton()
+//{
+//	mBody->removeChild();
+//}
 
 /**
  * Creates a button used to toggle the view.
@@ -216,6 +248,8 @@ void EditField::addTitle()
 void EditField::addBody()
 {
 	mBody = new VerticalLayout();
+	mBody->setBackgroundGradient(0x00BFD9, 0x0B00D9);
+	mBody->setChildHorizontalAlignment(MAW_ALIGNMENT_CENTER);
 }
 
 /**
@@ -225,16 +259,12 @@ void EditField::clearBody()
 {
 	removeChild(mBody);
 	DELETE(mBody);
-//	for (int i=mBody->countChildWidgets() - 1; i>=0; i--)
-//	{
-//		mBody->removeChild(mBody->getChild(i));
-//	}
 }
 
 /**
  * Creates a small spacer and ads it to the view body.
  */
-void EditField::addSubFieldsSpacer()
+void EditField::addFieldsSpacer()
 {
 	VerticalLayout* spacer = new VerticalLayout();
 	spacer->fillSpaceHorizontally();

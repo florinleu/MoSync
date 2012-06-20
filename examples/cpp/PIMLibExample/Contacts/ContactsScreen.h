@@ -116,6 +116,34 @@ class ContactsScreen :
 		 */
 		static const char* getOrganizationTypeString(PIM::Organization::eTypes type, const wchar* label);
 
+		/**
+		 * Gets the name of the social profile service.
+		 * @param protocol	The social profile service.
+		 * @return 		The service name.
+		 */
+		static const char* getSPServiceString(PIM::SocialProfile::eServices service, const wchar* label);
+
+		/**
+		 * Gets the name of the social profile type.
+		 * @param type	The social profile type.
+		 * @return 		The type name.
+		 */
+		static const char* getSPTypeString(PIM::SocialProfile::eTypes type, const wchar* label);
+
+		/**
+		 * Gets the name of the event type.
+		 * @param type	The event type.
+		 * @return 		The type name.
+		 */
+		static const char* getEventTypeString(PIM::Event::eTypes type, const wchar* label);
+
+		/**
+		 * Gets the name of the relation type.
+		 * @param type	The relation type.
+		 * @return 		The type name.
+		 */
+		static const char* getRelationTypeString(PIM::Relation::eTypes type, const wchar* label);
+
 	public:
 		static const char* sAddressTypes[PIM::Address::TYPE_CUSTOM + 1];
 		static const char* sPhoneTypes[PIM::Phone::TYPE_CUSTOM + 1];
@@ -124,6 +152,10 @@ class ContactsScreen :
 		static const char* sIMProtocols[10];
 		static const char* sIMTypes[PIM::InstantMessaging::TYPE_CUSTOM + 1];
 		static const char* sOrganizationTypes[PIM::Organization::TYPE_CUSTOM + 1];
+		static const char* sSPServices[7];
+		static const char* sSPTypes[PIM::SocialProfile::TYPE_CUSTOM + 1];
+		static const char* sEventTypes[PIM::Event::TYPE_CUSTOM + 1];
+		static const char* sRelationTypes[PIM::Relation::TYPE_CUSTOM + 1];
 
 	private:
 		NativeUI::VerticalLayout* mLayout;

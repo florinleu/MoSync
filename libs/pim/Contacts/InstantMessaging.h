@@ -105,6 +105,12 @@ namespace PIM
 			void write(MA_PIM_ARGS& args, int index);
 
 			/**
+			 * Adds a new IM to this contact.
+			 * @param args The values to add.
+			 */
+			void add(MA_PIM_ARGS& args);
+
+			/**
 			 * Deletes a contact's IM.
 			 * @param handle The handle of the contact.
 			 * @param index  The index of the IM to delete.
@@ -186,15 +192,13 @@ namespace PIM
 		private:
 			/**
 			 * Reads the protocol of the IM.
-			 * @param handle The handle of the contact.
-			 * @param index The index of this IM.
+			 * @param buffer The buffer to read from.
 			 */
 			void readProtocol(const MAAddress buffer);
 
 			/**
 			 * Reads the protocol label of the IM.
-			 * @param handle The handle of the contact.
-			 * @param index The index of this IM.
+			 * @param buffer The buffer to read from.
 			 */
 			void readProtocolLabel(const MAAddress buffer);
 

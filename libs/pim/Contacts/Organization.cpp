@@ -140,6 +140,15 @@ namespace PIM
 	}
 
 	/**
+	 * Adds a new organization to this contact.
+	 */
+	void Organization::add(MA_PIM_ARGS& args)
+	{
+		args.field = MA_PIM_FIELD_CONTACT_ORG;
+		maPimItemAddValue(&args, MA_PIM_ATTR_ORG_WORK);
+	}
+
+	/**
 	 * Deletes a contact's organization.
 	 * @param handle The handle of the contact.
 	 * @param index  The index of the organization to delete.

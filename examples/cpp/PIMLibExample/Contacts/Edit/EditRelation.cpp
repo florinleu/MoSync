@@ -15,11 +15,11 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditPhone.cpp
+ * @file EditRelation.cpp
  * @author Florin Leu
- * @date 08 Mar 2012
+ * @date 11 Jun 2012
  *
- * @brief Phone Edit Layout.
+ * @brief Relation Edit Layout.
  *
  **/
 
@@ -29,7 +29,7 @@ MA 02110-1301, USA.
 
 #include "ContactsScreen.h"
 
-#include "EditPhone.h"
+#include "EditRelation.h"
 #include "EditDefines.h"
 
 #include "TypeDialog.h"
@@ -43,7 +43,7 @@ using namespace MAUtil;
  * Constructor.
  * @param contact The owner of this field.
  */
-EditPhone::EditPhone(Contact* contact):
+EditRelation::EditRelation(Contact* contact):
 	EditField(contact)
 {
 	initData();
@@ -55,7 +55,7 @@ EditPhone::EditPhone(Contact* contact):
 /**
  * Destructor.
  */
-EditPhone::~EditPhone()
+EditRelation::~EditRelation()
 {
 	DELETE(mDialog);
 	DELETE(mDeleteButton);
@@ -64,92 +64,92 @@ EditPhone::~EditPhone()
 /**
  * Inits the data used to display this field.
  */
-void EditPhone::initData()
+void EditRelation::initData()
 {
-	mTitleText = strdup(TXT_EDIT_PHONE_TITLE);
-	mDeleteButton = new Button*[mOwner->getPhonesCount()];
+	mTitleText = strdup(TXT_EDIT_RELATION_TITLE);
+	mDeleteButton = new Button*[mOwner->getRelationsCount()];
 }
 
 /**
  * Creates the view.
  */
-void EditPhone::addBody()
+void EditRelation::addBody()
 {
 	const char* labels[] =
 	{
-		"number"
+		"name"
 	};
 
 	EditField::addBody();
 
-	for (int i=0; i<mOwner->getPhonesCount(); i++)
+	for (int i=0; i<mOwner->getRelationsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
 		sprintf(title, "%d.", i + 1);
 		addSubTitle(title, i);
-		addType(i, ContactsScreen::getPhoneTypeString(mOwner->getPhone(i)->getType(), mOwner->getPhone(i)->getLabel()),
-				mOwner->getPhone(i)->isPrimary());
+		addType(i, ContactsScreen::getRelationTypeString(mOwner->getRelation(i)->getType(), mOwner->getRelation(i)->getLabel()),
+				mOwner->getRelation(i)->isPrimary());
 		DELETE(title);
 
-		Phone* phone = mOwner->getPhone(i);
+		Relation* relation = mOwner->getRelation(i);
 
 		const char* texts[] =
 		{
-			wstrtostr(phone->getNumber()),
+			wstrtostr(relation->getName()),
 		};
 
 		const int datas[] =
 		{
-			Phone::NUMBER | (i << 8),
+			Relation::NAME | (i << 8),
 		};
 
-		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_PHONE_FLAGS);
+		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_RELATION_FLAGS);
 	}
 }
 
 /**
  * This method is called when an edit box loses focus.
  * The virtual keyboard is hidden.
- * Only for iphone platform.
+ * Only for irelation platform.
  * @param editBox The edit box object that generated the event.
  */
-void EditPhone::editBoxEditingDidEnd(EditBox* editBox)
+void EditRelation::editBoxEditingDidEnd(EditBox* editBox)
 {
 	int data = *(int*)(editBox->getData());
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d.", data);
 
-	Phone* phone = mOwner->getPhone(data >> 8);
+	Relation* relation = mOwner->getRelation(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case Phone::NUMBER:
-			phone->setNumber(text);
+		case Relation::NAME:
+			relation->setName(text);
 			break;
 	}
 }
 
 /**
  * This method is called when the return button was pressed.
- * On iphone platform the virtual keyboard is not hidden after
+ * On irelation platform the virtual keyboard is not hidden after
  * receiving this event.
  * @param editBox The edit box object that generated the event.
  */
-void EditPhone::editBoxReturn(EditBox* editBox)
+void EditRelation::editBoxReturn(EditBox* editBox)
 {
 	editBox->hideKeyboard();
 
 	//fleu TODO remove this after didend is implemented
 	int data = *(int*)(editBox->getData());
 	wchar* text = strtowstr(editBox->getText().c_str());
-	printf("Edit box did end %d.", data, text);
+	printf("Edit box did end %d %S.", data, text);
 
-	Phone* phone = mOwner->getPhone(data >> 8);
+	Relation* relation = mOwner->getRelation(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case Phone::NUMBER:
-			phone->setNumber(text);
+		case Relation::NAME:
+			relation->setName(text);
 			break;
 	}
 }
@@ -160,18 +160,18 @@ void EditPhone::editBoxReturn(EditBox* editBox)
  * @param checkBox The check box object that generated the event.
  * @param state True if the check box is checked, false otherwise.
  */
-void EditPhone::checkBoxStateChanged(CheckBox *checkBox, bool state)
+void EditRelation::checkBoxStateChanged(CheckBox *checkBox, bool state)
 {
 	int data = *(int*)(checkBox->getData());
-	Phone* phone = mOwner->getPhone(data);
-	phone->setPrimary(state);
+	Relation* relation = mOwner->getRelation(data);
+	relation->setPrimary(state);
 }
 
 /**
  * This method is called if the touch-up event was inside the bounds of the button.
  * @param button The button object that generated the event.
  */
-void EditPhone::buttonClicked(Widget* button)
+void EditRelation::buttonClicked(Widget* button)
 {
 	if (button == mTitle)
 	{
@@ -188,10 +188,10 @@ void EditPhone::buttonClicked(Widget* button)
 		}
 		else
 		{
-			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sPhoneTypes,
-					sizeof(ContactsScreen::sPhoneTypes)/sizeof(char*),
-					(int)mOwner->getPhone(data)->getType(),
-					mOwner->getPhone(data)->getLabel());
+			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sRelationTypes,
+					sizeof(ContactsScreen::sRelationTypes)/sizeof(char*),
+					(int)mOwner->getRelation(data)->getType(),
+					mOwner->getRelation(data)->getLabel());
 			TypeDialog::getInstance()->show();
 		}
 	}
@@ -203,25 +203,25 @@ void EditPhone::buttonClicked(Widget* button)
  * @param type The type to set.
  * @param label The label to set.
  */
-void EditPhone::update(int index, int type, String label)
+void EditRelation::update(int index, int type, String label)
 {
-	mOwner->getPhone(index)->setType((Phone::eTypes)type);
+	mOwner->getRelation(index)->setType((Relation::eTypes)type);
 
-	if (type == Phone::TYPE_CUSTOM)
+	if (type == Relation::TYPE_CUSTOM)
 	{
-		mOwner->getPhone(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
+		mOwner->getRelation(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 	}
 
-	mTypes[index]->setText(ContactsScreen::getPhoneTypeString(
-			mOwner->getPhone(index)->getType(), mOwner->getPhone(index)->getLabel()));
+	mTypes[index]->setText(ContactsScreen::getRelationTypeString(
+			mOwner->getRelation(index)->getType(), mOwner->getRelation(index)->getLabel()));
 }
 
 /**
- * Updates the phone.
+ * Updates the relation.
  */
-void EditPhone::update()
+void EditRelation::update()
 {
-	mOwner->removePhone(mCurrentSubField);
+	mOwner->removeRelation(mCurrentSubField);
 	clearBody();
 	addBody();
 	addChild(mBody);

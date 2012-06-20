@@ -464,6 +464,8 @@ group PIMConsts "PIM Constants" {
 		SERVICE = 3;
 		/// #MA_PIM_TYPE_STRING.
 		SERVICE_LABEL = 4;
+		/// Subfields number.
+		COUNT = 5;
 	}
 
 	constset MAString MA_PIM_CONTACT_IM_PROTOCOL_ {

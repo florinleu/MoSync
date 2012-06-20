@@ -186,7 +186,6 @@ public class PIMFieldPhone extends PIMFieldContacts {
 	}
 
 	void setSpecificData(String data, int index) {
-		DebugPrint("PIMFieldPhone.setSpecificData(" + data + ", " + index + ")");
 		String[] val = mValues.get(index);
 		val[1] = data;
 		mValues.set(index, val);

@@ -92,6 +92,15 @@ namespace PIM
 	}
 
 	/**
+	 * Adds a new website to this contact.
+	 */
+	void Website::add(MA_PIM_ARGS& args)
+	{
+		args.field = MA_PIM_FIELD_CONTACT_URL;
+		maPimItemAddValue(&args, MA_PIM_ATTR_WEBSITE_HOMEPAGE);
+	}
+
+	/**
 	 * Deletes a contact's website.
 	 * @param handle The handle of the contact.
 	 * @param index  The index of the website to delete.

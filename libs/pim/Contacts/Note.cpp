@@ -49,47 +49,58 @@ namespace PIM
 	}
 
 	/**
-	 * Reads the contact's name.
-	 * @param args The arguments needed to read the name.
-	 * @return true on success.
+	 * Reads a contact's note.
+	 * @param args The arguments needed to read the note.
+	 * @param index The index of the note to read.
 	 */
-	bool Note::read(MA_PIM_ARGS& args)
+	void Note::read(MA_PIM_ARGS& args, int index)
 	{
 		printf("@LIB: note read");
 		args.field = MA_PIM_FIELD_CONTACT_NOTE;
 		args.bufSize = PIM_BUF_SIZE;
-		CHECK_RESULT(maPimItemGetValue(&args, 0));
+		if (maPimItemGetValue(&args, index) >= 0)
+		{
+			wchar* src = (wchar*)args.buf;
+			mText = wcsdup(src);
 
-		wchar* src = (wchar*)args.buf;
-		mText = wcsdup(src);
-
-		return true;
+		}
 	}
 
 	/**
-	 * Writes the contact's note.
+	 * Writes a contact's note.
 	 * @param args The values to write.
+	 * @index args The index of the note to write.
 	 */
-	void Note::write(MA_PIM_ARGS& args)
+	void Note::write(MA_PIM_ARGS& args, int index)
 	{
 		printf("@LIB: note write");
 
 		args.field = MA_PIM_FIELD_CONTACT_NOTE;
 		memset(args.buf, 0, PIM_BUF_SIZE);
 		args.bufSize = writeWString(args.buf, mText, 0);
-		maPimItemSetValue(&args, 0, 0);
+		maPimItemSetValue(&args, index, 0);
 
 	}
 
 	/**
-	 * Deletes a contact's name.
-	 * @param handle The handle of the contact.
+	 * Adds a new note to this contact.
 	 */
-	void Note::remove(MAHandle handle)
+	void Note::add(MA_PIM_ARGS& args)
+	{
+		args.field = MA_PIM_FIELD_CONTACT_NOTE;
+		maPimItemAddValue(&args, 0);
+	}
+
+	/**
+	 * Deletes a contact's note.
+	 * @param handle The handle of the contact.
+	 * @param index  The index of the note to delete.
+	 */
+	void Note::remove(MAHandle handle, int index)
 	{
 		printf("@LIB: note delete");
 
-		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_NOTE, 0);
+		maPimItemRemoveValue(handle, MA_PIM_FIELD_CONTACT_NOTE, index);
 	}
 
 	/**

@@ -33,7 +33,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 		mStrType = Event.CONTENT_ITEM_TYPE;
 		mDataType = MA_PIM_TYPE_DATE;
 
-		mNames = new String[] { Event.START_DATE, Event.TYPE, Event.LABEL,
+		mNames = new String[] { Event._ID, Event.START_DATE, Event.TYPE, Event.LABEL,
 				Event.IS_PRIMARY };
 	}
 
@@ -157,7 +157,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 
 	String getSpecificData(int index) {
 		String[] val = mValues.get(index);
-		return val[0];
+		return val[1];
 	}
 
 	int getDataSize(String val) {
@@ -171,7 +171,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 
 	void setSpecificData(String data, int index) {
 		String[] val = mValues.get(index);
-		val[0] = data;
+		val[1] = data;
 		mValues.set(index, val);
 	}
 
@@ -207,7 +207,7 @@ public class PIMFieldBirthday extends PIMFieldContacts {
 				|| ((val = mValues.get(0)) == null)) {
 			DebugPrint("Not available");
 		} else {
-			DebugPrint("Birthday: " + val[0]);
+			DebugPrint("Birthday: " + val[1]);
 		}
 		DebugPrint("***************************");
 	}

@@ -105,7 +105,7 @@ class EditInstantMessaging:
 		void addBody();
 
 		/**
-		 * Updates the address.
+		 * Updates the instant messaging.
 		 */
 		void update();
 

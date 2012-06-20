@@ -29,6 +29,8 @@ MA 02110-1301, USA.
 #include "EditNote.h"
 #include "EditDefines.h"
 
+#include "ConfirmDialog.h"
+
 using namespace PIM;
 using namespace NativeUI;
 
@@ -39,9 +41,10 @@ using namespace NativeUI;
 EditNote::EditNote(Contact* contact):
 	EditField(contact)
 {
-	mNote = contact->getNote();
 	initData();
 	createUI();
+
+	mDialog = new ConfirmDialog(this);
 }
 
 /**
@@ -49,7 +52,8 @@ EditNote::EditNote(Contact* contact):
  */
 EditNote::~EditNote()
 {
-
+	DELETE(mDialog);
+	DELETE(mDeleteButton);
 }
 
 /**
@@ -58,6 +62,7 @@ EditNote::~EditNote()
 void EditNote::initData()
 {
 	mTitleText = strdup(TXT_EDIT_NOTE_TITLE);
+	mDeleteButton = new Button*[mOwner->getNotesCount()];
 }
 
 /**
@@ -70,18 +75,29 @@ void EditNote::addBody()
 		"text"
 	};
 
-	const char* texts[] =
-	{
-		wstrtostr(mNote->getText())
-	};
-
-	const int datas[] =
-	{
-		Note::TEXT
-	};
-
 	EditField::addBody();
-	addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_NOTE_FLAGS);
+
+	for (int i=0; i<mOwner->getNotesCount(); i++)
+	{
+		char* title = new char[BUFF_SIZE];
+		sprintf(title, "%d.", i + 1);
+		addSubTitle(title, i);
+		DELETE(title);
+
+		Note* note = mOwner->getNote(i);
+
+		const char* texts[] =
+		{
+			wstrtostr(note->getText())
+		};
+
+		const int datas[] =
+		{
+			Note::TEXT | (i << 8),
+		};
+
+		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_NOTE_FLAGS);
+	}
 }
 
 /**
@@ -96,10 +112,12 @@ void EditNote::editBoxEditingDidEnd(EditBox* editBox)
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d.", data);
 
+	Note* note = mOwner->getNote(data >> 8);
+
 	switch (data)
 	{
 		case Note::TEXT:
-			mNote->setText(text);
+			note->setText(text);
 			break;
 	}
 }
@@ -119,10 +137,45 @@ void EditNote::editBoxReturn(EditBox* editBox)
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d.", data);
 
+	Note* note = mOwner->getNote(data >> 8);
+
 	switch (data)
 	{
 		case Note::TEXT:
-			mNote->setText(text);
+			note->setText(text);
 			break;
 	}
+}
+
+/**
+ * This method is called if the touch-up event was inside the bounds of the button.
+ * @param button The button object that generated the event.
+ */
+void EditNote::buttonClicked(Widget* button)
+{
+	if (button == mTitle)
+	{
+		EditField::buttonClicked(button);
+	}
+	else
+	{
+		int data = *(int*)(button->getData());
+
+		if (button == mDeleteButton[data])
+		{
+			mDialog->show();
+			mCurrentSubField = data;
+		}
+	}
+}
+
+/**
+ * Updates the note.
+ */
+void EditNote::update()
+{
+	mOwner->removeNote(mCurrentSubField);
+	clearBody();
+	addBody();
+	addChild(mBody);
 }

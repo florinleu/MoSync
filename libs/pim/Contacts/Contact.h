@@ -76,7 +76,6 @@ namespace PIM
 			Contact();
 			~Contact();
 
-			void cleanFields(bool cleanID = true);
 			int readNext(int flag = RF_ALL);
 			int find(int flag = RF_ALL);
 			int write(int flag = RF_ALL);
@@ -91,53 +90,71 @@ namespace PIM
 
 			const int getAddressesCount() const;
 			Address* getAddress(int index) const;
+			void add(Address* address);
 			void setAddress(Address* address, int index);
 			void removeAddress(int index);
 
 			const int getPhonesCount() const;
+			void add(Phone* phone);
 			Phone* getPhone(int index) const;
 			void setPhone(Phone* phone, int index);
 			void removePhone(int index);
 
 			const int getEmailsCount() const;
+			void add(Email* email);
 			Email* getEmail(int index) const;
 			void setEmail(Email* email, int index);
 			void removeEmail(int index);
 
 			const int getWebsitesCount() const;
+			void add(Website* website);
 			Website* getWebsite(int index) const;
 			void setWebsite(Website* website, int index);
 			void removeWebsite(int index);
 
 			const int getInstantMessagingsCount() const;
+			void add(InstantMessaging* instantMessaging);
 			InstantMessaging* getInstantMessaging(int index) const;
 			void setInstantMessaging(InstantMessaging* instantMessaging, int index);
 			void removeInstantMessaging(int index);
 
-			Note* getNote() const;
-			void setNote(Note* note);
+			const int getNotesCount() const;
+			void add(Note* note);
+			Note* getNote(int index) const;
+			void setNote(Note* note, int index);
+			void removeNote(int index);
 
 			const int getOrganizationsCount() const;
+			void add(Organization* organization);
 			Organization* getOrganization(int index) const;
 			void setOrganization(Organization* organization, int index);
 			void removeOrganization(int index);
 
 			const int getSocialProfilesCount() const;
+			void add(SocialProfile* socialProfile);
 			SocialProfile* getSocialProfile(int index) const;
 			void setSocialProfile(SocialProfile* socialProfile, int index);
+			void removeSocialProfile(int index);
 
 			const int getEventsCount() const;
+			void add(Event* event);
 			Event* getEvent(int index) const;
 			void setEvent(Event* event, int index);
+			void removeEvent(int index);
 
 			const int getRelationsCount() const;
+			void add(Relation* relation);
 			Relation* getRelation(int index) const;
 			void setRelation(Relation* relation, int index);
+			void removeRelation(int index);
 
 			Photo* getPhoto() const;
 			void setPhoto(Photo* photo);
 
 		private:
+			void cleanFields(bool cleanID = true);
+			void close();
+
 			void initArgs(MA_PIM_ARGS& args);
 			void readID(MA_PIM_ARGS args);
 			void readName(MA_PIM_ARGS args);
@@ -163,6 +180,10 @@ namespace PIM
 			void writeInstantMessagings(MA_PIM_ARGS args);
 			void writeNote(MA_PIM_ARGS args);
 			void writeOrganizations(MA_PIM_ARGS args);
+			void writeSocialProfile(MA_PIM_ARGS args);
+			void writeEvent(MA_PIM_ARGS args);
+			void writeRelation(MA_PIM_ARGS args);
+			void writePhoto(MA_PIM_ARGS args);
 
 			/**
 			 * Finds a contact by it's id.
@@ -180,7 +201,7 @@ namespace PIM
 			MAUtil::Vector<Email*> mEmails;
 			MAUtil::Vector<Website*> mWebsites;
 			MAUtil::Vector<InstantMessaging*> mInstantMessagings;
-			Note* mNote;
+			MAUtil::Vector<Note*> mNotes;
 			MAUtil::Vector<Organization*> mOrganizations;
 			MAUtil::Vector<SocialProfile*> mSocialProfiles;
 			MAUtil::Vector<Event*> mEvents;

@@ -55,20 +55,6 @@ class ViewSocialProfile :
 		 * Creates the view.
 		 */
 		void addBody();
-
-		/**
-		 * Gets the name of the social profile service.
-		 * @param protocol 	The social profile service.
-		 * @return			The service name.
-		 */
-		const char* getSocialProfileServiceString(PIM::eSocialProfileServices service);
-
-		/**
-		 * Gets the name of the social profile type.
-		 * @param type	The social profile type.
-		 * @return 		The type name.
-		 */
-		const char* getSocialProfileTypeString(PIM::eSocialProfileTypes type);
 };
 
 #endif /* __VIEWSOCIALPROFILE_H__ */

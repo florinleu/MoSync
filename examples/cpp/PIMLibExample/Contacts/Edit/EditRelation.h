@@ -16,22 +16,21 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditAddress.h
+ * @file EditRelation.h
  * @author Florin Leu
- * @date 08 Mar 2012
+ * @date 11 Jun 2012
  *
- * @brief Address Edit Layout.
+ * @brief Relation Edit Layout.
  *
  **/
 
-#ifndef __EDITADDRESS_H__
-#define __EDITADDRESS_H__
+#ifndef __EDITRELATION_H__
+#define __EDITRELATION_H__
 
 #include "EditField.h"
-
 #include "Observer.h"
 
-class EditAddress:
+class EditRelation:
 	public EditField,
 	public Observer
 {
@@ -40,12 +39,12 @@ class EditAddress:
 		 * Constructor.
 		 * @param contact The owner of this field.
 		 */
-		EditAddress(PIM::Contact* contact);
+		EditRelation(PIM::Contact* contact);
 
 		/**
 		 * Destructor.
 		 */
-		~EditAddress();
+		~EditRelation();
 
 	protected:
         /**
@@ -98,14 +97,9 @@ class EditAddress:
 		void addBody();
 
 		/**
-		 * Ads a new subfield to this field.
-		 */
-		void addNewSubField();
-
-		/**
-		 * Updates the address.
+		 * Updates the relation.
 		 */
 		void update();
 };
 
-#endif /* __EDITADDRESS_H__ */
+#endif /* __EDITRELATION_H__ */

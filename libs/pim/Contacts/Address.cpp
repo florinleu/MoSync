@@ -35,7 +35,7 @@ namespace PIM
 	/**
 	 * Constructor.
 	 */
-	Address::Address():
+	Address::Address(): //fleu todo, initialize mType
 		mStreet(NULL),
 		mCity(NULL),
 		mState(NULL),
@@ -45,7 +45,8 @@ namespace PIM
 		mPOBox(NULL),
 		mFormattedAddress(NULL),
 		mLabel(NULL),
-		mIsPrimary(false)
+		mIsPrimary(false),
+		mIsNew(false)
 	{
 
 	}
@@ -120,11 +121,26 @@ namespace PIM
 		args.bufSize += writeWString(args.buf, mPostalCode, args.bufSize);
 		args.bufSize += writeWString(args.buf, mCountry, args.bufSize);
 		args.bufSize += writeWString(args.buf, mNeighborhood, args.bufSize);
-		maPimItemSetValue(&args, index, getAttribute());
+		if (mIsNew)
+		{
+			maPimItemAddValue(&args, getAttribute());
+		}
+		else
+		{
+			maPimItemSetValue(&args, index, getAttribute());
+		}
 
 		memset(args.buf, 0, PIM_BUF_SIZE);
 		args.bufSize = writeWString(args.buf, mLabel, 0);
 		maPimItemSetLabel(&args, index);
+	}
+
+	/**
+	 * Adds a new address to this contact.
+	 */
+	void Address::add()
+	{
+		mIsNew = true;
 	}
 
 	/**

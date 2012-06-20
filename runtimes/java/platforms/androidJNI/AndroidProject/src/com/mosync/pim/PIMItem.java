@@ -245,6 +245,7 @@ public abstract class PIMItem {
 	int addFieldValue(int field, int buffPointer, int buffSize, int attributes) {
 		DebugPrint("addFieldValue(" + field + ", " + buffPointer + ", "
 				+ buffSize + ", " + attributes + ")");
+
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {
@@ -267,7 +268,7 @@ public abstract class PIMItem {
 	 * @return
 	 */
 	int removeFieldValue(int field, int index) {
-		DebugPrint("getFieldValue(" + field + ", " + index + ")");
+		DebugPrint("removeFieldValue(" + field + ", " + index + ")");
 		PIMField pimField = getField(field);
 
 		if (pimField == null) {

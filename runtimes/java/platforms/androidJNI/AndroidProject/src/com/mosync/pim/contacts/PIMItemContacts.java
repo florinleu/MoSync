@@ -14,6 +14,7 @@ import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Data;
 import android.provider.ContactsContract.RawContacts;
+import android.provider.ContactsContract.CommonDataKinds.StructuredPostal;
 
 import com.mosync.pim.*;
 
@@ -201,6 +202,20 @@ public class PIMItemContacts extends PIMItem {
 				ContentProviderResult[] res = getContentResolver().applyBatch(
 						ContactsContract.AUTHORITY, ops);
 				DebugPrint("Result = " + res.length);
+//				for (int i=0; i<res.length; i++)
+//				{
+//					DebugPrint("res[" + i + "]= " + res[i].toString());
+//					Cursor c1 = getContentResolver().query(res[i].uri, null, null, null, null);
+//					DebugPrint("Cursor size: " + c1.getCount());
+//					while (c1.moveToNext())
+//					{
+//						for (int j=0; j<c1.getColumnCount(); j++)
+//						{
+//							DebugPrint(c1.getColumnName(j) + " = " + c1.getString(j));
+//						}
+//					}
+//					c1.close();
+//				}
 			}
 		} catch (OperationApplicationException e) {
 			DebugPrint("OperationApplicationException: " + e.getMessage());
@@ -215,5 +230,17 @@ public class PIMItemContacts extends PIMItem {
 		while (fieldsIt.hasNext()) {
 			fieldsIt.next().close();
 		}
+
+//		Cursor c2 = getContentResolver().query(Data.CONTENT_URI, new String[] { StructuredPostal._ID },
+//				Data.MIMETYPE + "=?", new String[] { StructuredPostal.CONTENT_ITEM_TYPE }, null);
+//		DebugPrint("Cursor 2 size: " + c2.getCount());
+//		while (c2.moveToNext())
+//		{
+//			for (int j=0; j<c2.getColumnCount(); j++)
+//			{
+//				DebugPrint(c2.getColumnName(j) + " = " + c2.getString(j));
+//			}
+//		}
+//		c2.close();
 	}
 }

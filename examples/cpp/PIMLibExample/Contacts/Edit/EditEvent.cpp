@@ -15,11 +15,11 @@ MA 02110-1301, USA.
 */
 
 /**
- * @file EditPhone.cpp
+ * @file EditEvent.cpp
  * @author Florin Leu
- * @date 08 Mar 2012
+ * @date 08 Jun 2012
  *
- * @brief Phone Edit Layout.
+ * @brief Event Edit Layout.
  *
  **/
 
@@ -29,7 +29,7 @@ MA 02110-1301, USA.
 
 #include "ContactsScreen.h"
 
-#include "EditPhone.h"
+#include "EditEvent.h"
 #include "EditDefines.h"
 
 #include "TypeDialog.h"
@@ -43,7 +43,7 @@ using namespace MAUtil;
  * Constructor.
  * @param contact The owner of this field.
  */
-EditPhone::EditPhone(Contact* contact):
+EditEvent::EditEvent(Contact* contact):
 	EditField(contact)
 {
 	initData();
@@ -55,7 +55,7 @@ EditPhone::EditPhone(Contact* contact):
 /**
  * Destructor.
  */
-EditPhone::~EditPhone()
+EditEvent::~EditEvent()
 {
 	DELETE(mDialog);
 	DELETE(mDeleteButton);
@@ -64,46 +64,46 @@ EditPhone::~EditPhone()
 /**
  * Inits the data used to display this field.
  */
-void EditPhone::initData()
+void EditEvent::initData()
 {
-	mTitleText = strdup(TXT_EDIT_PHONE_TITLE);
-	mDeleteButton = new Button*[mOwner->getPhonesCount()];
+	mTitleText = strdup(TXT_EDIT_EVENT_TITLE);
+	mDeleteButton = new Button*[mOwner->getEventsCount()];
 }
 
 /**
  * Creates the view.
  */
-void EditPhone::addBody()
+void EditEvent::addBody()
 {
 	const char* labels[] =
 	{
-		"number"
+		"date",
 	};
 
 	EditField::addBody();
 
-	for (int i=0; i<mOwner->getPhonesCount(); i++)
+	for (int i=0; i<mOwner->getEventsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
 		sprintf(title, "%d.", i + 1);
 		addSubTitle(title, i);
-		addType(i, ContactsScreen::getPhoneTypeString(mOwner->getPhone(i)->getType(), mOwner->getPhone(i)->getLabel()),
-				mOwner->getPhone(i)->isPrimary());
+		addType(i, ContactsScreen::getEventTypeString(mOwner->getEvent(i)->getType(), mOwner->getEvent(i)->getLabel()),
+				mOwner->getEvent(i)->isPrimary());
 		DELETE(title);
 
-		Phone* phone = mOwner->getPhone(i);
+		Event* event = mOwner->getEvent(i);
 
 		const char* texts[] =
 		{
-			wstrtostr(phone->getNumber()),
+			sprint_time(event->getDate()),
 		};
 
 		const int datas[] =
 		{
-			Phone::NUMBER | (i << 8),
+			Event::DATE | (i << 8),
 		};
 
-		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_PHONE_FLAGS);
+		addSubFields(labels, texts, datas, sizeof(labels)/sizeof(char*), EDIT_EVENT_FLAGS);
 	}
 }
 
@@ -113,18 +113,18 @@ void EditPhone::addBody()
  * Only for iphone platform.
  * @param editBox The edit box object that generated the event.
  */
-void EditPhone::editBoxEditingDidEnd(EditBox* editBox)
+void EditEvent::editBoxEditingDidEnd(EditBox* editBox)
 {
 	int data = *(int*)(editBox->getData());
 	wchar* text = strtowstr(editBox->getText().c_str());
 	printf("Edit box did end %d.", data);
 
-	Phone* phone = mOwner->getPhone(data >> 8);
+	Event* event = mOwner->getEvent(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case Phone::NUMBER:
-			phone->setNumber(text);
+		case Event::DATE:
+			//event->setDate(text);
 			break;
 	}
 }
@@ -135,21 +135,21 @@ void EditPhone::editBoxEditingDidEnd(EditBox* editBox)
  * receiving this event.
  * @param editBox The edit box object that generated the event.
  */
-void EditPhone::editBoxReturn(EditBox* editBox)
+void EditEvent::editBoxReturn(EditBox* editBox)
 {
 	editBox->hideKeyboard();
 
 	//fleu TODO remove this after didend is implemented
 	int data = *(int*)(editBox->getData());
 	wchar* text = strtowstr(editBox->getText().c_str());
-	printf("Edit box did end %d.", data, text);
+	printf("Edit box did end %d %S.", data, text);
 
-	Phone* phone = mOwner->getPhone(data >> 8);
+	Event* event = mOwner->getEvent(data >> 8);
 
 	switch (data & 0xFF)
 	{
-		case Phone::NUMBER:
-			phone->setNumber(text);
+		case Event::DATE:
+			//event->setDate(text);
 			break;
 	}
 }
@@ -160,18 +160,18 @@ void EditPhone::editBoxReturn(EditBox* editBox)
  * @param checkBox The check box object that generated the event.
  * @param state True if the check box is checked, false otherwise.
  */
-void EditPhone::checkBoxStateChanged(CheckBox *checkBox, bool state)
+void EditEvent::checkBoxStateChanged(CheckBox *checkBox, bool state)
 {
 	int data = *(int*)(checkBox->getData());
-	Phone* phone = mOwner->getPhone(data);
-	phone->setPrimary(state);
+	Event* event = mOwner->getEvent(data);
+	event->setPrimary(state);
 }
 
 /**
  * This method is called if the touch-up event was inside the bounds of the button.
  * @param button The button object that generated the event.
  */
-void EditPhone::buttonClicked(Widget* button)
+void EditEvent::buttonClicked(Widget* button)
 {
 	if (button == mTitle)
 	{
@@ -188,10 +188,10 @@ void EditPhone::buttonClicked(Widget* button)
 		}
 		else
 		{
-			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sPhoneTypes,
-					sizeof(ContactsScreen::sPhoneTypes)/sizeof(char*),
-					(int)mOwner->getPhone(data)->getType(),
-					mOwner->getPhone(data)->getLabel());
+			TypeDialog::getInstance()->setFeed(this, data, ContactsScreen::sEventTypes,
+					sizeof(ContactsScreen::sEventTypes)/sizeof(char*),
+					(int)mOwner->getEvent(data)->getType(),
+					mOwner->getEvent(data)->getLabel());
 			TypeDialog::getInstance()->show();
 		}
 	}
@@ -203,25 +203,25 @@ void EditPhone::buttonClicked(Widget* button)
  * @param type The type to set.
  * @param label The label to set.
  */
-void EditPhone::update(int index, int type, String label)
+void EditEvent::update(int index, int type, String label)
 {
-	mOwner->getPhone(index)->setType((Phone::eTypes)type);
+	mOwner->getEvent(index)->setType((Event::eTypes)type);
 
-	if (type == Phone::TYPE_CUSTOM)
+	if (type == Event::TYPE_CUSTOM)
 	{
-		mOwner->getPhone(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
+		mOwner->getEvent(index)->setLabel(strtowstr(label.c_str())); //fleu TODO label has and extra character at the end
 	}
 
-	mTypes[index]->setText(ContactsScreen::getPhoneTypeString(
-			mOwner->getPhone(index)->getType(), mOwner->getPhone(index)->getLabel()));
+	mTypes[index]->setText(ContactsScreen::getEventTypeString(
+			mOwner->getEvent(index)->getType(), mOwner->getEvent(index)->getLabel()));
 }
 
 /**
- * Updates the phone.
+ * Updates the event.
  */
-void EditPhone::update()
+void EditEvent::update()
 {
-	mOwner->removePhone(mCurrentSubField);
+	mOwner->removeEvent(mCurrentSubField);
 	clearBody();
 	addBody();
 	addChild(mBody);

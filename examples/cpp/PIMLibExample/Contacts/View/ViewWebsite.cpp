@@ -78,7 +78,7 @@ void ViewWebsite::addBody()
 				ContactsScreen::getWebsiteTypeString(
 					mOwner->getWebsite(i)->getType(),
 					mOwner->getWebsite(i)->getLabel()));
-		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
+		addSubTitle(title, mOwner->getWebsite(i)->isPrimary());
 		DELETE(title);
 
 		const char* datas[] =

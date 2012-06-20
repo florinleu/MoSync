@@ -50,6 +50,9 @@ MA 02110-1301, USA.
 #include "EditInstantMessaging.h"
 #include "EditNote.h"
 #include "EditOrganization.h"
+#include "EditSocialProfile.h"
+#include "EditEvent.h"
+#include "EditRelation.h"
 #include "EditDelete.h"
 #include "EditDefines.h"
 
@@ -83,27 +86,27 @@ void ContactEditScreen::createUI()
 
 	addID();
 
-//	addName();
-//
-//	addAddress();
-//
-//	addPhone();
-//
-//	addEmail();
-//
-//	addWebsite();
-//
-//	addInstantMessaging();
-//
-//	addNote();
+	addName();
+
+	addAddress();
+
+	addPhone();
+
+	addEmail();
+
+	addWebsite();
+
+	addInstantMessaging();
+
+	addNote();
 
 	addOrganization();
-//
-//	addSocialProfile();
-//
-//	addEvent();
-//
-//	addRelation();
+
+	addSocialProfile();
+
+	addEvent();
+
+	addRelation();
 
 	addDeleteButton();
 
@@ -213,229 +216,29 @@ void ContactEditScreen::addOrganization()
 
 void ContactEditScreen::addSocialProfile()
 {
-	const char* labels[] =
-	{
-		"url",
-		"username",
-		"user identifier",
-		"service"
-	};
+	EditSocialProfile* socialProfile = new EditSocialProfile(mContact);
 
-	for (int i=0; i<mContact->getSocialProfilesCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getSocialProfileTypeString(mContact->getSocialProfile(i)->getType()));
-		if (mContact->getSocialProfile(i)->getType() == SOCIALPROFILE_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getSocialProfile(i)->getLabel());
-		}
+	mLayout->addChild(socialProfile);
 
-		char* service = new char[BUFF_SIZE];
-		sprintf(service, "%s", getSocialProfileServiceString(mContact->getSocialProfile(i)->getService()));
-
-		if (mContact->getSocialProfile(i)->getService() == SERVICE_CUSTOM)
-		{
-			sprintf(service, "%s (%S)", service, mContact->getSocialProfile(i)->getServiceLabel());
-		}
-
-		const char* datas[] =
-		{
-			wstrtostr(mContact->getSocialProfile(i)->getURL()),
-			wstrtostr(mContact->getSocialProfile(i)->getUsername()),
-			wstrtostr(mContact->getSocialProfile(i)->getUserIdentifier()),
-			service
-		};
-
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getSocialProfile(i)->isPrimary());
-
-		DELETE(title);
-	}
-
-	if (mContact->getSocialProfilesCount())
-	{
-		addSpacer();
-	}
-}
-
-const char* ContactEditScreen::getSocialProfileServiceString(PIM::eSocialProfileServices service)
-{
-	const char* socialProfileService[] =
-	{
-		"Twitter",
-		"GameCenter",
-		"Facebook",
-		"MySpace",
-		"LinkedIn",
-		"Flickr",
-		"Custom"
-	};
-
-	return socialProfileService[service];
-}
-
-const char* ContactEditScreen::getSocialProfileTypeString(PIM::eSocialProfileTypes type)
-{
-	const char* socialProfileType[] =
-	{
-		"Home",
-		"Work",
-		"Other",
-		"Custom"
-	};
-
-	return socialProfileType[type];
+	addSpacer();
 }
 
 void ContactEditScreen::addEvent()
 {
-	const char* labels[] =
-	{
-		"date",
-	};
+	EditEvent* event = new EditEvent(mContact);
 
-	for (int i=0; i<mContact->getEventsCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getEventTypeString(mContact->getEvent(i)->getType()));
-		if (mContact->getEvent(i)->getType() == EVENT_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getEvent(i)->getLabel());
-		}
+	mLayout->addChild(event);
 
-		const char* datas[] =
-		{
-			sprint_time(mContact->getEvent(i)->getDate())
-		};
-
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getEvent(i)->isPrimary());
-
-		DELETE(title);
-	}
-
-	if (mContact->getEventsCount() > 0)
-	{
-		addSpacer();
-	}
-}
-
-const char* ContactEditScreen::getEventTypeString(PIM::eEventTypes type)
-{
-	const char* eventType[] =
-	{
-		"Birthday",
-		"Anniversary",
-		"Other",
-		"Custom"
-	};
-
-	return eventType[type];
+	addSpacer();
 }
 
 void ContactEditScreen::addRelation()
 {
-	const char* labels[] =
-	{
-		"name",
-	};
+	EditRelation* relation = new EditRelation(mContact);
 
-	for (int i=0; i<mContact->getRelationsCount(); i++)
-	{
-		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getRelationTypeString(mContact->getRelation(i)->getType()));
-		if (mContact->getRelation(i)->getType() == RELATION_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mContact->getRelation(i)->getLabel());
-		}
+	mLayout->addChild(relation);
 
-		const char* datas[] =
-		{
-			wstrtostr(mContact->getRelation(i)->getName()),
-		};
-
-		addField(title, labels, datas, sizeof(labels)/sizeof(char*), mContact->getRelation(i)->isPrimary());
-
-		DELETE(title);
-	}
-
-	if (mContact->getRelationsCount() > 0)
-	{
-		addSpacer();
-	}
-}
-
-const char* ContactEditScreen::getRelationTypeString(PIM::eRelationTypes type)
-{
-	const char* relationType[] =
-	{
-		"Mother",
-		"Father",
-		"Parent",
-		"Sister",
-		"Brother",
-		"Child",
-		"Friend",
-		"Spouse",
-		"Partner",
-		"Manager",
-		"Assistant",
-		"Domestic partner",
-		"Referred by",
-		"Relative",
-		"Custom"
-	};
-
-	return relationType[type];
-}
-
-bool ContactEditScreen::addField(const char* title, const char** labels, const char** datas, const int size, const bool primary)
-{
-	bool display = false;
-	for (int i=0; i<size; i++)
-	{
-		if ( (datas[i] != NULL) && (strlen(datas[i]) > 0) )
-		{
-			display = true;
-		}
-	}
-
-	if (!display)
-	{
-		return false;
-	}
-
-	Label* titleBar = new Label();
-	titleBar->fillSpaceHorizontally();
-	//titleBar->setBackgroundColor(primary?EDIT_TITLE_SPECIAL_COLOR:EDIT_TITLE_COLOR);
-	titleBar->setFontColor(EDIT_TITLE_TEXT_COLOR);
-	titleBar->setText(title);
-	titleBar->setTextHorizontalAlignment(MAW_ALIGNMENT_CENTER);
-	mLayout->addChild(titleBar);
-	for (int i=0; i<size; i++)
-	{
-		if ( (datas[i] != NULL) && (strlen(datas[i]) > 0) )
-		{
-			HorizontalLayout* layout = new HorizontalLayout();
-			layout->wrapContentVertically();
-			layout->setChildVerticalAlignment(MAW_ALIGNMENT_CENTER);
-
-			Label* label = new Label();
-			label->setWidth(EDIT_LABEL_WIDTH);
-			label->setBackgroundColor(EDIT_LABEL_COLOR);
-			label->setText(labels[i]);
-			label->setTextHorizontalAlignment(MAW_ALIGNMENT_CENTER);
-			layout->addChild(label);
-
-			EditBox* data = new EditBox();
-			data->fillSpaceHorizontally();
-			data->setText(datas[i]);
-			data->setEnabled(false);
-			layout->addChild(data);
-
-			mLayout->addChild(layout);
-		}
-	}
-
-	return true;
+	addSpacer();
 }
 
 void ContactEditScreen::addDeleteButton()
@@ -457,4 +260,6 @@ void ContactEditScreen::addSpacer()
 void ContactEditScreen::writeData()
 {
 	mContact->write();
+	delete mContact;
+	mContact = NULL;
 }

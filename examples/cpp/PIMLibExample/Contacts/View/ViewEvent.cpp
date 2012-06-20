@@ -28,6 +28,7 @@ MA 02110-1301, USA.
 
 #include "ViewEvent.h"
 #include "ViewDefines.h"
+#include "ContactsScreen.h"
 
 using namespace PIM;
 using namespace NativeUI;
@@ -73,12 +74,11 @@ void ViewEvent::addBody()
 	for (int i=0; i<mOwner->getEventsCount(); i++)
 	{
 		char* title = new char[BUFF_SIZE];
-		sprintf(title, "%d. %s", i + 1, getEventTypeString(mOwner->getEvent(i)->getType()));
-		if (mOwner->getEvent(i)->getType() == EVENT_CUSTOM)
-		{
-			sprintf(title, "%s (%S)", title, mOwner->getEvent(i)->getLabel());
-		}
-		addSubTitle(title, mOwner->getAddress(i)->isPrimary());
+		sprintf(title, "%d. %s", i + 1,
+				ContactsScreen::getEventTypeString(
+					mOwner->getEvent(i)->getType(),
+					mOwner->getEvent(i)->getLabel()));
+		addSubTitle(title, mOwner->getEvent(i)->isPrimary());
 		DELETE(title);
 
 		const char* datas[] =
@@ -88,22 +88,4 @@ void ViewEvent::addBody()
 
 		addSubFields(labels, datas, sizeof(labels)/sizeof(char*));
 	}
-}
-
-/**
- * Gets the name of the event type.
- * @param type	The event type.
- * @return 		The type name.
- */
-const char* ViewEvent::getEventTypeString(eEventTypes type)
-{
-	const char* eventType[] =
-	{
-		"Birthday",
-		"Anniversary",
-		"Other",
-		"Custom"
-	};
-
-	return eventType[type];
 }

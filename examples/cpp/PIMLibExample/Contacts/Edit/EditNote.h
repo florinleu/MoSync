@@ -27,11 +27,12 @@ MA 02110-1301, USA.
 #ifndef __EDITNOTE_H__
 #define __EDITNOTE_H__
 
-#include <NativeUI/EditBox.h>
 #include "EditField.h"
+#include "Observer.h"
 
 class EditNote :
-	public EditField
+	public EditField,
+	public Observer
 {
 	public:
 		/**
@@ -45,15 +46,6 @@ class EditNote :
 		 */
 		~EditNote();
 
-		/**
-		 * Inits the data used to display this field.
-		 */
-		void initData();
-
-		/**
-		 * Creates the view.
-		 */
-		void addBody();
 	protected:
         /**
          * This method is called when an edit box loses focus.
@@ -71,8 +63,27 @@ class EditNote :
          */
         void editBoxReturn(NativeUI::EditBox* editBox);
 
+        /**
+         * This method is called if the touch-up event was inside the bounds of the button.
+         * @param button The button object that generated the event.
+         */
+        void buttonClicked(Widget* button);
+
 	private:
-        PIM::Note* mNote;
+		/**
+		 * Inits the data used to display this field.
+		 */
+		void initData();
+
+		/**
+		 * Creates the view.
+		 */
+		void addBody();
+
+		/**
+		 * Updates the note.
+		 */
+		void update();
 };
 
 #endif // __EDITNOTE_H__

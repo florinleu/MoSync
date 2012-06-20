@@ -28,11 +28,13 @@ MA 02110-1301, USA.
 #define __EDITFIELD_H__
 
 #include <NativeUI/Button.h>
+#include <NativeUI/ImageButton.h>
 #include <NativeUI/ButtonListener.h>
 #include <NativeUI/EditBox.h>
 #include <NativeUI/EditBoxListener.h>
 #include <NativeUI/CheckBox.h>
 #include <NativeUI/CheckBoxListener.h>
+#include <NativeUI/HorizontalLayout.h>
 #include <NativeUI/VerticalLayout.h>
 #include <Contacts/Contact.h>
 
@@ -121,6 +123,11 @@ class EditField :
 		 */
 		void addSubFields(const char** labels, const char** texts, const int* datas, const int size, const int flags);
 
+		/**
+		 * Ads the button for inserting a new subfield.
+		 */
+		void addInsertButton();
+
         /**
          * This method is called when an edit box loses focus.
          * The virtual keyboard is hidden.
@@ -160,7 +167,7 @@ class EditField :
 		/**
 		 * Creates a small spacer and ads it to the view body.
 		 */
-		void addSubFieldsSpacer();
+		void addFieldsSpacer();
 
 	protected:
 		/**
@@ -187,6 +194,11 @@ class EditField :
 		 * Button widget for type.
 		 */
 		MAUtil::Vector<NativeUI::Button*> mTypes;
+
+		/**
+		 * Button used for inserting a new subfield.
+		 */
+		NativeUI::ImageButton* mAddButton;
 
 		/**
 		 * Delete button widget.

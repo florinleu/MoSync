@@ -52,23 +52,31 @@ namespace PIM
 			~Note();
 
 			/**
-			 * Reads the contact's note.
+			 * Reads a contact's note.
 			 * @param args The arguments needed to read the note.
-			 * @return true on success.
+			 * @param index The index of the note to read.
 			 */
-			bool read(MA_PIM_ARGS& args);
+			void read(MA_PIM_ARGS& args, int index);
 
 			/**
-			 * Writes the contact's note.
+			 * Writes a contact's note.
 			 * @param args The values to write.
+			 * @index args The index of the note to write.
 			 */
-			void write(MA_PIM_ARGS& args);
+			void write(MA_PIM_ARGS& args, int index);
+
+			/**
+			 * Adds a new note to this contact.
+			 * @param args The values to add.
+			 */
+			void add(MA_PIM_ARGS& args);
 
 			/**
 			 * Deletes a contact's note.
 			 * @param handle The handle of the contact.
+			 * @param index  The index of the note to delete.
 			 */
-			void remove(MAHandle handle);
+			void remove(MAHandle handle, int index);
 
 			/**
 			 * Gets the contact's note text.
