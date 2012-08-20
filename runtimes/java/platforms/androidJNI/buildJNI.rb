@@ -177,6 +177,7 @@ sh( "#{File.join(androidSDKTools, "/aapt")} package -f -v " +
 	"-M #{File.join(package_root,"AndroidManifest.xml")} -F resources.ap_ " +
 	"-I #{File.join(androidSDKPath, "android.jar")} " +
 	"-I #{File.join("#{package_root}libs/", "GoogleAdMobAdsSdk.jar")} " +
+	"-I #{File.join("#{package_root}libs/", "maps.jar")} " +
 	"-S #{File.join(package_root, "res")} " +
 	"-m -J #{File.join(package_root, "gen")}");
 
@@ -211,7 +212,7 @@ if ENV['OS'] == "Windows_NT"
 	sh(
 		"javac -source 1.6 -target 1.6 -g -d #{class_dir} " +
 		"-classpath " +
-		"\"#{File.join(androidSDKPath, "android.jar")};#{File.join("#{package_root}libs/", "GoogleAdMobAdsSdk.jar")}\" " + java_files);
+		"\"#{File.join(androidSDKPath, "android.jar")};#{File.join("#{package_root}libs/", "GoogleAdMobAdsSdk.jar")};#{File.join("#{package_root}libs/", "maps.jar")}\" " + java_files);
 else
 	sh(
 		"javac -source 1.6 -target 1.6 -g -d #{class_dir} " +
@@ -224,6 +225,7 @@ puts "Copy Generated Library File\n\n"
 # copy the library file
 FileUtils.copy_file( "#{File.join(cpath, "AndroidProject/libs/armeabi/libmosync.so")}", "temp/libmosync.so")
 FileUtils.copy_file( "#{File.join(cpath, "AndroidProject/libs/GoogleAdMobAdsSdk.jar")}", "temp/GoogleAdMobAdsSdk.jar")
+FileUtils.copy_file( "#{File.join(cpath, "AndroidProject/libs/maps.jar")}", "temp/maps.jar")
 
 puts "Build Zip Package\n\n"
 

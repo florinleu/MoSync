@@ -75,12 +75,14 @@ import com.mosync.internal.android.notifications.PushNotificationsManager;
 import com.mosync.nativeui.ui.widgets.OptionsMenuItem;
 import com.mosync.nativeui.ui.widgets.ScreenWidget;
 
+import com.google.android.maps.MapActivity;
+
 /**
  * Main MoSync activity
  *
  * As long as this activity is running the application is running.
  */
-public class MoSync extends Activity
+public class MoSync extends MapActivity
 {
 	/**
 	 * Activity request codes for Camera intent.
@@ -175,6 +177,9 @@ public class MoSync extends Activity
 
 		registerShutdownListener();
     }
+
+    @Override
+    protected boolean isRouteDisplayed() { return false; }
 
     public MoSyncThread getMoSyncThread()
     {

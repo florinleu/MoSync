@@ -87,7 +87,10 @@ public class Widget
 	public Widget(int handle, View view)
 	{
 		m_view = view;
-		m_view.setId( handle );
+		if (m_view != null)
+		{
+			m_view.setId( handle );
+		}
 	}
 
 	/**
@@ -321,6 +324,18 @@ public class Widget
 	}
 
 	/**
+	 * Associates a view with this widget.
+	 */
+	public void setView(View view)
+	{
+		if (m_view != null)
+		{
+			view.setId(getHandle());
+		}
+		m_view = view;
+	}
+
+	/**
 	 * Returns the root view associated with this widget (if the mosync widgets contain an internal tree).
 	 *
 	 * @return The root view associated with this widget.
@@ -338,6 +353,10 @@ public class Widget
 	 */
 	public int getHandle()
 	{
+		if (m_view == null)
+		{
+			return -1;
+		}
 		return m_view.getId( );
 	}
 

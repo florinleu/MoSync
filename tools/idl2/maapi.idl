@@ -7790,7 +7790,7 @@ group WidgetAPI "Widget API" {
 		/*
 		* @brief Set the map center latitude coordinate.
 		*
-		* @validvalue A double value between -90.0 and 90.0.
+		* @validvalue A double value between -90.0 and 90.0. Default value is 0.
 		*
 		* @setonly
 		* @par Example
@@ -7804,7 +7804,7 @@ group WidgetAPI "Widget API" {
 		/*
 		* @brief Set the map center longitude coordinate.
 		*
-		* @validvalue A double value between -180.0 and 180.0.
+		* @validvalue A double value between -180.0 and 180.0. Default value is 0.
 		*
 		* @setonly
 		* @par Example
@@ -7818,7 +7818,7 @@ group WidgetAPI "Widget API" {
 		/*
 		* @brief Set the map zoom level value.
 		*
-		* @validvalue A double value between 0 and 21.
+		* @validvalue A double value between 0 and 21. Default value is 0.
 		*
 		* @setonly
 		* @par Example
