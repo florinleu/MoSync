@@ -267,6 +267,7 @@ static void writeManifest(const char* filename, const SETTINGS& s, const Runtime
 		file <<"\t\tandroid:icon=\"@drawable/icon\"\n";
 	}
 	file <<"\t\tandroid:label=\"@string/app_name\">\n"
+		<<"\t\t<uses-library android:name=\"com.google.android.maps\" />\n"
 		<<"\t\t<activity android:name=\".MoSync\"\n"
 		// Use portrait orientation as default.
 		<<"\t\t\tandroid:screenOrientation=\"portrait\"\n"
