@@ -1,5 +1,8 @@
 package com.mosync.internal.android;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.mosync.pim.PIM;
 import com.mosync.pim.PIMUtil;
 
@@ -15,6 +18,7 @@ class MoSyncPIM {
 	MoSyncThread mMoSyncThread;
 
 	private PIM mPIM;
+	private PIMPG mPIMPG;
 
 	/**
 	 * Constructor.
@@ -24,6 +28,7 @@ class MoSyncPIM {
 	public MoSyncPIM(MoSyncThread thread) {
 		mMoSyncThread = thread;
 		mPIM = new PIM(thread);
+		mPIMPG = new PIMPG(thread);
 		PIMUtil.sMoSyncThread = thread;
 	}
 
@@ -67,12 +72,14 @@ class MoSyncPIM {
 
 	int maPimItemSetLabel(int item, int field, int buffPointer, int buffSize,
 			int index) {
-		return mPIM.maPimItemSetLabel(item, field, buffPointer, buffSize, index);
+		return mPIM
+				.maPimItemSetLabel(item, field, buffPointer, buffSize, index);
 	}
 
 	int maPimItemGetLabel(int item, int field, int buffPointer, int buffSize,
 			int index) {
-		return mPIM.maPimItemGetLabel(item, field, buffPointer, buffSize, index);
+		return mPIM
+				.maPimItemGetLabel(item, field, buffPointer, buffSize, index);
 	}
 
 	int maPimFieldType(int list, int field) {
@@ -81,7 +88,8 @@ class MoSyncPIM {
 
 	int maPimItemGetValue(int item, int field, int buffPointer, int buffSize,
 			int index) {
-		return mPIM.maPimItemGetValue(item, field, buffPointer, buffSize, index);
+		return mPIM
+				.maPimItemGetValue(item, field, buffPointer, buffSize, index);
 	}
 
 	int maPimItemSetValue(int item, int field, int buffPointer, int buffSize,
@@ -110,5 +118,10 @@ class MoSyncPIM {
 
 	int maPimItemRemove(int list, int item) {
 		return mPIM.maPimItemRemove(list, item);
+	}
+
+	// PhoneGap related methods
+	int maPIMPGContactsFind(JSONArray fields, String filter) {
+		return mPIMPG.maPIMPGContactsFind(fields, filter);
 	}
 }

@@ -17,6 +17,9 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 
 package com.mosync.internal.android;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import static com.mosync.internal.android.MoSyncHelpers.DebugPrint;
 
 import static com.mosync.internal.android.MoSyncHelpers.EXTENT;
@@ -5125,6 +5128,11 @@ public class MoSyncThread extends Thread
 	int maPimItemRemove(int list, int item)
 	{
 		return mMoSyncPIM.maPimItemRemove(list, item);
+	}
+
+	int maPIMPGContactsFind(JSONArray fields, String filter)
+	{
+		return mMoSyncPIM.maPIMPGContactsFind(fields, filter);
 	}
 
 	int maNFCStart() {
