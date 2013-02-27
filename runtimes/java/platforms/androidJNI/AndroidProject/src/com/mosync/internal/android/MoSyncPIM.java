@@ -1,12 +1,9 @@
 package com.mosync.internal.android;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.mosync.pim.PIM;
+import com.mosync.pim.PIMPG;
 import com.mosync.pim.PIMUtil;
-
-import android.app.Activity;
 
 /**
  * Wrapper for PIM Syscalls to avoid cluttering the MoSyncSyscalls file.
@@ -32,12 +29,12 @@ class MoSyncPIM {
 		PIMUtil.sMoSyncThread = thread;
 	}
 
-	/**
-	 * @return The Activity object.
-	 */
-	private Activity getActivity() {
-		return mMoSyncThread.getActivity();
-	}
+	// /**
+	// * @return The Activity object.
+	// */
+	// private Activity getActivity() {
+	// return mMoSyncThread.getActivity();
+	// }
 
 	/**
 	 * PIM related methods

@@ -86,16 +86,27 @@ public class PIMPG {
 
 		while (mCursor.moveToNext()) {
 			getContentResolver().query(Data.CONTENT_URI,
-					buildProjection(fields), buildSelection(),
+					buildProjection(fields, filter), buildSelection(),
 					buildSelectionArgs(), Data.CONTACT_ID + " ASC");
 		}
 
 		return 0;
 	}
 
-	String[] buildProjection(JSONArray fields) {
+	/**
+	 * Build the projection for the query.
+	 * @param fields
+	 *            The fields to add to the projection.
+	 * @param filter
+	 *            The keyword to search for.
+	 * @return The projection.
+	 * @note TODO Special cases: fields empty, fields = "*".
+	 */
+	String[] buildProjection(JSONArray fields, String filter) {
 
 		List<String> projection = new ArrayList<String>();
+		List<String> selection = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 		String field;
 
 		for (int i = 0; i < fields.length(); i++) {
@@ -105,8 +116,13 @@ public class PIMPG {
 				try {
 					if (field.contains("id")) {
 						projection.add(Data.CONTACT_ID);
+						selection.add("(" + Data.CONTACT_ID + " = ? )");
+						args.add(filter.substring(1, filter.length() - 1));
 					} else if (field.contains("displayName")) {
 						projection.add(StructuredName.DISPLAY_NAME);
+						selection
+								.add("(" + Contacts.DISPLAY_NAME + " LIKE ? )");
+						args.add(filter);
 					} else if (field.contains("name")) {
 						projection.add(StructuredName.DISPLAY_NAME);
 						projection.add(StructuredName.FAMILY_NAME);
@@ -117,16 +133,33 @@ public class PIMPG {
 						projection.add(StructuredName.PHONETIC_FAMILY_NAME);
 						projection.add(StructuredName.PHONETIC_GIVEN_NAME);
 						projection.add(StructuredName.PHONETIC_MIDDLE_NAME);
+						selection.add("(" + StructuredName.DISPLAY_NAME
+								+ " LIKE ? AND " + Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(StructuredName.CONTENT_ITEM_TYPE);
 					} else if (field.contains("nickname")) {
 						projection.add(Nickname.NAME);
+						selection.add("(" + Nickname.NAME + " LIKE ? AND "
+								+ Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(Nickname.CONTENT_ITEM_TYPE);
 					} else if (field.contains("phoneNumbers")) {
 						projection.add(Phone._ID);
 						projection.add(Phone.NUMBER);
 						projection.add(Phone.TYPE);
+						selection.add("(" + Phone.NUMBER + " LIKE ? AND "
+								+ Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(Phone.CONTENT_ITEM_TYPE);
+
 					} else if (field.contains("emails")) {
 						projection.add(Email._ID);
 						projection.add(Email.DATA);
 						projection.add(Email.TYPE);
+						selection.add("(" + Email.ADDRESS + " LIKE ? AND "
+								+ Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(Email.CONTENT_ITEM_TYPE);
 					} else if (field.contains("addresses")) {
 						projection.add(StructuredPostal._ID);
 						projection.add(StructuredPostal.POBOX);
@@ -136,12 +169,21 @@ public class PIMPG {
 						projection.add(StructuredPostal.POSTCODE);
 						projection.add(StructuredPostal.COUNTRY);
 						projection.add(StructuredPostal.NEIGHBORHOOD);
+						projection.add(StructuredPostal.FORMATTED_ADDRESS);
 						projection.add(StructuredPostal.TYPE);
+						selection.add("(" + StructuredPostal.FORMATTED_ADDRESS
+								+ " LIKE ? AND " + Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(StructuredPostal.CONTENT_ITEM_TYPE);
 					} else if (field.contains("ims")) {
 						projection.add(Im._ID);
 						projection.add(Im.DATA);
 						projection.add(Im.PROTOCOL);
 						projection.add(Im.TYPE);
+						selection.add("(" + Im.DATA + " LIKE ? AND "
+								+ Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(Im.CONTENT_ITEM_TYPE);
 					} else if (field.contains("organizations")) {
 						projection.add(Organization._ID);
 						projection.add(Organization.COMPANY);
@@ -151,12 +193,20 @@ public class PIMPG {
 						projection.add(Organization.PHONETIC_NAME);
 						projection.add(Organization.OFFICE_LOCATION);
 						projection.add(Organization.TYPE);
+						selection.add("(" + Organization.COMPANY
+								+ " LIKE ? AND " + Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(Organization.CONTENT_ITEM_TYPE);
 					} else if (field.contains("birthday")) {
 						projection.add(Event._ID);
 						projection.add(Event.START_DATE);
 						projection.add(Event.TYPE);
 					} else if (field.contains("note")) {
 						projection.add(Note.NOTE);
+						selection.add("(" + Note.NOTE + " LIKE ? AND "
+								+ Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(Note.CONTENT_ITEM_TYPE);
 					} else if (field.contains("photos")) {
 						projection.add(Photo._ID);
 						projection.add(Photo.PHOTO);
@@ -166,6 +216,10 @@ public class PIMPG {
 						projection.add(Website._ID);
 						projection.add(Website.URL);
 						projection.add(Website.TYPE);
+						selection.add("(" + Website.URL + " LIKE ? AND "
+								+ Data.MIMETYPE + " = ? )");
+						args.add(filter);
+						args.add(Website.CONTENT_ITEM_TYPE);
 					}
 				} catch (UnsupportedOperationException e) {
 					// adding to this List is not supported.
