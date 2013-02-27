@@ -22,23 +22,30 @@ MA 02110-1301, USA.
  * Functions to display device info and handle sensors.
  */
 
-function onDeviceReady()
+function showDeviceInfo()
 {
 	var platform = document.getNativeElementById("DeviceOSLabel");
 	platform.setProperty("text" , "Platform: " + device.platform);
+
 	var version = document.getNativeElementById("OSVersionLabel");
 	version.setProperty("text" , "Version: " + device.version);
+
 	var uuid = document.getNativeElementById("UUIDLabel");
 	uuid.setProperty("text" , "UUID: " + device.uuid);
+
 	var deviceName = document.getNativeElementById("DeviceNameLabel");
 	deviceName.setProperty("text" , "Device Name: " + device.name);
 }
 
 var accelPhonegapWatch = null;
+
 function toggleAccelPhonegap()
 {
+	var button = document.getNativeElementById("ToggleAccelButton");
+
 	if (accelPhonegapWatch !== null)
 	{
+		button.setProperty("text", "Toggle Accelerometer (is off)");
 		navigator.accelerometer.clearWatch(accelPhonegapWatch);
 		updateAccelPhonegap({
 			x : " ",
@@ -49,6 +56,7 @@ function toggleAccelPhonegap()
 	}
 	else
 	{
+		button.setProperty("text", "Toggle Accelerometer (is on)");
 		var options = {};
 		options.frequency = 1000;
 		accelPhonegapWatch = navigator.accelerometer.watchAcceleration(
@@ -85,12 +93,15 @@ function updateAccelPhonegap(a)
 }
 
 var geolocationWatch = null;
+
 function toggleGeolocation()
 {
+	var button = document.getNativeElementById("ToggleLocButton");
+
 	if (geolocationWatch !== null)
 	{
+		button.setProperty("text", "Toggle Location (is off)");
 		navigator.geolocation.clearWatch(geolocationWatch);
-		console.log("Starting location");
 		updateGeolocation({coords:{
 			latitude : " ",
 			longitude : " ",
@@ -100,6 +111,7 @@ function toggleGeolocation()
 	}
 	else
 	{
+		button.setProperty("text", "Toggle Location (is on)");
 		var options = {};
 		options.frequency = 1000;
 		geolocationWatch = navigator.geolocation.watchPosition(
@@ -125,29 +137,34 @@ function updateGeolocation(a)
 }
 
 var compassWatch = null;
+
 function toggleCompass()
 {
+	var button = document.getNativeElementById("ToggleCompassButton");
+
 	if (compassWatch !== null)
 	{
+		button.setProperty("text", "Toggle Compass (is off)");
 		navigator.compass.clearWatch(compassWatch);
 		updateCompass({
-			magneticHeading : " "
+			magneticHeading : ""
 		});
 		compassWatch = null;
 	}
 	else
 	{
+		button.setProperty("text", "Toggle Compass (is on)");
 		var options = {};
 		options.frequency = 1000;
 		compassWatch = navigator.compass.watchHeading(
 			// Success function.
 			updateCompass,
 			// Error function.
-			function(ex) {
+			function(error) {
 				var data = document.getNativeElementById("CompassLabel");
 				data.setProperty(
 					"text",
-					"Compass error: " + ex.name + ": " + ex.message);
+					"Compass error: " + error.name + ": " + error.message);
 			},
 			options);
 	}
@@ -156,5 +173,5 @@ function toggleCompass()
 function updateCompass(a)
 {
 	var data = document.getNativeElementById("CompassLabel");
-	data.setProperty("text", "Compass Heading: " +  a.magneticHeading);
+	data.setProperty("text", "Compass Heading: " + a.magneticHeading);
 }

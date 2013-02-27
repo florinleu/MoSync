@@ -250,6 +250,11 @@ void streamHeaderFunctions(ostream& stream, const Interface& inf, bool syscall) 
 		if(f.groupId != "")
 			stream << "/** @ingroup " << f.groupId << " */\n";
 
+		if(!syscall && f.returnType != "noreturn")
+			stream <<
+				"#if defined(__arm__) && !defined(MAPIP)\n"
+				"inline\n"
+				"#endif\n";
 		if(syscall)
 			stream << "SYSCALL(";
 		stream << cType(inf, f.returnType);
@@ -435,9 +440,28 @@ static void streamMembers(ostream& stream, string tab, const vector<Member>& mem
 static void streamStruct(ostream& stream, const Struct& s, const string& name,
 	const Interface& inf, int ix, bool runtime, bool native)
 {
-	stream << "typedef " << s.type << " " << name << " {\n";
+	stream << "typedef " << s.type;
+	if(!native) {
+		stream << "\n"
+			"#ifdef __GNUC__\n"
+			"\t__attribute((packed,aligned(4)))\n"
+			"#elif defined(_MSC_VER)\n"
+			"#pragma pack(push, 4)\n"
+			"#elif !defined(SYMBIAN)\n"
+			"#error Unsupported compiler!\n"
+			"#endif\n"
+		;
+	}
+	stream << " " << name << " {\n";
 	streamMembers(stream, "\t", s.members, inf, runtime, native);
 	stream << "} " << name << ";\n";
+	if(!native) {
+		stream <<
+			"#ifdef _MSC_VER\n"
+			"#pragma pack(pop)\n"
+			"#endif\n"
+		;
+	}
 }
 
 static void streamStructs(ostream& stream, const Interface& inf, int ix, bool runtime) {

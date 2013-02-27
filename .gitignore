@@ -44,6 +44,8 @@ config_platform.h
 
 wormhole.js
 
+LocalFiles.bin*
+
 /*.bat
 
 /ipch/*
@@ -109,6 +111,7 @@ wormhole.js
 /testPrograms/temp.s
 /testPrograms/copyfiles.bat
 /testPrograms/filesystem/
+/testPrograms/httpPut/config.h
 
 /runtimes/cpp/generated
 
@@ -201,12 +204,45 @@ wormhole.js
 /tests/libc-suite/filesystem
 /tests/libc-suite/loader/config.h
 
+/tests/Benchmarks/linpack/android-dalvik/bin/
+/tests/Benchmarks/linpack/android-dalvik/gen/
+/tests/Benchmarks/linpack/android-ndk/gen/
+/tests/Benchmarks/linpack/android-ndk/obj/
+/tests/Benchmarks/linpack/android-ndk/bin/
+/tests/Benchmarks/linpack/android-ndk/libs/
+
+/tests/Benchmarks/membench/android-dalvik/bin/
+/tests/Benchmarks/membench/android-dalvik/gen/
+/tests/Benchmarks/membench/android-ndk/gen/
+/tests/Benchmarks/membench/android-ndk/obj/
+/tests/Benchmarks/membench/android-ndk/bin/
+/tests/Benchmarks/membench/android-ndk/libs/
+
+/tests/Benchmarks/opengl/android-dalvik/bin/
+/tests/Benchmarks/opengl/android-dalvik/gen/
+
+/tests/Benchmarks/stropbench/android-dalvik/bin/
+/tests/Benchmarks/stropbench/android-dalvik/gen/
+/tests/Benchmarks/stropbench/android-ndk/gen/
+/tests/Benchmarks/stropbench/android-ndk/obj/
+/tests/Benchmarks/stropbench/android-ndk/bin/
+/tests/Benchmarks/stropbench/android-ndk/libs/
+
+/tests/Benchmarks/*/bin/
+/tests/Benchmarks/*/obj/
+/tests/Benchmarks/*/gen/
+/tests/Benchmarks/*/libs/*.so
+/tests/Benchmarks/server/db_conn.php
+/tests/Benchmarks/server/db_priv_conn.php
+
 /tools/vis/sld.*
 
-/examples/GenerateResources/config.rb
-/examples/GenerateResources/profile.rb
+/examples/cpp/GenerateResources/config.rb
+/examples/cpp/GenerateResources/profile.rb
 
-/examples/FacebookDemo/config.h
+/examples/cpp/FacebookDemo/config.h
+
+/examples/cpp/*/filesystem/
 
 /docs/*.dot.*
 

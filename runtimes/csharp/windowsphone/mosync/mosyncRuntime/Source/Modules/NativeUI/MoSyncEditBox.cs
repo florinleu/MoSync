@@ -17,6 +17,7 @@ MA 02110-1301, USA.
 /**
  * @file MoSyncEditBox.cs
  * @author Rata Gabriela
+ *
  *         ovidiu
  *         Spiridon Alexandru
  *
@@ -134,6 +135,7 @@ namespace MoSync
                         {
                             // move the cursor to the first position
                             mEditBox.Select(0, 0);
+                            setWatermarkMode(false);
                         }
 
                         /**
@@ -285,16 +287,24 @@ namespace MoSync
             {
                 set
                 {
-                    if (mIsWatermarkMode)
+                    if (mIsWatermarkMode || mIsPasswordMode)
                     {
-                        setWatermarkMode(false);
-                        mEditBox.Text = value;
-                    }
-                    else
-                    {
+                        if (mIsWatermarkMode && !String.IsNullOrEmpty(value))
+                        {
+                            setWatermarkMode(false);
+                            mEditBox.Text = value;
+                        }
+
                         if (mIsPasswordMode)
                         {
                             mPasswordBox.Password = value;
+                        }
+                    }
+                    else
+                    {
+                        if (String.IsNullOrEmpty(value))
+                        {
+                            setWatermarkMode(true);
                         }
                         else
                         {
@@ -329,6 +339,7 @@ namespace MoSync
                 set
                 {
                     mIsWatermarkMode = true;
+                    mFirstChar = true;
 
                     mEditBox.Foreground = mWaterMarkBrush;
                     mPlaceholderText = value;

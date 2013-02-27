@@ -721,6 +721,7 @@ namespace Base {
 
 	SYSCALL(int, maCreateData(MAHandle placeholder, int size)) {
 #ifndef _android
+        if(size < 0) return RES_OUT_OF_MEMORY;
 		MemStream* ms = new MemStream(size);
 #else
 		char* b = SYSCALL_THIS->loadBinary(placeholder, size);
@@ -737,7 +738,9 @@ namespace Base {
 	SYSCALL(int, maGetDataSize(MAHandle data)) {
 		Stream* b = SYSCALL_THIS->resources.get_RT_BINARY(data);
 		int len;
-		DEBUG_ASSERT(b->length(len));
+		bool res = b->length(len);
+		DEBUG_ASSERT(res);
+		//DEBUG_ASSERT(b->length(len));
 		return len;
 	}
 	SYSCALL(void, maReadData(MAHandle data, void* dst, int offset, int size)) {
@@ -928,6 +931,7 @@ namespace Base {
 
 #ifndef _android
 	SYSCALL(int, maLoadResource(MAHandle handle, MAHandle placeholder, int flag)) {
+		DEBUG_ASSERT(resourcesFilename != NULL);
 		if (((flag & MA_RESOURCE_OPEN) != 0) && (resource == NULL))
 		{
 			resource = new FileStream(resourcesFilename);
@@ -1413,6 +1417,8 @@ namespace Base {
 
 	int Syscall::maFileReadToData(MAHandle file, MAHandle data, int offset, int len) {
 		LOGF("maFileReadToData(%i, %i)\n", file, len);
+        if(len < 0) FILE_FAIL(MA_FERR_GENERIC);
+
 		FileHandle& fh(getFileHandle(file));
 		Stream* b = SYSCALL_THIS->resources.get_RT_BINARY(data);
 		MYASSERT(b->seek(Seek::Start, offset), ERR_DATA_OOB);

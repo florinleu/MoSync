@@ -47,7 +47,11 @@ class MoSyncPIM {
 	}
 
 	int maPimListNext(int list) {
-		return mPIM.maPimListNext(list);
+		return mPIM.maPimListNext(list, false);
+	}
+
+	int maPimListNextSummary(int list) {
+		return mPIM.maPimListNext(list, true);
 	}
 
 	int maPimListClose(int list) {

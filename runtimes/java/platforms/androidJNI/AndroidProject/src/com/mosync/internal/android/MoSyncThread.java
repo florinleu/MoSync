@@ -49,6 +49,7 @@ import static com.mosync.internal.generated.MAAPI_consts.TRANS_ROT180;
 import static com.mosync.internal.generated.MAAPI_consts.TRANS_ROT270;
 import static com.mosync.internal.generated.MAAPI_consts.TRANS_ROT90;
 import static com.mosync.internal.generated.MAAPI_consts.EVENT_TYPE_ALERT;
+import static com.mosync.internal.generated.MAAPI_consts.MA_IMAGE_PICKER_EVENT_RETURN_TYPE_IMAGE_HANDLE;
 
 import static com.mosync.internal.generated.MAAPI_consts.MA_RESOURCE_OPEN;
 import static com.mosync.internal.generated.MAAPI_consts.MA_RESOURCE_CLOSE;
@@ -181,7 +182,7 @@ public class MoSyncThread extends Thread
 	MoSyncNativeUI mMoSyncNativeUI;
 	MoSyncFile mMoSyncFile;
 	// Module for device fonts.
-	MoSyncFont mMoSyncFont;
+	static MoSyncFont mMoSyncFont;
 	MoSyncCameraController mMoSyncCameraController;
 	MoSyncSMS mMoSyncSMS;
 	MoSyncSensor mMoSyncSensor;
@@ -660,7 +661,10 @@ public class MoSyncThread extends Thread
 	 */
 	public void threadPanic(int errorCode, String message)
 	{
-		//new Exception("STACKTRACE: threadPanic").printStackTrace();
+		// Print debug data to the logcat console.
+		Log.e("@@@ MoSync",
+			"threadPanic errorCode: " + errorCode + " message: " + message);
+		new Exception("STACKTRACE: threadPanic").printStackTrace();
 
 		mHasDied = true;
 
@@ -1246,7 +1250,7 @@ public class MoSyncThread extends Thread
 		//mMemDataSection.position(address);
 		//IntBuffer ib = mMemDataSection.asIntBuffer();
 
-		IntBuffer ib = getMemorySlice(address, -1).asIntBuffer();
+		IntBuffer ib = getMemorySlice(address, -1).order(null).asIntBuffer();
 
 		int[] vertices = new int[count*2];
 		ib.get(vertices);
@@ -1308,7 +1312,7 @@ public class MoSyncThread extends Thread
 		//mMemDataSection.position(address);
 		//IntBuffer ib = mMemDataSection.asIntBuffer();
 
-		IntBuffer ib = getMemorySlice(address, -1).asIntBuffer();
+		IntBuffer ib = getMemorySlice(address, -1).order(null).asIntBuffer();
 
 		int[] vertices = new int[count*2];
 		ib.get(vertices);
@@ -1332,8 +1336,8 @@ public class MoSyncThread extends Thread
 
 			if(i >= count*2)
 				break;
-			xa = vertices[i++];
-			ya = vertices[i++];
+			xb = vertices[i++];
+			yb = vertices[i++];
 			path.moveTo(xa,ya);
 			path.lineTo(xc,yc);
 			path.lineTo(xb,yb);
@@ -1507,7 +1511,7 @@ public class MoSyncThread extends Thread
 	 * @param fontHandle A font handle.
 	 * @return The font handle object.
 	 */
-	public MoSyncFontHandle getMoSyncFont(int fontHandle)
+	public static MoSyncFontHandle getMoSyncFont(int fontHandle)
 	{
 		return mMoSyncFont.getMoSyncFont(fontHandle);
 	}
@@ -1667,7 +1671,7 @@ public class MoSyncThread extends Thread
 		//mMemDataSection.position(mem);
 		//IntBuffer ib = mMemDataSection.asIntBuffer();
 
-		IntBuffer ib = getMemorySlice(mem, -1).asIntBuffer();
+		IntBuffer ib = getMemorySlice(mem, -1).order(null).asIntBuffer();
 
 		for (int y = 0; y < srcRectHeight; y++)
 		{
@@ -2099,6 +2103,21 @@ public class MoSyncThread extends Thread
 	{
 		SYSLOG("maCreateImageFromData");
 
+		// long freeSize = 0L;
+		// long totalSize = 0L;
+		// long usedSize = -1L;
+		// try {
+		// Runtime info = Runtime.getRuntime();
+		// freeSize = info.freeMemory() / 1024L;
+		// totalSize = info.totalMemory() / 1024L;
+		// usedSize = totalSize - freeSize;
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		//
+		// Log.i("memory 2", "################# total = " + totalSize
+		// + "; free = " + freeSize + "; used = " + usedSize);
+
 		// Byte array to hold resource data. This is the data we will
 		// use to create the image.
 		byte[] resourceData = null;
@@ -2185,33 +2204,35 @@ public class MoSyncThread extends Thread
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
-			/**
-			 * The code below converts the Bitmap to the ARGB format.
-			 * If you do not use this method or a similar one, Android will ignore
-			 * the specified format and use the format of the screen, usually
-			 * RGB 565.
-			 */
-
+			// /**
+			// * The code below converts the Bitmap to the ARGB format.
+			// * If you do not use this method or a similar one, Android will
+			// ignore
+			// * the specified format and use the format of the screen, usually
+			// * RGB 565.
+			// */
+			//
 			Bitmap decodedImage = decodeImageFromData(resourceData, options);
 
-			if (decodedImage == null)
-			{
+			if (decodedImage == null) {
 				logError("maCreateImageFromData - "
-					+ "could not decode image data (decodedImage == null)");
+						+ "could not decode image data (decodedImage == null)");
 				return RES_BAD_INPUT;
 			}
-
-			int width =  decodedImage.getWidth();
-			int height = decodedImage.getHeight();
-			int[] pixels = new int[width * height];
-			decodedImage.getPixels(pixels, 0, width, 0, 0, width, height);
-
-			recycleImageData(decodedImage);
-
-			Bitmap argbImage = createBitmapFromData(width, height, pixels);
-
-			mImageResources.put(
-				placeholder, new ImageCache(null, argbImage));
+			//
+			// int width = decodedImage.getWidth();
+			// int height = decodedImage.getHeight();
+			// int[] pixels = new int[width * height];
+			// decodedImage.getPixels(pixels, 0, width, 0, 0, width, height);
+			//
+			// recycleImageData(decodedImage);
+			//
+			// Bitmap argbImage = createBitmapFromData(width, height, pixels);
+			//
+			// mImageResources.put(
+			// placeholder, new ImageCache(null, argbImage));
+			mImageResources
+					.put(placeholder, new ImageCache(null, decodedImage));
 		}
 		catch (UnsupportedOperationException e)
 		{
@@ -2945,8 +2966,30 @@ public class MoSyncThread extends Thread
 
 			return 0;
 		}
+		else if(url.startsWith("fb://") || url.startsWith("mailto:") || url.startsWith("tweetie://"))
+		{
+			Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+			sharingIntent.setType("text/plain");
+			String sharedText = splitShareIntentText(url);
+			sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, sharedText);
+
+			((Activity)mContext).startActivity(Intent.createChooser(sharingIntent, "Share text via"));
+
+			return 0;
+		}
 
 		return -1;
+	}
+
+	private String splitShareIntentText(String text)
+	{
+		String parsed[] = text.split(":");
+		int size = parsed[1].length();
+		if(parsed[1].startsWith("//"))
+		{
+			return parsed[1].substring(2, size);
+		}
+		return parsed[1];
 	}
 
 	/**
@@ -3110,9 +3153,14 @@ public class MoSyncThread extends Thread
 		{
 			mUBinaryResources.remove(resourceIndex);
 		}
-		else if(null != mImageResources.get(resourceIndex))
+		else
 		{
-			mImageResources.remove(resourceIndex);
+			ImageCache img = mImageResources.get(resourceIndex);
+			if(null != img)
+			{
+				img.mBitmap.recycle();
+				mImageResources.remove(resourceIndex);
+			}
 		}
 		//else
 		//{
@@ -3282,7 +3330,18 @@ public class MoSyncThread extends Thread
 	 */
 	int maImagePickerOpen()
 	{
-		return mMoSyncNativeUI.maImagePickerOpen();
+		return mMoSyncNativeUI.maImagePickerOpen(MA_IMAGE_PICKER_EVENT_RETURN_TYPE_IMAGE_HANDLE);
+	}
+
+	/**
+	 * Displays an image picker to the user and sets the event return type.
+	 * @param eventReturnType One of the next constants:
+	 * - #MA_IMAGE_PICKER_EVENT_RETURN_TYPE_IMAGE_HANDLE
+	 * - #MA_IMAGE_PICKER_EVENT_RETURN_TYPE_IMAGE_DATA
+	 */
+	int maImagePickerOpenWithEventReturnType(int eventReturnType)
+	{
+		return mMoSyncNativeUI.maImagePickerOpen(eventReturnType);
 	}
 
 	/**
@@ -3891,8 +3950,16 @@ public class MoSyncThread extends Thread
 		}
 		else if (SCREEN_ORIENTATION_DYNAMIC == orientation)
 		{
-			maScreenSetOrientationHelper(
-				ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			if ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD )
+			{
+				maScreenSetOrientationHelper(
+						ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+			}
+			else
+			{
+				maScreenSetOrientationHelper(
+						ActivityInfo.SCREEN_ORIENTATION_SENSOR);
+			}
 		}
 		else
 		{
@@ -3986,6 +4053,16 @@ public class MoSyncThread extends Thread
 	void maConnWrite(int connHandle, int src, int size)
 	{
 		mMoSyncNetwork.maConnWrite(connHandle, src, size);
+	}
+
+	void maConnReadFrom(int connHandle, int dst, int size, int src)
+	{
+		mMoSyncNetwork.maConnReadFrom(connHandle, dst, size, src);
+	}
+
+	void maConnWriteTo(int connHandle, int src, int size, int dst)
+	{
+		mMoSyncNetwork.maConnWriteTo(connHandle, src, size, dst);
 	}
 
 	void maConnReadToData(int connHandle, int data, int offset, int size)
@@ -4224,7 +4301,7 @@ public class MoSyncThread extends Thread
 	 * multiple icons will be added. The shortcut launches the current
 	 * application.
 	 * @param name The text that will be used for the shortcut label.
-	 * @return <0 on error
+	 * @return < 0 on error
 	 */
 	int maHomeScreenShortcutAdd(String name)
 	{
@@ -4234,7 +4311,7 @@ public class MoSyncThread extends Thread
 	/**
 	 * Remove a shortcut icon to the home screen.
 	 * @param name The shortcut(s) with this label will be removed.
-	 * @return <0 on error
+	 * @return < 0 on error
 	 */
 	int maHomeScreenShortcutRemove(String name)
 	{
@@ -4463,7 +4540,8 @@ public class MoSyncThread extends Thread
 	 */
 	public void acquireHardware()
 	{
-		if (mMoSyncCameraController != null) {
+		if (mMoSyncCameraController != null)
+		{
 			mMoSyncCameraController.acquireCamera();
 		}
 	}
@@ -4510,7 +4588,7 @@ public class MoSyncThread extends Thread
 		}
 
 		int result = mMoSyncCameraController.cameraStop();
-		//go back to the previous screen'
+		//go back to the previous screen
 		if(cameraScreen != 0)
 		{
 			maWidgetDestroy(cameraScreen);
@@ -4565,7 +4643,7 @@ public class MoSyncThread extends Thread
 	 * Selects the active Camera
 	 *
 	 * @param cameraNumber index of the camera in the list
-	 * @return >0 for success, <0 for failure
+	 * @return > 0 for success, < 0 on failure
 	 */
 	int maCameraSelect(int cameraNumber)
 	{
@@ -4650,10 +4728,60 @@ public class MoSyncThread extends Thread
 			return IOCTL_UNAVAILABLE;
 		}
 
-		return mMoSyncCameraController.getCameraPorperty(key,
+		return mMoSyncCameraController.getCameraProperty(key,
 										memBuffer,
 										memBufferSize);
 	}
+
+	public int maCameraPreviewSize()
+	{
+		if(mMoSyncCameraController == null)
+		{
+			return IOCTL_UNAVAILABLE;
+		}
+
+		return mMoSyncCameraController.getPreviewSize();
+	}
+
+	public int maCameraPreviewEventEnable(
+			int eventType,
+			int previewBuffer,
+			int rectLeft,
+			int rectTop,
+			int rectWidth,
+			int rectHeight
+		)
+	{
+		if(mMoSyncCameraController == null)
+		{
+			return IOCTL_UNAVAILABLE;
+		}
+
+		return mMoSyncCameraController.enablePreviewEvents(
+			eventType, previewBuffer, rectLeft, rectTop,
+			rectWidth, rectHeight);
+	}
+
+	int maCameraPreviewEventDisable()
+	{
+		if(mMoSyncCameraController == null)
+		{
+			return IOCTL_UNAVAILABLE;
+		}
+
+		return mMoSyncCameraController.disablePreviewEvents();
+	}
+
+	int maCameraPreviewEventConsumed()
+	{
+		if(mMoSyncCameraController == null)
+		{
+			return IOCTL_UNAVAILABLE;
+		}
+
+		return mMoSyncCameraController.previewEventConsumed();
+	}
+
 
 	/**
 	 * Called when the back button has been pressed.
@@ -5055,6 +5183,11 @@ public class MoSyncThread extends Thread
 		return mMoSyncPIM.maPimListNext(list);
 	}
 
+	int maPimListNextSummary(int list)
+	{
+		return mMoSyncPIM.maPimListNextSummary(list);
+	}
+
 	int maPimListClose(int list)
 	{
 		return mMoSyncPIM.maPimListClose(list);
@@ -5185,6 +5318,10 @@ public class MoSyncThread extends Thread
 
 	public int maNFCGetSize(int tagHandle) {
 		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetSize(tagHandle);
+	}
+
+	public int maNFCGetId(int tagHandle, int dst, int len) {
+		return mMoSyncNFC == null ? IOCTL_UNAVAILABLE : mMoSyncNFC.maNFCGetId(tagHandle, dst, len);
 	}
 
 	void maNFCConnectTag(int tagHandle) {

@@ -58,7 +58,17 @@ public:
 	/**
 	 * Constructor.
 	 */
-	MessageStream(NativeUI::WebView* webView, MAHandle dataHandle);
+	MessageStream(
+		MAWidgetHandle webViewHandle,
+		MAHandle dataHandle);
+
+	/**
+	 * Constructor.
+	 * @deprecated
+	 */
+	MessageStream::MessageStream(
+		NativeUI::WebView* webView,
+		MAHandle dataHandle);
 
 	/**
 	 * Destructor.
@@ -71,10 +81,26 @@ public:
 	bool isValid();
 
 	/**
-	 * Get the WebView widget associated with this message.
-	 * @return Pointer to WebView object.
+	 * Get the WebView widget handle associated with this message.
+	 * @return Handle to WebView widget.
+	 */
+	MAWidgetHandle getWebViewHandle();
+
+	/**
+	 * Get the WebView object associated with this message.
+	 * @return WebView object. NULL may be returned if the
+	 * MessageStream constructor was not called with a WebView
+	 * object. Use getWebViewHandle() instead, or use callJS() if you
+	 * wish to evaluate JavScript in the WebViewthat sent this message.
+	 * @deprecated
 	 */
 	NativeUI::WebView* getWebView();
+
+	/**
+	 * Evaluate JavaScript the WebView associated with this message.
+	 * @param script JavaScript string.
+	 */
+	void callJS(const MAUtil::String& script);
 
 	/**
 	 * Get a pointer to the next string in the message stream,
@@ -105,13 +131,21 @@ protected:
 	 */
 	int raise(int base, int e);
 
-protected:
 	/**
-	 * The WebView of this message.
+	 * The WebView widget handle of this message.
+	 */
+	MAWidgetHandle mWebViewHandle;
+
+	/**
+	 * The WebView widget handle of this message.
+	 * @deprecated
 	 */
 	NativeUI::WebView* mWebView;
 
-public:
+	/**
+	 * Variables for internal use only, but made protected
+	 * if some future need for subclassing would arise.
+	 */
 	char* mData;
 	int mDataSize;
 	char* mStart;

@@ -25,6 +25,7 @@ LOCAL_SRC_FILES := FileImpl.cpp \
 	../sdl/FileImpl.cpp \
 	MoSyncBridge.cpp \
 	AndroidHelpers.cpp \
+	EventQueue.cpp \
 	SyscallImpl.cpp \
 	IOCtl.cpp \
 	../../base/FileStream.cpp \
@@ -42,6 +43,6 @@ LOCAL_SRC_FILES := FileImpl.cpp \
 
 LOCAL_LDLIBS	:= -L$(SYSROOT)/usr/lib -llog -lGLESv1_CM -lGLESv2
 
-LOCAL_CFLAGS	:= -DFPM_ARM
+LOCAL_CFLAGS	:= -DFPM_ARM -Wno-psabi
 
 include $(BUILD_SHARED_LIBRARY)

@@ -136,7 +136,7 @@ std::string RtspConnection::methodString() {
 	case RTSP_DESCRIBE: return "DESCRIBE";
 	case RTSP_SETUP: return "SETUP";
 	case RTSP_PLAY: return "PLAY";
-	case RTSP_PAUSE: return "PAUSE"; 
+	case RTSP_PAUSE: return "PAUSE";
 	case RTSP_TEARDOWN: return "TEARDOWN";
 	default:
 		DEBIG_PHAT_ERROR;
@@ -202,16 +202,16 @@ void RtspConnection::parseDescribeData(const char *desc) {
 		int type = *desc;
 		desc+=2;
 		switch(type) {
-			case 'a': 
+			case 'a':
 				{
-					const char *str = "control:trackID="; 
+					const char *str = "control:trackID=";
 					if(strncmp(desc, str, strlen(str)-1)==0) {
 						desc+=strlen(str);
 						sscanf(desc, "%d", &streams[streams.size()-1].trackID);
 					}
 				}
 				break;
-			case 'm': 
+			case 'm':
 				{
 					//Stream stream;
 					streams.resize(streams.size()+1);
@@ -241,7 +241,7 @@ int RtspConnection::sendAndVerify(int method) {
 	int recvCSeq = atoi(cseqStr->c_str());
 	if(recvCSeq != CSeq) return CONNERR_GENERIC;
 
-	const std::string *recvSessionId = GetResponseHeader("Session");	
+	const std::string *recvSessionId = GetResponseHeader("Session");
 	if(recvSessionId) {
 		std::string temp = *recvSessionId + ";";
 		if(gotSessionId) {
@@ -302,7 +302,7 @@ int RtspConnection::setup() {
 	const std::string *contentLengthStr = GetResponseHeader("Content-Length");
 	if(!contentLengthStr) return CONNERR_GENERIC;
 	int contentLength = atoi(contentLengthStr->c_str());
-	
+
 	char *describeData = new char[contentLength+1];
 	if((res=read(describeData, contentLength))<0) return res;	//TODO: error handling
 	describeData[contentLength] = 0;
@@ -359,16 +359,25 @@ void RtspConnection::run() {
 //socket creation helpers
 //******************************************************************************
 
-static Connection* newSocketConnection(const std::string& hostname, int port, bool ssl) {
-	if(ssl) {
-		return new SslConnection(hostname, port);
-	} else {
-		return new TcpConnection(hostname, port);
+enum ConnType {
+	Socket, Ssl, Datagram
+};
+
+static Connection* newSocketConnection(const std::string& hostname, int port, ConnType type) {
+	switch(type) {
+	case Ssl: return new SslConnection(hostname, port);
+	case Socket: return new TcpConnection(hostname, port);
+	case Datagram: return new UdpConnection(hostname, port);
+	default: DEBIG_PHAT_ERROR;
 	}
 }
 
 //returns >0 or CONNERR.
-static int createSocketConnection(const char* parturl, Connection*& conn, bool ssl) {
+static int createSocketConnection(const char* parturl, Connection*& conn, ConnType type) {
+	if(type == Datagram && parturl[0] == 0) {
+		conn = new UdpConnection();
+		return 2;
+	}
 	const char* port_m1 = strchr(parturl, ':');
 	if(!port_m1) {
 		return CONNERR_URL;
@@ -378,7 +387,11 @@ static int createSocketConnection(const char* parturl, Connection*& conn, bool s
 	if(port <= 0 || port >= 1 << 16) {
 		return CONNERR_URL;
 	}
-	conn = newSocketConnection(hostname, port, ssl);
+	if(type == Datagram && hostname.empty()) {
+		conn = new UdpConnection(port);
+		return 2;
+	}
+	conn = newSocketConnection(hostname, port, type);
 	return 1;
 }
 
@@ -388,7 +401,7 @@ static int httpCreateConnection(const char* parturl, HttpConnection*& conn, int 
 	const char *path;
 	std::string hostname;
 	if(parseProtocolURL(parturl, &port, ssl ? 443 : 80, &path, hostname)!=SUCCESS) return CONNERR_URL;
-	Connection* transport = newSocketConnection(hostname, port, ssl);
+	Connection* transport = newSocketConnection(hostname, port, ssl ? Ssl : Socket);
 	conn = new HttpConnection(transport, hostname, path, method);
 	return 1;
 }
@@ -413,9 +426,11 @@ SYSCALL(MAHandle, maConnect(const char* url)) {
 	if(sstrcmp(url, http_string) == 0) {
 		const char* parturl = url + sizeof(http_string) - 1;
 		TLTZ_PASS(httpCreateFinishingGetConnection(parturl, conn, false));
+
 	} else if(sstrcmp(url, https_string) == 0) {
 		const char* parturl = url + sizeof(https_string) - 1;
 		TLTZ_PASS(httpCreateFinishingGetConnection(parturl, conn, true));
+
 	} else if(sstrcmp(url, socket_string) == 0) {
 		//possible forms:
 		// socket://	# server on random port
@@ -425,10 +440,32 @@ SYSCALL(MAHandle, maConnect(const char* url)) {
 
 		//extract address and port
 		const char* parturl = url + sizeof(socket_string) - 1;
-		TLTZ_PASS(createSocketConnection(parturl, conn, false));
+		TLTZ_PASS(createSocketConnection(parturl, conn, Socket));
+
 	} else if(sstrcmp(url, ssl_string) == 0) {
 		const char* parturl = url + sizeof(ssl_string) - 1;
-		TLTZ_PASS(createSocketConnection(parturl, conn, true));
+		TLTZ_PASS(createSocketConnection(parturl, conn, Ssl));
+
+	} else if(sstrcmp(url, datagram_string) == 0) {
+		const char* parturl = url + sizeof(datagram_string) - 1;
+		int res;
+		TLTZ_PASS(res = createSocketConnection(parturl, conn, Datagram));
+		if(res == 2) {	// server connection
+			res = conn->connect();
+			if(res < 0) {
+				delete conn;
+				return res;
+			}
+			gConnMutex.lock();
+			{
+				MAStreamConn* mac = new MAStreamConn(gConnNextHandle, conn);
+				gConnections.insert(ConnPair(gConnNextHandle, mac));
+				mac->state = 0;
+				res = gConnNextHandle++;
+			}
+			gConnMutex.unlock();
+			return res;
+		}
 	} else if(sstrcmp(url, btspp_string) == 0) {
 		//allowed forms:
 		// btspp://localhost:%32x
@@ -585,6 +622,15 @@ SYSCALL(void, maConnRead(MAHandle conn, void* dst, int size)) {
 	gThreadPool.execute(new ConnRead(mac, dst, size));
 }
 
+SYSCALL(void, maConnReadFrom(MAHandle conn, void* dst, int size, MAConnAddr* src)) {
+	LOGST("ConnReadFrom %i %i", conn, size);
+	SYSCALL_THIS->ValidateMemRange(dst, size);
+	MAStreamConn& mac = getStreamConn(conn);
+	MYASSERT((mac.state & CONNOP_READ) == 0, ERR_CONN_ALREADY_READING);
+	mac.state |= CONNOP_READ;
+	gThreadPool.execute(new ConnReadFrom(mac, dst, size, src));
+}
+
 SYSCALL(void, maConnWrite(MAHandle conn, const void* src, int size)) {
 	LOGST("ConnWrite %i %i", conn, size);
 	SYSCALL_THIS->ValidateMemRange(src, size);
@@ -592,6 +638,15 @@ SYSCALL(void, maConnWrite(MAHandle conn, const void* src, int size)) {
 	MYASSERT((mac.state & CONNOP_WRITE) == 0, ERR_CONN_ALREADY_WRITING);
 	mac.state |= CONNOP_WRITE;
 	gThreadPool.execute(new ConnWrite(mac, src, size));
+}
+
+SYSCALL(void, maConnWriteTo(MAHandle conn, const void* src, int size, const MAConnAddr* dst)) {
+	LOGST("ConnWriteTo %i %i", conn, size);
+	SYSCALL_THIS->ValidateMemRange(src, size);
+	MAStreamConn& mac = getStreamConn(conn);
+	MYASSERT((mac.state & CONNOP_WRITE) == 0, ERR_CONN_ALREADY_WRITING);
+	mac.state |= CONNOP_WRITE;
+	gThreadPool.execute(new ConnWriteTo(mac, src, size, *dst));
 }
 
 SYSCALL(void, maConnReadToData(MAHandle conn, MAHandle data, int offset, int size)) {
@@ -609,7 +664,7 @@ SYSCALL(void, maConnReadToData(MAHandle conn, MAHandle data, int offset, int siz
 		int sLength;
 		MYASSERT(stream.length(sLength), ERR_DATA_OOB);
 		MYASSERT(sLength >= offset + size, ERR_DATA_OOB);
-		ROOM(SYSCALL_THIS->resources.add_RT_FLUX(data, (void*)sLength));
+		ROOM(SYSCALL_THIS->resources.add_RT_FLUX(data, (void*)(size_t)sLength));
 	}
 
 	mac.state |= CONNOP_READ;
@@ -630,7 +685,7 @@ SYSCALL(void, maConnWriteFromData(MAHandle conn, MAHandle data, int offset, int 
 		int sLength;
 		MYASSERT(stream.length(sLength), ERR_DATA_OOB);
 		MYASSERT(sLength >= offset + size, ERR_DATA_OOB);
-		ROOM(SYSCALL_THIS->resources.add_RT_FLUX(data, (void*)sLength));
+		ROOM(SYSCALL_THIS->resources.add_RT_FLUX(data, (void*)(size_t)sLength));
 	}
 
 	mac.state |= CONNOP_WRITE;

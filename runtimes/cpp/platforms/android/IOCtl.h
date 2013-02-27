@@ -235,6 +235,8 @@ namespace Base
 
 	int _maImagePickerOpen(JNIEnv* jNIEnv, jobject jThis);
 
+	int _maImagePickerOpenWithEventReturnType(int eventReturnType, JNIEnv* jNIEnv, jobject jThis);
+
 	int _maOptionsBox(const wchar* title, const wchar* destructiveText, const wchar* cancelText, int bufPointer, int bufSize,
 						JNIEnv* jNIEnv, jobject jThis);
 
@@ -614,6 +616,13 @@ namespace Base
 	*/
 	MAHandle _maPimListNext(MAHandle list, JNIEnv* jNIEnv, jobject jThis);
 
+	/** Returns a handle to the next PimItem in the \a list, or 0 if there are no more items,
+	* or \< 0 on error.
+	* Using this you can only get name and phone numbers when calling maPimItemGetValue.
+	* You must use maPimItemClose() on every item to prevent memory leaks.
+	*/
+	MAHandle _maPimListNextSummary(MAHandle list, JNIEnv* jNIEnv, jobject jThis);
+
 	/** Closes a PimList.
 	* \note This does not close the list's items, but it does invalidate them,
 	* so that maPimItemClose() is the only function you can safely use on them.
@@ -774,6 +783,17 @@ namespace Base
 								int memBuffer, int memBufferSize,
 								JNIEnv* jNIEnv, jobject jThis);
 
+	int _maCameraPreviewSize(JNIEnv* jNIEnv, jobject jThis);
+
+	int _maCameraPreviewEventEnable(int memStart, int previewEventType,
+									int previewBuffer,
+									MARect* previewArea,
+									JNIEnv* jNIEnv, jobject jThis);
+
+	int _maCameraPreviewEventDisable(JNIEnv* jNIEnv, jobject jThis);
+
+	int _maCameraPreviewEventConsumed(JNIEnv* jNIEnv, jobject jThis);
+
 	int _maNFCStart(JNIEnv* jNIEnv, jobject jThis);
 
 	int _maNFCStop(JNIEnv* jNIEnv, jobject jThis);
@@ -799,6 +819,8 @@ namespace Base
 	int _maNFCTransceive(MAHandle tagHandle, int src, int srcLen, int dst, int dstLen, int memStart, JNIEnv* jNIEnv, jobject jThis);
 
 	int _maNFCGetSize(MAHandle tagHandle, JNIEnv* jNIEnv, jobject jThis);
+
+	int _maNFCGetId(MAHandle tagHandle, int dst, int len, int memStart, JNIEnv* jNIEnv, jobject jThis);
 
 	int _maNFCReadNDEFMessage(MAHandle tag, JNIEnv* jNIEnv, jobject jThis);
 

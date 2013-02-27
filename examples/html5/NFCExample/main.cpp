@@ -30,7 +30,7 @@ MA 02110-1301, USA.
  */
 
 // Include Moblet and message class for web applications.
-#include <Wormhole/WebAppMoblet.h>
+#include <Wormhole/HybridMoblet.h>
 #include <Wormhole/MessageStreamJSON.h>
 // Utility functions for working with NDEF tags
 #include "nfcutil.h"
@@ -41,10 +41,12 @@ MA 02110-1301, USA.
 // Namespaces we want to access.
 using namespace MAUtil; // Class Moblet
 using namespace NativeUI; // Class WebView
-using namespace Wormhole; // Class WebAppMoblet
+using namespace Wormhole; // Class HybridMoblet
 
 // A buffer size used as a basis for text buffers and data buffers.
 #define BUF_SIZE 4096
+// The buffer size used for ids.
+#define ID_SIZE 64
 
 // Icon constants -- these correspond to the png images found in
 // the LocalFiles/images directory.
@@ -68,7 +70,7 @@ enum Mode { _read, _write };
 /**
  * The application class.
  */
-class NFCMoblet : public WebAppMoblet, TimerListener
+class NFCMoblet : public HybridMoblet, TimerListener
 {
 private:
 	// This is the buffer used for writing messages in the UI.
@@ -93,9 +95,9 @@ public:
 
 	void initWebView() {
 		// Initialize the web view and show the main page.
-		enableWebViewMessages();
-		getWebView()->disableZoom();
 		showPage("index.html");
+		// Disable zooming of the page.
+		getWebView()->disableZoom();
 	}
 
 	/**
@@ -327,7 +329,7 @@ public:
 	}
 
 	/**
-	 * Set read/write mode and issue an appropiate message to the user.
+	 * Set read/write mode and issue an appropriate message to the user.
 	 */
 	void setMode(Mode mode) {
 		fMode = mode;
@@ -358,6 +360,8 @@ public:
 	 * the message
 	 */
 	void showStatus(const char* icon, const char* msg, int period) {
+		// Small hack: we always clear the tag id.
+		showTagId("");
 		if (fDisallowStatusMessages) {
 			return;
 		}
@@ -369,6 +373,11 @@ public:
 		} else {
 			removeTimer(this);
 		}
+	}
+
+	void showTagId(const char* tagId) {
+		sprintf(fJsFnCall, "updateTagId(\"%s\")", tagId);
+		callJS(fJsFnCall);
 	}
 
 	void destroySampleTag() {
@@ -425,15 +434,31 @@ public:
 			maNFCCloseTag(tag);
 		} else {
 			int records = maNFCGetNDEFRecordCount(ndef);
-			for (int i = 0; i < records; i++) {
-				MAHandle record = maNFCGetNDEFRecord(ndef, i);
+			String id = getId(tag);
+			if (records > 0) {
+				MAHandle record = maNFCGetNDEFRecord(ndef, 0);
 				// Try to idenfify what kind of NDEF it is...
 				const char* icon = getIcon(record);
 				String text = getText(record);
-				// ...and output it to the UI.
+				// ...and output it to the UI with the serial id. Done!
+				String displayThis = text + "<br/><i>" + id + "</i>";
 				showStatus(icon, text.c_str(), 0);
+				showTagId(id.c_str());
 			}
 		}
+	}
+
+	String toBase16(const char* data, int len) {
+		char HEX_CHARS[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+		char* result = (char*) malloc(2 * len + 1);
+		for (int i = 0; i < len; i++) {
+			result[2 * i] = HEX_CHARS[(data[i] >> 4) & 0xf];
+			result[2 * i + 1] = HEX_CHARS[data[i] & 0xf];
+		}
+		result[2 * len] = '\0';
+		String resultStr = String(result);
+		free(result);
+		return resultStr;
 	}
 
 	void handleNDEFFormattable(MAHandle msg) {
@@ -472,6 +497,20 @@ public:
 		return String("?");
 	}
 
+
+	/**
+	 * Returns an appropriate text representing the tag's serial id.
+	 */
+	String getId(MAHandle tag) {
+		char id[ID_SIZE];
+		int idSize = maNFCGetId(tag, &id, ID_SIZE);
+		if (idSize > 0) {
+			return toBase16(id, idSize);
+		} else {
+			return "No or unknown id";
+		}
+	}
+
 	void handleMifare(const char* type, MAHandle mfu) {
 		int size = maNFCGetSize(mfu);
 		sprintf(fInfoBuffer, "<b>%s</b><br/>Size: %d bytes", type, size);
@@ -492,6 +531,6 @@ public:
  */
 extern "C" int MAMain()
 {
-	Moblet::run(new NFCMoblet());
+	(new NFCMoblet())->enterEventLoop();
 	return 0;
 }

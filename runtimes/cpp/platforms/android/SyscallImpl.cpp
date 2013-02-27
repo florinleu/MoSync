@@ -20,9 +20,12 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "Core.h"
 
 #include "IOCtl.h"
+#include "EventQueue.h"
 
 #include <helpers/cpp_defs.h>
-#include <helpers/fifo.h>
+
+// Not used, instead class EventQueue is used.
+//#include <helpers/fifo.h>
 
 #include <jni.h>
 #include <GLES/gl.h>
@@ -67,7 +70,8 @@ namespace Base
 	bool mIsReloading = false;
 
 	static ResourceArray gResourceArray;
-	static CircularFifo<MAEvent, EVENT_BUFFER_SIZE> gEventFifo;
+	static EventQueue gEventFifo;
+	//static CircularFifo<MAEvent, EVENT_BUFFER_SIZE> gEventFifo;
 
 	int gClipLeft = 0;
 	int gClipTop = 0;
@@ -856,6 +860,37 @@ namespace Base
 		mJNIEnv->DeleteLocalRef(cls);
 	}
 
+	SYSCALL(void, maConnReadFrom(MAHandle conn, void* dst, int size, MAConnAddr* src))
+	{
+		SYSLOG("maConnReadFrom");
+
+		int rdst = (int)dst - (int)gCore->mem_ds;
+		int rsrc = (int)src - (int)gCore->mem_ds;
+
+		jclass cls = mJNIEnv->GetObjectClass(mJThis);
+		jmethodID methodID = mJNIEnv->GetMethodID(cls, "maConnReadFrom", "(IIII)V");
+		if (methodID == 0) ERROR_EXIT;
+		mJNIEnv->CallVoidMethod(mJThis, methodID, conn, (jint)rdst, size, rsrc);
+
+		mJNIEnv->DeleteLocalRef(cls);
+
+	}
+
+	SYSCALL(void, maConnWriteTo(MAHandle conn, const void* src, int size, const MAConnAddr* dst))
+	{
+		SYSLOG("maConnWriteTo");
+
+		int rsrc = (int)src - (int)gCore->mem_ds;
+		int rdst = (int)dst - (int)gCore->mem_ds;
+
+		jclass cls = mJNIEnv->GetObjectClass(mJThis);
+		jmethodID methodID = mJNIEnv->GetMethodID(cls, "maConnWriteTo", "(IIII)V");
+		if (methodID == 0) ERROR_EXIT;
+		mJNIEnv->CallVoidMethod(mJThis, methodID, conn, (jint)rsrc, size, rdst);
+
+		mJNIEnv->DeleteLocalRef(cls);
+	}
+
 	SYSCALL(void,  maConnReadToData(MAHandle conn, MAHandle data, int offset, int size))
 	{
 		SYSLOG("maConnReadToData");
@@ -1321,7 +1356,7 @@ namespace Base
 	*				if this syscall is not implemented on this platfom.
 	*
 	*/
-	SYSCALL(int,  maIOCtl(int function, int a, int b, int c))
+	SYSCALL(longlong,  maIOCtl(int function, int a, int b, int c))
 	{
 		SYSLOG("maIOCtl");
 		//__android_log_write(ANDROID_LOG_INFO, "MoSync Syscall", "maIOCtl");
@@ -1764,7 +1799,7 @@ namespace Base
 			// the background during the time the maTextBox is running.
 			MAEvent event;
 			event.type = EVENT_TYPE_FOCUS_LOST;
-			event.data = NULL;
+			event.data = (MAAddress)NULL;
 			Base::gSyscall->postEvent(event);
 
 			// Get the two first parameters of the IOCtl function
@@ -1957,6 +1992,13 @@ namespace Base
 		case maIOCtl_maImagePickerOpen:
 			SYSLOG("maIOCtl_maImagePickerOpen");
 			return _maImagePickerOpen(
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maImagePickerOpenWithEventReturnType:
+			SYSLOG("maIOCtl_maImagePickerOpenWithEventReturnType");
+			return _maImagePickerOpenWithEventReturnType(
+				a,
 				mJNIEnv,
 				mJThis);
 
@@ -2251,6 +2293,45 @@ namespace Base
 			return _maCameraGetProperty((int)gCore->mem_ds, _property, _valueBuffer, _valueBufferSize, mJNIEnv, mJThis);
 		}
 
+		case maIOCtl_maCameraPreviewSize:
+		{
+
+			return _maCameraPreviewSize(mJNIEnv, mJThis);
+		}
+
+
+		// int maCameraEnablePreviewEvents( in int previewEventType,
+		//									in MAAddress previewBuffer,
+		//									in MARect previewArea);
+
+		case maIOCtl_maCameraPreviewEventEnable:
+		{
+
+			MARect* rect = (MARect*) SYSCALL_THIS->GetValidatedMemRange(c, sizeof(MARect));
+
+			int type = a;
+
+			int previewSize = rect->width * rect->height;
+
+			int data = (int) SYSCALL_THIS->GetValidatedMemRange(b, (previewSize*4));
+
+			char t[200];
+			sprintf(t, "pbuffer :%u data :%u\n", b, data);
+			__android_log_write(ANDROID_LOG_INFO, "@@@@@@ MOSYNC JNI", t);
+
+			return _maCameraPreviewEventEnable((int)gCore->mem_ds, type, data, rect, mJNIEnv, mJThis);
+		}
+
+		case maIOCtl_maCameraPreviewEventDisable:
+		{
+			return _maCameraPreviewEventDisable(mJNIEnv, mJThis);
+		}
+
+		case maIOCtl_maCameraPreviewEventConsumed:
+		{
+			return _maCameraPreviewEventConsumed(mJNIEnv, mJThis);
+		}
+
 		// ********** Sensor API **********
 
 		case maIOCtl_maSensorStart:
@@ -2280,6 +2361,13 @@ namespace Base
 		case maIOCtl_maPimListNext:
 			SYSLOG("maIOCtl_maPimListNext");
 			return _maPimListNext(
+				a,
+				mJNIEnv,
+				mJThis);
+
+		case maIOCtl_maPimListNextSummary:
+			SYSLOG("maIOCtl_maPimListNextSummary");
+			return _maPimListNextSummary(
 				a,
 				mJNIEnv,
 				mJThis);
@@ -2497,6 +2585,15 @@ namespace Base
 
 		case maIOCtl_maNFCGetSize:
 			return _maNFCGetSize(a, mJNIEnv, mJThis);
+
+			case maIOCtl_maNFCGetId:
+				return _maNFCGetId(
+					a,
+					(int) SYSCALL_THIS->GetValidatedMemRange( b, c * sizeof(byte)),
+					c,
+					(int)gCore->mem_ds,
+					mJNIEnv,
+					mJThis);
 
 		case maIOCtl_maNFCGetNDEFMessage:
 			return _maNFCGetNDEFMessage(a, mJNIEnv, mJThis);

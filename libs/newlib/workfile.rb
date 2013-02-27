@@ -39,6 +39,9 @@ work.instance_eval do
 			"libc/misc", "libc/unix", "libc/posix", "libc/locale", "libc/reent", "libc/stdio",
 			"libc/search", "libc/stdlib", "libc/string", "libc/time", "libc/ctype", "libc/errno",
 			"libm/math", "libm/common", "../ResCompiler"]
+		@EXTRA_SOURCEFILES = [
+			'../MAStd/inet_ntop.c',
+		]
 		@EXTRA_INCLUDES = ["libc/include", "libc/sys/mosync", "libm/common"]
 
 		@EXTRA_CFLAGS = " -DUSE_EXOTIC_MATH -Wno-float-equal -Wno-unreachable-code -Wno-sign-compare -Wno-old-style-definition"
@@ -91,7 +94,7 @@ work.instance_eval do
 
 		@IGNORED_FILES = ["engine.c"]
 
-		@EXTRA_OBJECTS = [FileTask.new(self, "libc/sys/mosync/crtlib.s")]
+		@EXTRA_OBJECTS = [FileTask.new(self, "libc/sys/mosync/crtlib.s"), FileTask.new(self, "libc/sys/mosync/mastack.s")]
 
 		# copy subdirs
 		copyHeaderDir("sys")
@@ -104,6 +107,8 @@ work.instance_eval do
 			FileTask.new(self, '../libsupc++/new'))
 		@prerequisites << CopyFileTask.new(self, mosync_include + '/macpp.h',
 			FileTask.new(self, '../libsupc++/macpp.h'))
+		@prerequisites << CopyFileTask.new(self, mosync_include + '/inet_ntop.h',
+			FileTask.new(self, '../MAStd/inet_ntop.h'))
 
 		@HEADER_DIRS = ["libc/include", "libc/sys/mosync"]
 		@INSTALL_INCDIR = "."

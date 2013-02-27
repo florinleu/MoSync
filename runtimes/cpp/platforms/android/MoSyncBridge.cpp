@@ -113,9 +113,9 @@ static jboolean nativeLoad(
 	jclass fdClass = env->FindClass("java/io/FileDescriptor");
 	if (fdClass != NULL)
 	{
-		jclass fdPrgClassRef = (jclass) env->NewGlobalRef(fdClass);
+		//jclass fdPrgClassRef = (jclass) env->NewGlobalRef(fdClass);
 		jfieldID fdClassDescriptorFieldID =
-			env->GetFieldID(fdPrgClassRef, "descriptor", "I");
+			env->GetFieldID(fdClass, "descriptor", "I");
 
 		if (fdClassDescriptorFieldID != NULL && program != NULL)
 		{
@@ -143,9 +143,9 @@ static jboolean nativeLoad(
 		jclass fdClass2 = env->FindClass("java/io/FileDescriptor");
 		if (fdClass2 != NULL)
 		{
-			jclass fdResClassRef = (jclass) env->NewGlobalRef(fdClass2);
+			//jclass fdResClassRef = (jclass) env->NewGlobalRef(fdClass2);
 			jfieldID fdClassDescriptorFieldID =
-				env->GetFieldID(fdResClassRef, "descriptor", "I");
+				env->GetFieldID(fdClass2, "descriptor", "I");
 
 			if (fdClassDescriptorFieldID != NULL && resource != NULL)
 			{
@@ -191,12 +191,13 @@ static jboolean nativeLoadResource(
 	if (resourceOffset != 0)
 	{
 		SYSLOG("MoSyncBridge.cpp: nativeLoad: Get resource file descriptor");
-		jclass fdClass2 = env->FindClass("java/io/FileDescriptor");
-		if (fdClass2 != NULL)
+		jclass fdClass = env->FindClass("java/io/FileDescriptor");
+		if (fdClass != NULL)
 		{
-			jclass fdResClassRef = (jclass) env->NewGlobalRef(fdClass2);
+			//jclass fdResClassRef = (jclass) env->NewGlobalRef(fdClass2);
 			jfieldID fdClassDescriptorFieldID =
-				env->GetFieldID(fdResClassRef, "descriptor", "I");
+				env->GetFieldID(fdClass, "descriptor", "I");
+				//env->GetFieldID(fdResClassRef, "descriptor", "I");
 
 			if (fdClassDescriptorFieldID != NULL && resource != NULL)
 			{
@@ -257,7 +258,12 @@ static void nativeRun(JNIEnv* env, jobject jthis)
 {
 	SYSLOG("nativeRun");
 
-	Base::gSyscall->setJNIEnvironment(env, jthis);
+	// Updated, ICS made changes in how local and global references are handled.
+	// This global is not deleted since it's used for the entire life cycle of the app.
+	jobject gloablRefJThis = env->NewGlobalRef(jthis);
+	Base::gSyscall->setJNIEnvironment(env, gloablRefJThis);
+
+	//Base::gSyscall->setJNIEnvironment(env, jthis);
 
 	while(1)
 	{
@@ -313,6 +319,8 @@ static void nativeRun(JNIEnv* env, jobject jthis)
 
 /**
 * @brief nativePostEvent
+* Don't forget to update the file EventQueue.cpp when adding
+* event types that would potentially overflow the event queue.
 */
 static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 {
@@ -330,7 +338,7 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 	// Build the event.
 	MAEvent event;
 	event.type = intArray[0];
-	event.data = NULL;
+	event.data = (MAAddress)NULL;
 
 	// Print log message.
 	char logBuf[256];
@@ -383,6 +391,7 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 	{
 		event.imagePickerState = intArray[1];
 		event.imagePickerItem = intArray[2];
+		event.imagePickerEncodingType = intArray[3];
 	}
 	else if (event.type == EVENT_TYPE_SMS)
 	{
@@ -493,6 +502,8 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 		 * intArray[4] - Handle to url data.
 		 *
 		 * WIDGET_EVENT_RATING_STAR_VALUE_CHANGED
+		 *
+		 * MAW_EVENT_SCREEN_ORIENTATION_DID_CHANGE
 		 */
 
 		// Allocate the widget event data structure.
@@ -512,6 +523,11 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 		else if (widgetEventType == MAW_EVENT_ITEM_CLICKED)
 		{
 			widgetEvent->listItemIndex = intArray[3];
+		}
+		else if (widgetEventType == MAW_EVENT_SEGMENTED_LIST_ITEM_CLICKED)
+		{
+			widgetEvent->sectionIndex = intArray[3];
+			widgetEvent->sectionItemIndex = intArray[4];
 		}
 		else if (widgetEventType == MAW_EVENT_TAB_CHANGED)
 		{
@@ -595,6 +611,13 @@ static void nativePostEvent(JNIEnv* env, jobject jthis, jintArray eventBuffer)
 	{
 		event.audioInstance = intArray[1];
 	}
+	else if (event.type == EVENT_TYPE_CAMERA_PREVIEW)
+	{
+		__android_log_write(ANDROID_LOG_INFO, "@@@@@@@@ MoSync JNI", "Camera event sent");
+	}
+	// HOLD ON!
+	// Don't forget to update the file EventQueue.cpp when adding
+	// event types that would potentially overflow the event queue.
 
 	// Release the memory used for the int array.
 	env->ReleaseIntArrayElements(eventBuffer, intArray, 0);

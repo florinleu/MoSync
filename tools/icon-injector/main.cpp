@@ -39,7 +39,7 @@ using namespace MoSync;
 map<string, Injector*> gInjectors;
 map<string, string> oldInjectors;
 
-static void initInjectors() {
+static void initInjectors(bool force) {
 	gInjectors["JavaME"] = new JavaInjector();
 #ifdef WIN32 // for now..
 	gInjectors["Windows Mobile"] = new WinmobileInjector();
@@ -49,6 +49,10 @@ static void initInjectors() {
 	gInjectors["Symbian"] = new Symbian9Injector();
 	gInjectors["Android"] = new AndroidInjector();
 	gInjectors["iOS"] = new IOSInjector();
+
+	for (std::map<string, Injector*>::iterator injectors = gInjectors.begin(); injectors != gInjectors.end(); ++injectors) {
+		injectors->second->setForce(force);
+	}
 
 	oldInjectors["j2me"] = "JavaME";
 	oldInjectors["winmobile"] = "Windows Mobile";
@@ -61,7 +65,10 @@ static void initInjectors() {
 static bool parseCmdLine(map<string, string>& params, int argc, char **argv) {
 	for(int i = 1; i < argc; i++) {
 		const char *name = argv[i];
-		if(strncmp(name, "-", 1)==0) {
+		if(!strcmp(name, "-force")) {
+			// Special op.
+			params["force"] = "true";
+		} else if(strncmp(name, "-", 1)==0) {
 			name++;
 			i++;
 			if(i>=argc) return false;
@@ -78,7 +85,7 @@ int main(int argc, char **argv) {
 	if(!parseCmdLine(params, argc, argv)) errorExit("Couldn't parse the command-line\n");
 	string src = Injector::verifyParameter(params, "src");
 	string platform = Injector::verifyParameter(params, "platform");
-	initInjectors();
+	initInjectors(!params["force"].empty());
 	// We support old, inconsistent platforms as well as the new platform based format
 	string newPlatform = oldInjectors[platform];
 	if (!newPlatform.empty()) {

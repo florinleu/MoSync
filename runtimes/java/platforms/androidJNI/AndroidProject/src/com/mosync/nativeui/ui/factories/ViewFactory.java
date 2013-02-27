@@ -129,6 +129,8 @@ public class ViewFactory
 		addFactory( IX_WIDGET.MAW_RADIO_BUTTON, new RadioButtonFactory( ) );
 		addFactory( IX_WIDGET.MAW_RADIO_GROUP, new RadioGroupFactory( ) );
 		addFactory( IX_WIDGET.MAW_RATING_BAR, new RatingBarFactory( ) );
+		addFactory( IX_WIDGET.MAW_LIST_VIEW_SECTION,  new ListSectionFactory( ) );
+		addFactory( IX_WIDGET.MAW_NUMBER_PICKER, new NumberPickerFactory( ) );
 	}
 
 	/**

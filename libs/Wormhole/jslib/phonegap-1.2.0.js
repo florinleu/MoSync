@@ -170,7 +170,7 @@ PhoneGap.CallbackSuccess = function(callbackId, args, cast)
                 }
             }
             catch (e) {
-                console.log("Error in success callback: "+callbackId+" = " + e.message);
+                console.log("Error in success callback with id: "+callbackId+": " + e.message);
             }
         }
 
@@ -530,7 +530,13 @@ PhoneGap.onDeviceReady = new PhoneGap.Channel('onDeviceReady');
 
 
 // Array of channels that must fire before "deviceready" is fired
-PhoneGap.deviceReadyChannelsArray = [ PhoneGap.onPhoneGapReady, PhoneGap.onPhoneGapInfoReady, PhoneGap.onPhoneGapConnectionReady];
+// MOSYNC: Added PhoneGap.onNativeReady to channels array to fix
+// bug that caused onDeviceReady to fire too early.
+PhoneGap.deviceReadyChannelsArray = [
+	PhoneGap.onPhoneGapReady,
+	PhoneGap.onPhoneGapInfoReady,
+	PhoneGap.onPhoneGapConnectionReady,
+	PhoneGap.onNativeReady];
 
 // Hashtable of user defined channels that must also fire before "deviceready" is fired
 PhoneGap.deviceReadyChannelsMap = {};
@@ -739,7 +745,6 @@ Accelerometer.prototype.getCurrentAcceleration = function(successCallback, error
     var onSuccess = function(result)
     {
         var accResult = JSON.parse(result);
-        console.log("Accel x = " + accResult.x);
         self.lastAcceleration = new Acceleration(accResult.x,accResult.y,accResult.z);
         successCallback(self.lastAcceleration);
     }
@@ -793,7 +798,6 @@ Accelerometer.prototype.watchAcceleration = function(successCallback, errorCallb
 
     var onSuccess = function (result) {
         var accResult = JSON.parse(result);
-        console.log("Accel x = " + accResult.x);
         self.lastAcceleration = new Acceleration(accResult.x, accResult.y, accResult.z);
         successCallback(self.lastAcceleration);
     }
@@ -1831,8 +1835,11 @@ var Device = function() {
     var me = this;
     this.getInfo(
         function (res) {
-            var info = JSON.parse(res);
-            console.log("GotDeviceInfo :: " + info.version);
+            // MOSYNC: We send in device info as an object,
+            // it is already parsed.
+            //var info = JSON.parse(res); // Line kept for reference.
+            var info = res;
+            console.log("GotDeviceInfo: " + info.version);
             me.available = true;
             me.platform = info.platform;
             me.version = info.version;
@@ -3172,7 +3179,7 @@ LocalFileSystem.prototype.resolveLocalFileSystemURI = function(uri, successCallb
 };
 
 /**
-* TODO: The following comment is misplaced (copy/paste error). The function is used
+* TODO: MOSYNC The following comment is misplaced (copy/paste error). The function is used
 * by the file system API. Update with proper comment.
 *
 * This function returns and array of contacts.  It is required as we need to convert raw
@@ -3815,7 +3822,7 @@ var Connection = function()
     var me = this;
     this.getInfo(
         function(type) {
-            console.log("getInfo result" + type);
+            console.log("PhoneGap: Connection getInfo type: " + type);
             // Need to send events if we are on or offline
             if (type == "none") {
                 // set a timer if still offline at the end of timer send the offline event

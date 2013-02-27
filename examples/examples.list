@@ -14,6 +14,7 @@ HelloOpenGLES
 Graphun
 RockPaperScissorsGameNativeUI
 NativeUIDemo
+NativeUIMap
 Location = location
 MapDemo
 MAStx
@@ -53,3 +54,5 @@ WebViewTwitter
 WormholeDemo
 WormholeNativeUI
 NFCExample
+PhotoGallery
+EuropeanCountries

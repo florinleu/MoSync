@@ -322,6 +322,32 @@ public class EventQueue
 		sMoSyncThread.postEvent(event);
 	}
 
+	/**
+	 * Sends an item clicked event.
+	 * @param widgetHandle The segmented list view that sends the event.
+	 * @param position The position index.
+	 * @param index The index fo the item inside the position.
+	 */
+	public void postSegmentedListItemClicked(int widgetHandle, int position, int index)
+	{
+		postWidgetEvent(
+				IX_WIDGET.MAW_EVENT_SEGMENTED_LIST_ITEM_CLICKED,
+				widgetHandle,
+				position,
+				index);
+	}
+
+	/**
+	 * Sends a screen orientation changed event.
+	 * @param widgetHandle The screen widget that sends the event.
+	 */
+	public void postScreenOrientationChanged(int widgetHandle)
+	{
+		postWidgetEvent(
+				IX_WIDGET.MAW_EVENT_SCREEN_ORIENTATION_DID_CHANGE,
+				widgetHandle);
+	}
+
 	public static EventQueue getDefault()
 	{
 		return DEFAULT;

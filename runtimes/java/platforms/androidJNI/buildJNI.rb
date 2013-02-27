@@ -55,6 +55,8 @@ configPath = ARGV[3]
 androidVersion = ARGV[4]
 debugFlag = ARGV[5]
 
+# Converts the android version to an Integer
+androidVersionInt = Integer(androidVersion)
 
 if ENV['MOSYNC_SRC'] == nil
 	cd "../../../../"
@@ -77,8 +79,12 @@ ENV['MOSYNC_JAVA_SRC'] = cpath
 #We need two different make files for android due to some restrictions in JNI
 
 puts "android version is: #{androidVersion}"
-if((androidVersion == "3") ||(androidVersion == "4"))
+if(androidVersionInt < 7)
 	ENV['ANDROID_API_BELOW_7'] = "true"
+end
+
+if(androidVersionInt >= 15)
+	ENV['ANDROID_API_15_OR_ABOVE'] = "true"
 end
 
 if androidNDKPath == nil
@@ -139,12 +145,12 @@ if ENV['OS'] == "Windows_NT"
 			  "PATH or CYGPATH environmental variable"
 		raise Exception.new(msg)
 	end
-	success = sh "#{cygPath}bash.exe --login -c \"dos2unix $(cygpath -u #{cpath}/cygwin_u.sh)\""
+	success = sh "#{cygPath}/bash.exe --login -c \"dos2unix $(cygpath -u #{cpath}/cygwin_u.sh)\""
 	if (!success)
 		exitBuilder(1, mosyncppsource, configPath)
 	end
 
-	success = sh "#{cygPath}bash.exe --login -i #{File.join(cpath, "cygwin_u.sh")} #{androidNDKPath} #{androidSDKPath} #{ENV['MOSYNC_SRC']}"
+	success = sh "#{cygPath}/bash.exe --login -i #{File.join(cpath, "cygwin_u.sh")} #{androidNDKPath} #{androidSDKPath} #{ENV['MOSYNC_SRC']}"
 else
 	success = sh("#{File.join(cpath, "invoke-ndk-build.sh")} #{androidNDKPath} #{androidSDKPath} $MOSYNC_SRC");
 end
@@ -182,26 +188,27 @@ sh( "#{File.join(androidSDKTools, "/aapt")} package -f -v " +
 
 puts "Compiling Java Source Files\n\n"
 
-packages = ["src/com/mosync/java/android/*.java",
-            "src/com/mosync/internal/android/*.java",
-            "src/com/mosync/internal/generated/*.java",
-            "src/com/mosync/nativeui/core/*.java",
-			"src/com/mosync/nativeui/ui/egl/*.java",
-            "src/com/mosync/nativeui/ui/factories/*.java",
-            "src/com/mosync/nativeui/ui/widgets/*.java",
-            "src/com/mosync/nativeui/util/*.java",
-            "src/com/mosync/nativeui/util/properties/*.java",
-			"src/com/mosync/pim/*.java",
-			"src/com/mosync/nativeui/ui/custom/*.java",
-			"gen/com/mosync/java/android/*.java",
-            "src/com/mosync/internal/android/nfc/*.java",
-            "src/com/mosync/internal/android/nfc/ops/*.java",
-	        "src/com/mosync/nativeui/ui/ads/*.java",
-			"src/com/mosync/internal/android/notifications/*.java",
-			"src/com/mosync/internal/android/billing/*.java",
-			"src/com/mosync/internal/android/billing/request/*.java",
-			"gen/com/android/vending/billing/IMarketBillingService.java"
-            ]
+packages = [
+	"src/com/mosync/java/android/*.java",
+	"src/com/mosync/internal/android/*.java",
+	"src/com/mosync/internal/generated/*.java",
+	"src/com/mosync/nativeui/core/*.java",
+	"src/com/mosync/nativeui/ui/egl/*.java",
+	"src/com/mosync/nativeui/ui/factories/*.java",
+	"src/com/mosync/nativeui/ui/widgets/*.java",
+	"src/com/mosync/nativeui/util/*.java",
+	"src/com/mosync/nativeui/util/properties/*.java",
+	"src/com/mosync/pim/*.java",
+	"src/com/mosync/nativeui/ui/custom/*.java",
+	"gen/com/mosync/java/android/*.java",
+	"src/com/mosync/internal/android/nfc/*.java",
+	"src/com/mosync/internal/android/nfc/ops/*.java",
+	"src/com/mosync/nativeui/ui/ads/*.java",
+	"src/com/mosync/internal/android/notifications/*.java",
+	"src/com/mosync/internal/android/billing/*.java",
+	"src/com/mosync/internal/android/billing/request/*.java",
+	"gen/com/android/vending/billing/IMarketBillingService.java",
+]
 
 # Concatenate each list element with package_root, and flatten the list to a string
 java_files = packages.map { |package| File.join(package_root, package) }.join(" ")

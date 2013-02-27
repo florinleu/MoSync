@@ -330,7 +330,7 @@ static NotificationManager *sharedInstance = nil;
 		return MA_NOTIFICATION_RES_INVALID_STRING_BUFFER_SIZE;
 	}
 
-    [retVal getCString:value maxLength:length encoding:NSASCIIStringEncoding];
+    [retVal getCString:value maxLength:length encoding:NSUTF8StringEncoding];
 	[retVal release];
     return MA_NOTIFICATION_RES_OK;
 }
@@ -409,7 +409,7 @@ static NotificationManager *sharedInstance = nil;
     for (NSNumber* key in allKeys)
     {
         UILocalNotification* localNotification = [mLocalNotificationDictionary objectForKey:key];
-        if (localNotification == notification)
+        if ([localNotification isEqual: notification])
         {
             return [key intValue];
         }
@@ -589,7 +589,7 @@ static NotificationManager *sharedInstance = nil;
             NSLog(@"NotificationManager::getPushNotificationData Buffer too small.");
             return MA_NOTIFICATION_RES_INVALID_STRING_BUFFER_SIZE;
         }
-        [messageAlert getCString:charAddress maxLength:maxLength encoding:NSASCIIStringEncoding];
+        [messageAlert getCString:charAddress maxLength:maxLength encoding:NSUTF8StringEncoding];
         pushNotificationType = pushNotificationType | MA_NOTIFICATION_PUSH_TYPE_ALERT;
     }
 
@@ -605,7 +605,7 @@ static NotificationManager *sharedInstance = nil;
             NSLog(@"NotificationManager::getPushNotificationData Buffer too small.");
             return MA_NOTIFICATION_RES_INVALID_STRING_BUFFER_SIZE;
         }
-        [soundFileName getCString:charAddress maxLength:maxLength encoding:NSASCIIStringEncoding];
+        [soundFileName getCString:charAddress maxLength:maxLength encoding:NSUTF8StringEncoding];
         pushNotificationType = pushNotificationType | MA_NOTIFICATION_PUSH_TYPE_SOUND;
     }
 
@@ -683,7 +683,7 @@ static NotificationManager *sharedInstance = nil;
         return MA_NOTIFICATION_RES_REGISTRATION_MESSAGE_BUF_TOO_SMALL;
     }
 
-    [messageString getCString:messageAddress maxLength:size encoding:NSASCIIStringEncoding];
+    [messageString getCString:messageAddress maxLength:size encoding:NSUTF8StringEncoding];
     return result;
 }
 

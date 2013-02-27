@@ -33,6 +33,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #include "File.h"
 #include "xlstcomp.h"
 #include "resdirectives.h"
+#include "helpers/attribute.h"
 
 using namespace std;
 
@@ -47,10 +48,15 @@ using namespace std;
 #define RES_AUDIO "audio"
 #define RES_MEDIA "media"
 #define RES_STRING "string"
+#define RES_CSTRING "cstring"
+#define RES_PSTRING "pstring"
 #define RES_BINARY "binary"
+#define RES_BYTE "byte"
+#define RES_WORD "word"
+#define RES_HALF "half"
 #define RES_PLACEHOLDER "placeholder"
 
-
+static void error(const char* file, int lineNo, string msg) GCCATTRIB(noreturn);
 static void error(const char* file, int lineNo, string msg) {
 	ostringstream errMsg;
 	if (file) {
@@ -61,6 +67,7 @@ static void error(const char* file, int lineNo, string msg) {
 	exit(1);
 }
 
+static void error(ParserState* state, string msg) GCCATTRIB(noreturn);
 static void error(ParserState* state, string msg) {
 	if (state) {
 		error(state->fileName.c_str(), state->lineNo, msg);
@@ -69,11 +76,12 @@ static void error(ParserState* state, string msg) {
 	}
 }
 
+static void error(ParserState* state, const char* msg) GCCATTRIB(noreturn);
 static void error(ParserState* state, const char* msg) {
 	error(state, string(msg));
 }
 
-string getVariantStr(string variant) {
+static string getVariantStr(string variant) {
 	if (variant.length() == 0) {
 		return string("(fallback variant)");
 	} else {
@@ -207,9 +215,19 @@ static ResourceDirective* createDirective(const char* tagName) {
 	if (fileDirective) {
 		return fileDirective;
 	} else if (!strcmp(RES_STRING, tagName)) {
-		return new StringResourceDirective();
+		return new StringResourceDirective(StringResourceDirective::STRING);
+	} else if (!strcmp(RES_CSTRING, tagName)) {
+		return new StringResourceDirective(StringResourceDirective::CSTRING);
+	} else if (!strcmp(RES_PSTRING, tagName)) {
+		return new StringResourceDirective(StringResourceDirective::PSTRING);
 	} else if (!strcmp(RES_PLACEHOLDER, tagName)) {
 		return new PlaceholderDirective();
+	} else if (!strcmp(RES_BYTE, tagName)) {
+		return new DataResourceDirective(Byte);
+	} else if (!strcmp(RES_HALF, tagName)) {
+		return new DataResourceDirective(Half);
+	} else if (!strcmp(RES_WORD, tagName)) {
+		return new DataResourceDirective(Word);
 	}
 	return NULL;
 }
@@ -226,6 +244,16 @@ static bool isResource(const char* tagName) {
 	bool result = directive != NULL;
 	disposeDirective(directive);
 	return result;
+}
+
+static bool addDirective(ParserState* state, ResourceDirective* directive, VariantCondition* cond) {
+	if (state->directiveStack.empty()) {
+		return state->resourceSet->addDirective(directive, cond);
+	} else if (directive) {
+		ResourceDirective* parent = state->directiveStack.top();
+		directive->setParent(parent);
+	}
+	return directive;
 }
 
 static void xlstStart(void *data, const char *tagName, const char **attributes) {
@@ -262,17 +290,14 @@ static void xlstStart(void *data, const char *tagName, const char **attributes) 
 			directive->setLineNo(state->lineNo);
 			string id = directive->getId();
 			state->currentId = id;
-			if (state->currentId.length() == 0) {
-				error(state, "No id attribute in resource tag " + string(tagName) + " (or a parent resource tag)");
-			}
-			string errorMsg = directive->validate();
-			if (!errorMsg.empty()) {
-				error(state, errorMsg);
-			}
 			VariantCondition* cond = state->conditionStack.empty() ? NULL : &(state->conditionStack.top());
 			bool shouldAdd = !cond || cond->isApplicable();
-			if (shouldAdd && state->resourceSet->addDirective(directive, cond)) {
-				state->currentDirective = directive;
+			if (shouldAdd && addDirective(state, directive, cond)) {
+				state->directiveStack.push(directive);
+				string errorMsg = directive->validate();
+				if (!errorMsg.empty()) {
+					error(state, errorMsg);
+				}
 			} else {
 				// Just remove it at once.
 				disposeDirective(directive);
@@ -289,16 +314,23 @@ static void xlstEnd(void *data, const char *tagName) {
 		state->started = false;
 	} else if (!strcmp(TAG_CONDITION, tagName)) {
 		state->conditionStack.pop();
-	} else if (isResource(tagName)) {
-		state->currentDirective = NULL;
+	} else if (isResource(tagName) && !state->directiveStack.empty()) {
+		ResourceDirective* directive = state->directiveStack.top();
+		string errorMsg = directive->validate();
+		if (!errorMsg.empty()) {
+			error(state, errorMsg);
+		}
+		state->directiveStack.pop();
 	}
 }
 
 static void xlstCDATA(void *data, const char *content, int length) {
 	ParserState* state = (ParserState*) data;
-	ResourceDirective* directive = state->currentDirective;
-	if (directive) {
-		directive->initDirectiveFromCData(content, length);
+	if (!state->directiveStack.empty()) {
+		ResourceDirective* directive = state->directiveStack.top();
+		if (directive) {
+			directive->initDirectiveFromCData(content, length);
+		}
 	}
 }
 
@@ -312,7 +344,6 @@ void VariantResourceSet::parseLSTX(string inputFile) {
 	state->platform = fPlatform;
 	state->started = false;
 	state->resourceSet = this;
-	state->currentDirective = NULL;
 	XML_SetUserData(parser, (void*) state);
 
 	string line;
@@ -337,7 +368,7 @@ void VariantResourceSet::parseLSTX(string inputFile) {
 	delete state;
 }
 
-const char* mosyncdir() {
+static const char* mosyncdir() {
 	static const char* md = NULL;
 	if(!md) {
 		md	= getenv("MOSYNCDIR");
@@ -362,7 +393,7 @@ string VariantResourceSet::parseLST(string lstFile, string outputDir) {
 	return output;
 }
 
-const char* getDefaultVariantAttr(const char* resourceType) {
+static const char* getDefaultVariantAttr(const char* resourceType) {
 	if (!strcmp(RES_BINARY, resourceType)) {
 		return ATTR_PLATFORM;
 	} else if (!strcmp(RES_IMAGE, resourceType)) {
@@ -391,7 +422,7 @@ bool equalsIgnoreCase(const char* attr, const char* variantAttr) {
 	return false;
 }
 
-const char* getStandardVariantAttr(const char* variantAttr) {
+static const char* getStandardVariantAttr(const char* variantAttr) {
 	if (equalsIgnoreCase(ATTR_PLATFORM, variantAttr)) return ATTR_PLATFORM;
 	if (equalsIgnoreCase(ATTR_LOCALE, variantAttr)) return ATTR_LOCALE;
 	if (equalsIgnoreCase(ATTR_SCREENSIZE, variantAttr)) return ATTR_SCREENSIZE;
@@ -625,7 +656,7 @@ static void writePStr(char* array, int& offset, const char* str, size_t len) {
 	}
 }
 
-void addLabelDirective(ostringstream& output, const char* label) {
+static void addLabelDirective(ostringstream& output, const char* label) {
 	output << ".label \"" << label << "\"\n";
 }
 

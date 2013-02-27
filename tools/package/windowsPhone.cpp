@@ -24,7 +24,7 @@
 #include "util.h"
 #include "tools.h"
 #include "helpers/mkdir.h"
-#include "filelist/copyFiles.h"
+#include "filelist/copyfiles.h"
 
 #if defined (WIN32) || defined(_WIN32)
 #define PLATFORM_WIN32
@@ -111,7 +111,7 @@ void packageWindowsPhone(const SETTINGS& s, const RuntimeInfo& ri) {
 			std::ostringstream iconInjectCmd;
 			string size = sizes[i];
 			string outputIcon = csprojOutput + "/" + filenames[i];
-			injectIcon("Windows Phone", size.c_str(), s.icon, outputIcon.c_str(), s.silent);
+			injectIcon("Windows Phone", size.c_str(), s.icon, outputIcon.c_str(), s.silent, true);
 		}
 	}
 

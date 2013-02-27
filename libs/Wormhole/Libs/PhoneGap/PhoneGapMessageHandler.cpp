@@ -26,32 +26,34 @@ MA 02110-1301, USA.
 #include <maapi.h>
 #include <mastdlib.h> // C string conversion functions
 #include <conprint.h>
+#include "../../Encoder.h"
 #include "PhoneGapMessageHandler.h"
 
 namespace Wormhole
 {
 	// NameSpaces we want to access.
-	using namespace MAUtil; // Class Moblet, String
-	using namespace NativeUI; // WebView widget
+	using namespace MAUtil;
+	using namespace NativeUI;
 
 	/**
 	 * Constructor.
 	 */
 	PhoneGapMessageHandler::PhoneGapMessageHandler(NativeUI::WebView* webView) :
 		mWebView(webView),
-		mPhoneGapSensors(this),
-		mPhoneGapSensorManager(this),
-		mPhoneGapFile(this),
-		mPhoneGapCapture(this),
-		mPhoneGapCamera(this),
-		mPushNotificationManager(this),
 		mBeepSound(0)
 	{
+		mPhoneGapSensors = new PhoneGapSensors(this);
+		mSensorManager = new SensorManager(this);
+		mPhoneGapFile = new PhoneGapFile(this);
+		mPhoneGapCapture = new PhoneGapCapture(this);
+		mPhoneGapCamera = new PhoneGapCamera(this);
+		mPushNotificationManager = new PushNotificationManager(this);
+
 		enableHardware();
 
-		for(int i = 0; i < MAXIMUM_SENSORS; i++)
+		for (int i = 0; i < MAXIMUM_SENSORS; i++)
 		{
-			mSensorEventToManager[MAXIMUM_SENSORS] = false;
+			mSensorEventToManager[i] = false;
 		}
 	}
 
@@ -60,6 +62,54 @@ namespace Wormhole
 	 */
 	PhoneGapMessageHandler::~PhoneGapMessageHandler()
 	{
+		if (mPhoneGapSensors) { delete mPhoneGapSensors; }
+		if (mSensorManager) { delete mSensorManager; }
+		if (mPhoneGapFile) { delete mPhoneGapFile; }
+		if (mPhoneGapCapture) { delete mPhoneGapCapture; }
+		if (mPhoneGapCamera) { delete mPhoneGapCamera; }
+		if (mPushNotificationManager) { delete mPushNotificationManager; }
+	}
+
+	void PhoneGapMessageHandler::setSensorsHandler(
+		PhoneGapSensors* handler)
+	{
+		if (mPhoneGapSensors) { delete mPhoneGapSensors; }
+		mPhoneGapSensors = handler;
+	}
+
+	void PhoneGapMessageHandler::setSensorManagerHandler(
+		SensorManager* handler)
+	{
+		if (mSensorManager) { delete mSensorManager; }
+		mSensorManager = handler;
+	}
+
+	void PhoneGapMessageHandler::setFileHandler(
+		PhoneGapFile* handler)
+	{
+		if (mPhoneGapFile) { delete mPhoneGapFile; }
+		mPhoneGapFile = handler;
+	}
+
+	void PhoneGapMessageHandler::setCaptureHandler(
+		PhoneGapCapture* handler)
+	{
+		if (mPhoneGapCapture) { delete mPhoneGapCapture; }
+		mPhoneGapCapture = handler;
+	}
+
+	void PhoneGapMessageHandler::setCameraHandler(
+		PhoneGapCamera* handler)
+	{
+		if (mPhoneGapCamera) { delete mPhoneGapCamera; }
+		mPhoneGapCamera = handler;
+	}
+
+	void PhoneGapMessageHandler::setPushNotificationManagerHandler(
+		PushNotificationManager* handler)
+	{
+		if (mPushNotificationManager) { delete mPushNotificationManager; }
+		mPushNotificationManager = handler;
 	}
 
 	/**
@@ -67,10 +117,7 @@ namespace Wormhole
 	 */
 	void PhoneGapMessageHandler::initializePhoneGap()
 	{
-		// Send native ready event to PhoneGap using the lazy version.
-		// This way we allow PhoneGap to initialize itself whenever
-		// it is convenient.
-		callJS("{_nativeReady = true;}");
+		callJS("try{PhoneGap.onNativeReady.fire()}catch(e){_nativeReady=true}");
 	}
 
 	/**
@@ -79,6 +126,22 @@ namespace Wormhole
 	void PhoneGapMessageHandler::setBeepSound(MAHandle sound)
 	{
 		mBeepSound = sound;
+	}
+
+	/**
+	 * Get the FileUtil object to be used for File APIs.
+	 */
+	FileUtil* PhoneGapMessageHandler::getFileUtil()
+	{
+		return mFileUtil;
+	}
+
+	/**
+	 * Set the FileUtil object to be used for File APIs.
+	 */
+	void PhoneGapMessageHandler::setFileUtil(FileUtil* fileUtil)
+	{
+		mFileUtil = fileUtil;
 	}
 
 	/**
@@ -135,31 +198,31 @@ namespace Wormhole
 			|| (message.getParam("service") == "GeoLocation")
 			|| (message.getParam("service") == "Compass"))
 		{
-			mPhoneGapSensors.handleMessage(message);
+			mPhoneGapSensors->handleMessage(message);
 		}
 		else if (message.getParam("service") == "SensorManager")
 		{
-			mPhoneGapSensorManager.handleMessage(message);
+			mSensorManager->handleMessage(message);
 		}
 		else if (message.getParam("service") == "File")
 		{
-			mPhoneGapFile.handleFileMessage(message);
+			mPhoneGapFile->handleFileMessage(message);
 		}
 		else if (message.getParam("service") == "FileTransfer")
 		{
-			mPhoneGapFile.handleFileTransferMessage(message);
+			mPhoneGapFile->handleFileTransferMessage(message);
 		}
 		else if (message.getParam("service") == "PushNotification")
 		{
-			mPushNotificationManager.handleMessage(message);
+			mPushNotificationManager->handleMessage(message);
 		}
 		else if (message.getParam("service") == "Capture")
 		{
-			mPhoneGapCapture.handleMessage(message);
+			mPhoneGapCapture->handleMessage(message);
 		}
 //		else if (message.getParam("service") == "Camera")
 //		{
-//			mPhoneGapCamera.handleMessage(message);
+//			mPhoneGapCamera->handleMessage(message);
 //		}
 		else
 		{
@@ -179,7 +242,7 @@ namespace Wormhole
 	{
 		if (MAK_BACK == keyCode)
 		{
-			callJS("PhoneGapCommandResult('backbutton');");
+			callJS("try{PhoneGapCommandResult('backbutton')}catch(e){}");
 		}
 	}
 
@@ -270,17 +333,17 @@ namespace Wormhole
 
 		// Send the result back to PhoneGap.
 		sprintf(buffer,
-			"\\'{"
-				"\"platform\":\"%s\","
-				"\"name\":\"%s\","
-				"\"uuid\":\"%s\","
-				"\"version\":\"%s\","
+			"{"
+				"\"platform\":%s,"
+				"\"name\":%s,"
+				"\"uuid\":%s,"
+				"\"version\":%s,"
 				"\"phonegap\":\"1.2.0\""
-			"}\\'",
-			deviceOS,
-			deviceName,
-			deviceUUID,
-			deviceOSVersion
+			"}",
+			Encoder::JSONStringify(deviceOS).c_str(),
+			Encoder::JSONStringify(deviceName).c_str(),
+			Encoder::JSONStringify(deviceUUID).c_str(),
+			Encoder::JSONStringify(deviceOSVersion).c_str()
 			);
 
 		callSuccess(
@@ -306,17 +369,17 @@ namespace Wormhole
 	{
 		if (event.type == EVENT_TYPE_LOCATION)
 		{
-			mPhoneGapSensors.sendLocationData(event);
+			mPhoneGapSensors->sendLocationData(event);
 		}
 		else if (event.type == EVENT_TYPE_FOCUS_LOST)
 		{
 			//let the phoneGap app know that it should go to sleep
-			callJS("PhoneGapCommandResult('pause');");
+			callJS("try{PhoneGapCommandResult('pause')}catch(e){}");
 		}
 		else if (event.type == EVENT_TYPE_FOCUS_GAINED)
 		{
 			//let the PhoneGap side know that it should resume
-			callJS("PhoneGapCommandResult('resume');");
+			callJS("try{PhoneGapCommandResult('resume')}catch(e){}");
 		}
 	}
 
@@ -327,20 +390,20 @@ namespace Wormhole
 	 */
 	void PhoneGapMessageHandler::sensorEvent(MASensor sensorData)
 	{
-		if(mSensorEventToManager[sensorData.type] == false)
+		if (mSensorEventToManager[sensorData.type] == false)
 		{
 			if (sensorData.type == SENSOR_TYPE_ACCELEROMETER)
 			{
-				mPhoneGapSensors.sendAccelerometerData(sensorData);
+				mPhoneGapSensors->sendAccelerometerData(sensorData);
 			}
 			else if (sensorData.type == SENSOR_TYPE_COMPASS)
 			{
-				mPhoneGapSensors.sendCompassData(sensorData);
+				mPhoneGapSensors->sendCompassData(sensorData);
 			}
 		}
 		else
 		{
-			mPhoneGapSensorManager.sendSensorData(sensorData);
+			mSensorManager->sendSensorData(sensorData);
 		}
 	}
 
@@ -466,7 +529,8 @@ namespace Wormhole
 	/**
 	 * Set the target class for sensor event messages.
 	 * @param sensor The sensor that is configured.
-	 * @param toSensorManager If true, the SensorManager object will receive the events, normal PhoneGap API if false
+	 * @param toSensorManager If true, the SensorManager object will
+	 * receive the events, normal PhoneGap API if false.
 	 */
 	void PhoneGapMessageHandler::setSensorEventTarget(int sensor, bool toSensorManager)
 	{
